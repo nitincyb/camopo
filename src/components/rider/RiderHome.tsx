@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, MapPin, Navigation, Clock, CreditCard, ChevronRight, User, Settings, LogOut, Car, Bell, ArrowUpDown, HelpCircle, ShieldAlert, Users, Phone } from 'lucide-react';
+import { Search, MapPin, Navigation, Clock, CreditCard, ChevronRight, User, Settings, LogOut, Car, Bell, ArrowUpDown, HelpCircle, ShieldAlert, Users, Phone, Home, Wallet as WalletIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import Map from '../shared/Map';
@@ -275,7 +275,7 @@ export default function RiderHome() {
   const [pickupCoords, setPickupCoords] = useState<{ lat: number, lng: number }>({ lat: LOCATIONS.RRU.lat, lng: LOCATIONS.RRU.lng });
   const [destinationCoords, setDestinationCoords] = useState<{ lat: number, lng: number }>({ lat: LOCATIONS.DAHEGAM.lat, lng: LOCATIONS.DAHEGAM.lng });
   const [selectedRide, setSelectedRide] = useState(RIDE_TYPES[0]);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showBooking, setShowBooking] = useState(false);
   const [currentRideId, setCurrentRideId] = useState<string | null>(null);
   const [activeRide, setActiveRide] = useState<any>(null);
   const [driverLocation, setDriverLocation] = useState<{ lat: number, lng: number } | null>(null);
@@ -815,22 +815,21 @@ export default function RiderHome() {
         )}
       </div>
 
-      {/* Header / Menu Trigger */}
-      <div className="absolute top-6 left-6 right-6 z-20 flex items-center justify-between pointer-events-none">
+      {/* Top Search Bar */}
+      <div className="absolute top-6 left-4 right-4 z-20 flex items-center gap-3 pointer-events-none">
         <button 
-          onClick={() => setIsMenuOpen(true)}
-          className="w-12 h-12 bg-zinc-900 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform border border-zinc-800 pointer-events-auto"
+          onClick={() => {
+            setShowBooking(true);
+          }}
+          className="flex-1 bg-zinc-900/80 backdrop-blur-md rounded-full shadow-2xl flex items-center gap-3 px-5 py-3.5 border border-zinc-800 pointer-events-auto hover:bg-zinc-900 transition-colors"
         >
-          <div className="space-y-1">
-            <div className="w-5 h-0.5 bg-zinc-50"></div>
-            <div className="w-3 h-0.5 bg-zinc-50"></div>
-            <div className="w-5 h-0.5 bg-zinc-50"></div>
-          </div>
+          <Search size={18} className="text-zinc-500 shrink-0" />
+          <span className="text-sm font-bold text-zinc-400 truncate">{t.where_to}</span>
         </button>
         
-        <div className="flex items-center gap-4 pointer-events-auto">
+        <div className="flex items-center gap-2 pointer-events-auto">
           {locationLoading && (
-            <div className="bg-zinc-900/80 backdrop-blur-md px-4 py-2 rounded-full shadow-lg flex items-center gap-2 border border-zinc-800">
+            <div className="bg-zinc-900/80 backdrop-blur-md px-3 py-2 rounded-full shadow-lg flex items-center gap-2 border border-zinc-800">
               <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
               <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-50">{t.locating}</span>
             </div>
@@ -849,95 +848,11 @@ export default function RiderHome() {
         </div>
       </div>
 
-      {/* Side Menu */}
-      <AnimatePresence>
-        {isMenuOpen && (
-          <>
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsMenuOpen(false)}
-              className="absolute inset-0 bg-black/40 backdrop-blur-sm z-40"
-            />
-            <motion.div 
-              initial={{ x: '-100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
-              className="absolute top-0 left-0 h-full w-[85vw] max-w-72 bg-zinc-950 z-50 p-6 sm:p-8 flex flex-col border-r border-zinc-800"
-            >
-              <div className="flex items-center gap-4 mb-8 sm:mb-12">
-                <div className="w-16 h-16 bg-zinc-900 rounded-full flex items-center justify-center overflow-hidden border border-zinc-800">
-                  {profile?.photoURL ? (
-                    <img src={profile.photoURL} alt="Profile" className="w-full h-full object-cover" />
-                  ) : (
-                    <User size={32} className="text-zinc-600" />
-                  )}
-                </div>
-                <div>
-                  <h3 className="font-bold text-lg text-zinc-50">{profile?.displayName || 'User'}</h3>
-                  <p className="text-zinc-500 text-sm">{t.rider_profile}</p>
-                </div>
-              </div>
-
-              <nav className="flex-1 space-y-6">
-                <button 
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    navigate('/ride-sharing');
-                  }}
-                  className="flex items-center gap-4 w-full text-zinc-400 hover:text-zinc-50 font-semibold transition-colors"
-                >
-                  <Users size={20} /> {t.ride_sharing}
-                </button>
-                <button 
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    navigate('/history');
-                  }}
-                  className="flex items-center gap-4 w-full text-zinc-400 hover:text-zinc-50 font-semibold transition-colors"
-                >
-                  <Clock size={20} /> {t.your_trips}
-                </button>
-                <button className="flex items-center gap-4 w-full text-zinc-400 hover:text-zinc-50 font-semibold transition-colors">
-                  <CreditCard size={20} /> {t.wallet}
-                </button>
-                <button 
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    navigate('/support');
-                  }}
-                  className="flex items-center gap-4 w-full text-zinc-400 hover:text-zinc-50 font-semibold transition-colors"
-                >
-                  <HelpCircle size={20} /> {t.support}
-                </button>
-                <button 
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    navigate('/profile');
-                  }}
-                  className="flex items-center gap-4 w-full text-zinc-400 hover:text-zinc-50 font-semibold transition-colors"
-                >
-                  <Settings size={20} /> {t.settings}
-                </button>
-              </nav>
-
-              <button 
-                onClick={() => auth.signOut()}
-                className="flex items-center gap-4 text-red-500 font-bold mt-auto"
-              >
-                <LogOut size={20} /> {t.sign_out}
-              </button>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
       {/* Main UI Overlay */}
       <div className="absolute inset-x-0 bottom-0 z-20 pointer-events-none">
         <div className="max-w-xl mx-auto p-4 sm:p-6 pb-safe pointer-events-auto">
           <AnimatePresence mode="wait">
-            {step === 'home' && (
+            {step === 'home' && showBooking && (
               <motion.div 
                 key="home"
                 initial={{ y: 20, opacity: 0 }}
@@ -945,9 +860,17 @@ export default function RiderHome() {
                 exit={{ y: 20, opacity: 0 }}
                 className="glass-panel rounded-[32px] p-6 space-y-6"
               >
-                <div className="space-y-1">
-                  <p className="text-[10px] text-emerald-500 font-black uppercase tracking-[0.2em]">{t.welcome_back}</p>
-                  <h2 className="text-2xl font-black tracking-tight font-display text-white">{profile?.displayName || 'Rider'}</h2>
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <p className="text-[10px] text-emerald-500 font-black uppercase tracking-[0.2em]">{t.welcome_back}</p>
+                    <h2 className="text-2xl font-black tracking-tight font-display text-white">{profile?.displayName || 'Rider'}</h2>
+                  </div>
+                  <button 
+                    onClick={() => setShowBooking(false)}
+                    className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
+                  >
+                    <ChevronRight className="rotate-90" size={20} />
+                  </button>
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -1640,6 +1563,50 @@ export default function RiderHome() {
         isOpen={isNotificationsOpen} 
         onClose={() => setIsNotificationsOpen(false)} 
       />
+
+      {/* Bottom Navigation Bar */}
+      {!showBooking && step === 'home' && (
+        <div className="absolute bottom-0 left-0 right-0 z-30">
+          <div className="bg-zinc-900/80 backdrop-blur-2xl border-t border-zinc-800 px-2 pb-safe">
+            <div className="max-w-xl mx-auto flex items-center justify-around py-2">
+              <button 
+                className="flex flex-col items-center gap-1 py-2 px-3 text-emerald-500"
+              >
+                <Home size={20} />
+                <span className="text-[9px] font-black uppercase tracking-widest">Home</span>
+              </button>
+              <button 
+                onClick={() => navigate('/history')}
+                className="flex flex-col items-center gap-1 py-2 px-3 text-zinc-500 hover:text-zinc-300 transition-colors"
+              >
+                <Clock size={20} />
+                <span className="text-[9px] font-black uppercase tracking-widest">{t.history}</span>
+              </button>
+              <button 
+                onClick={() => navigate('/wallet')}
+                className="flex flex-col items-center gap-1 py-2 px-3 text-zinc-500 hover:text-zinc-300 transition-colors"
+              >
+                <WalletIcon size={20} />
+                <span className="text-[9px] font-black uppercase tracking-widest">{t.wallet}</span>
+              </button>
+              <button 
+                onClick={() => navigate('/support')}
+                className="flex flex-col items-center gap-1 py-2 px-3 text-zinc-500 hover:text-zinc-300 transition-colors"
+              >
+                <HelpCircle size={20} />
+                <span className="text-[9px] font-black uppercase tracking-widest">{t.support}</span>
+              </button>
+              <button 
+                onClick={() => navigate('/profile')}
+                className="flex flex-col items-center gap-1 py-2 px-3 text-zinc-500 hover:text-zinc-300 transition-colors"
+              >
+                <User size={20} />
+                <span className="text-[9px] font-black uppercase tracking-widest">{t.profile}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
