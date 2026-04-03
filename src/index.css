@@ -1,0 +1,65 @@
+/* CampusMobility Styles - Version 1.0.5 */
+@import url('https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+@theme {
+  --font-sans: "Rubik", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Rubik", sans-serif;
+}
+
+@keyframes pulse-glow {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+  70% { box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+@layer base {
+  html, body {
+    @apply font-sans;
+  }
+  body {
+    @apply bg-zinc-950 text-zinc-50 antialiased selection:bg-emerald-500/30;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-zinc-900/80 backdrop-blur-2xl border border-zinc-800 shadow-2xl;
+  }
+
+  .glass-panel-light {
+    @apply bg-white/80 backdrop-blur-2xl border border-zinc-200 shadow-xl;
+  }
+  
+  .premium-button {
+    @apply relative overflow-hidden transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none;
+  }
+  
+  .premium-button::after {
+    @apply content-[''] absolute inset-0 bg-white/5 opacity-0 transition-opacity;
+  }
+  
+  .premium-button:hover::after {
+    @apply opacity-100;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-zinc-800 rounded-full;
+  }
+  .custom-scrollbar.light::-webkit-scrollbar-thumb {
+    @apply bg-zinc-200;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-zinc-700;
+  }
+  .custom-scrollbar.light::-webkit-scrollbar-thumb:hover {
+    @apply bg-zinc-300;
+  }
+}

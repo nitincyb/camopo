@@ -1,0 +1,1645 @@
+import React, { useState, useEffect } from 'react';
+import { Search, MapPin, Navigation, Clock, CreditCard, ChevronRight, User, Settings, LogOut, Car, Bell, ArrowUpDown, HelpCircle, ShieldAlert, Users, Phone } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { useNavigate } from 'react-router-dom';
+import Map from '../shared/Map';
+import Logo from '../shared/Logo';
+import { NotificationsPanel } from '../shared/NotificationsPanel';
+import { useAuth } from '../../contexts/AuthContext';
+import { useCall } from '../../contexts/CallContext';
+import { auth, db } from '../../firebase';
+import { doc, updateDoc, collection, addDoc, onSnapshot, query, where, serverTimestamp, getDoc as getDocFromFirestore } from 'firebase/firestore';
+import { useGeolocation } from '../../hooks/useGeolocation';
+import { mapService } from '../../services/mapService';
+import { sendPushNotification } from '../../services/notificationService';
+import { handleFirestoreError, OperationType } from '../../utils/firestoreErrorHandler';
+import { format, addHours, isAfter, isBefore, addDays } from 'date-fns';
+
+const translations = {
+  en: {
+    rru_name: 'Rashtriya Raksha University',
+    rru_address: 'Lavad, Dahegam, Gandhinagar, Gujarat 382305',
+    gate1_name: 'RRU(Gate-1)',
+    gate1_address: 'Main Entrance, RRU Campus',
+    gate2_name: 'RRU(Gate-2)',
+    gate2_address: 'Secondary Entrance, RRU Campus',
+    dahegam_name: 'Dahegam Bus Stand',
+    dahegam_address: 'Dahegam, Gandhinagar, Gujarat',
+    search_pickup: 'Search for pickup...',
+    search_destination: 'Search for destination...',
+    searching_ride: 'Searching for your ride...',
+    finding_driver: 'Finding the best driver for you',
+    ride_active: 'Ride Active',
+    otp: 'OTP',
+    cancel: 'CANCEL',
+    sos: 'SOS',
+    trip_directions: 'Trip Directions',
+    emergency_sos: 'Emergency SOS',
+    sos_description: 'This will immediately alert the campus security team with your live location and ride details. Use only in emergencies.',
+    trigger_sos: 'TRIGGER SOS NOW',
+    got_it: 'GOT IT',
+    no_locations: 'No locations found in Gujarat',
+    type_to_search: 'Type to search locations',
+    quick_selection: 'Quick Selection',
+    current_location: 'Current Location',
+    pickup_label: 'PICKUP',
+    destination_label: 'DESTINATION',
+    confirm_ride: 'CONFIRM RIDE',
+    searching: 'SEARCHING',
+    ride_details: 'RIDE DETAILS',
+    driver_arriving: 'Driver is arriving',
+    driver_arrived: 'Driver has arrived',
+    ride_started: 'Ride in progress',
+    ride_completed: 'Ride completed',
+    ride_cancelled: 'Ride cancelled',
+    where_to: 'Where to?',
+    welcome_back: 'Welcome back,',
+    request_ride: 'REQUEST RIDE',
+    choose_ride: 'Choose Ride',
+    finding_ride: 'Finding your ride...',
+    cancel_request: 'CANCEL REQUEST',
+    driver_coming: 'Driver is coming',
+    en_route: 'En route to destination',
+    history: 'History',
+    support: 'Support',
+    profile: 'Profile',
+    settings: 'Settings',
+    logout: 'Logout',
+    your_trips: 'Your Trips',
+    wallet: 'Wallet',
+    sign_out: 'Sign Out',
+    locating: 'Locating...',
+    rider_profile: 'Rider Profile',
+    auto_ricksaw: 'Auto Ricksaw',
+    economy_cab: 'Economy Cab (4 seater)',
+    premium_cab: 'Premium Cab (6 seater)',
+    no_directions: 'No detailed directions',
+    schedule_ride: 'Schedule Ride',
+    select_time: 'Select Pickup Time',
+    schedule_confirm: 'Schedule for',
+    invalid_time: 'Please select a future time (up to 24h)',
+    ride_scheduled: 'Ride Scheduled Successfully',
+    view_scheduled: 'View Scheduled Rides',
+    scheduled_info: 'Your ride has been successfully scheduled.',
+    scheduled_for: 'Scheduled for',
+    share_ride: 'Share Ride',
+    available_seats: 'Available Seats',
+    ride_sharing: 'Ride Sharing',
+    join_ride: 'Join Ride',
+    no_shared_rides: 'No shared rides available',
+    joined_riders: 'Joined Riders',
+    waiting_for_others: 'Waiting for others to join...'
+  },
+  hi: {
+    rru_name: 'राष्ट्रीय रक्षा विश्वविद्यालय',
+    rru_address: 'लवाड, दहेगाम, गांधीनगर, गुजरात 382305',
+    gate1_name: 'आरआरयू (गेट-1)',
+    gate1_address: 'मुख्य प्रवेश द्वार, आरआरयू कैंपस',
+    gate2_name: 'आरआरयू (गेट-2)',
+    gate2_address: 'द्वितीयक प्रवेश द्वार, आरआरयू कैंपस',
+    dahegam_name: 'दहेगाम बस स्टैंड',
+    dahegam_address: 'दहेगाम, गांधीनगर, गुजरात',
+    search_pickup: 'पिकअप खोजें...',
+    search_destination: 'गंतव्य खोजें...',
+    searching_ride: 'आपकी सवारी की तलाश है...',
+    finding_driver: 'आपके लिए सबसे अच्छा ड्राइवर ढूंढ रहे हैं',
+    ride_active: 'सवारी सक्रिय है',
+    joined_riders: 'शामिल हुए यात्री',
+    waiting_for_others: 'दूसरों के शामिल होने की प्रतीक्षा कर रहे हैं...',
+    otp: 'ओटीपी',
+    cancel: 'रद्द करें',
+    sos: 'एसओएस',
+    trip_directions: 'यात्रा के निर्देश',
+    emergency_sos: 'आपातकालीन एसओएस',
+    sos_description: 'यह तुरंत आपके लाइव स्थान और सवारी विवरण के साथ परिसर सुरक्षा टीम को सचेत करेगा। केवल आपात स्थिति में उपयोग करें।',
+    trigger_sos: 'अभी एसओएस ट्रिगर करें',
+    got_it: 'समझ गया',
+    no_locations: 'गुजरात में कोई स्थान नहीं मिला',
+    type_to_search: 'स्थान खोजने के लिए टाइप करें',
+    quick_selection: 'त्वरित चयन',
+    current_location: 'वर्तमान स्थान',
+    pickup_label: 'पिकअप',
+    destination_label: 'गंतव्य',
+    confirm_ride: 'सवारी की पुष्टि करें',
+    searching: 'खोज रहे हैं',
+    ride_details: 'सवारी विवरण',
+    driver_arriving: 'ड्राइवर आ रहा है',
+    driver_arrived: 'ड्राइवर पहुंच गया है',
+    ride_started: 'सवारी प्रगति पर है',
+    ride_completed: 'सवारी पूरी हुई',
+    ride_cancelled: 'सवारी रद्द कर दी गई',
+    where_to: 'कहाँ जाना है?',
+    welcome_back: 'स्वागत है,',
+    request_ride: 'सवारी का अनुरोध करें',
+    choose_ride: 'सवारी चुनें',
+    finding_ride: 'आपकी सवारी ढूंढ रहे हैं...',
+    cancel_request: 'अनुरोध रद्द करें',
+    driver_coming: 'ड्राइवर आ रहा है',
+    en_route: 'गंतव्य के रास्ते में',
+    history: 'इतिहास',
+    support: 'सहायता',
+    profile: 'प्रोफ़ाइल',
+    settings: 'सेटिंग्स',
+    logout: 'लॉगआउट',
+    your_trips: 'आपकी यात्राएं',
+    wallet: 'वॉलेट',
+    sign_out: 'साइन आउट',
+    locating: 'ढूंढ रहे हैं...',
+    rider_profile: 'राइडर प्रोफ़ाइल',
+    auto_ricksaw: 'ऑटो रिक्शा',
+    economy_cab: 'इकोनॉमी कैब (4 सीटर)',
+    premium_cab: 'प्रीमियम कैब (6 सीटर)',
+    no_directions: 'कोई विस्तृत निर्देश नहीं',
+    schedule_ride: 'सवारी शेड्यूल करें',
+    select_time: 'पिकअप समय चुनें',
+    schedule_confirm: 'के लिए शेड्यूल करें',
+    invalid_time: 'कृपया भविष्य का समय चुनें (24 घंटे तक)',
+    ride_scheduled: 'सवारी सफलतापूर्वक शेड्यूल की गई',
+    view_scheduled: 'शेड्यूल की गई सवारी देखें',
+    scheduled_info: 'आपकी सवारी सफलतापूर्वक शेड्यूल कर दी गई है।',
+    scheduled_for: 'के लिए शेड्यूल किया गया',
+    share_ride: 'सवारी साझा करें',
+    available_seats: 'उपलब्ध सीटें',
+    ride_sharing: 'सवारी साझा करना',
+    join_ride: 'सवारी में शामिल हों',
+    no_shared_rides: 'कोई साझा सवारी उपलब्ध नहीं है'
+  },
+  gu: {
+    rru_name: 'રાષ્ટ્રીય રક્ષા યુનિવર્સિટી',
+    rru_address: 'લવાડ, દહેગામ, ગાંધીનગર, ગુજરાત 382305',
+    gate1_name: 'આરઆરયુ (ગેટ-1)',
+    gate1_address: 'મુખ્ય પ્રવેશ દ્વાર, આરઆરયુ કેમ્પસ',
+    gate2_name: 'આરઆરયુ (ગેટ-2)',
+    gate2_address: 'ગૌણ પ્રવેશ દ્વાર, આરઆરયુ કેમ્પસ',
+    dahegam_name: 'દહેગામ બસ સ્ટેન્ડ',
+    dahegam_address: 'દહેગામ, ગાંધીનગર, ગુજરાત',
+    search_pickup: 'પિકઅપ શોધો...',
+    search_destination: 'ગંતવ્ય શોધો...',
+    searching_ride: 'તમારી સવારી શોધી રહ્યા છીએ...',
+    finding_driver: 'તમારા માટે શ્રેષ્ઠ ડ્રાઈવર શોધી રહ્યા છીએ',
+    ride_active: 'સવારી સક્રિય છે',
+    otp: 'ઓટીપી',
+    cancel: 'રદ કરો',
+    sos: 'એસઓએસ',
+    trip_directions: 'મુસાફરીની દિશાઓ',
+    emergency_sos: 'ઇમરજન્સી એસઓએસ',
+    sos_description: 'આ તરત જ તમારા લાઇવ લોકેશન અને રાઇડ વિગતો સાથે કેમ્પસ સિક્યુરિટી ટીમને એલર્ટ કરશે. માત્ર કટોકટીમાં જ ઉપયોગ કરો.',
+    trigger_sos: 'હમણાં એસઓએસ ટ્રિગર કરો',
+    got_it: 'સમજાઈ ગયું',
+    no_locations: 'ગુજરાતમાં કોઈ સ્થાનો મળ્યા નથી',
+    type_to_search: 'સ્થાનો શોધવા માટે ટાઇપ કરો',
+    quick_selection: 'ઝડપી પસંદગી',
+    current_location: 'વર્તમાન સ્થાન',
+    pickup_label: 'પિકઅપ',
+    destination_label: 'ગંતવ્ય',
+    confirm_ride: 'રાઇડ કન્ફર્મ કરો',
+    searching: 'શોધી રહ્યા છીએ',
+    ride_details: 'રાઇડ વિગતો',
+    driver_arriving: 'ડ્રાઈવર આવી રહ્યો છે',
+    driver_arrived: 'ડ્રાઈવર આવી ગયો છે',
+    ride_started: 'સવારી ચાલુ છે',
+    ride_completed: 'સવારી પૂર્ણ થઈ',
+    ride_cancelled: 'સવારી રદ કરવામાં આવી',
+    where_to: 'ક્યાં જવું છે?',
+    welcome_back: 'સ્વાગત છે,',
+    request_ride: 'રાઇડની વિનંતી કરો',
+    choose_ride: 'રાઇડ પસંદ કરો',
+    finding_ride: 'તમારી રાઇડ શોધી રહ્યા છીએ...',
+    cancel_request: 'વિનંતી રદ કરો',
+    driver_coming: 'ડ્રાઈવર આવી રહ્યો છે',
+    en_route: 'ગંતવ્યના માર્ગ પર',
+    history: 'ઇતિહાસ',
+    support: 'સપોર્ટ',
+    profile: 'પ્રોફાઇલ',
+    settings: 'સેટિંગ્સ',
+    logout: 'લોગઆઉટ',
+    your_trips: 'તમારી ટ્રિપ્સ',
+    wallet: 'વોલેટ',
+    sign_out: 'સાઇન આઉટ',
+    locating: 'શોધી રહ્યા છીએ...',
+    rider_profile: 'રાઇડર પ્રોફાઇલ',
+    auto_ricksaw: 'ઓટો રિક્ષા',
+    economy_cab: 'ઇકોનોમી કેબ (4 સીટર)',
+    premium_cab: 'પ્રીમિયમ કેબ (6 સીટર)',
+    no_directions: 'કોઈ વિગતવાર દિશાઓ નથી',
+    schedule_ride: 'સવારી શેડ્યૂલ કરો',
+    select_time: 'પિકઅપ સમય પસંદ કરો',
+    schedule_confirm: 'માટે શેડ્યૂલ કરો',
+    invalid_time: 'કૃપા કરીને ભવિષ્યનો સમય પસંદ કરો (24 કલાક સુધી)',
+    ride_scheduled: 'સવારી સફળતાપૂર્વક શેડ્યૂલ કરવામાં આવી',
+    view_scheduled: 'શેડ્યૂલ કરેલી સવારી જુઓ',
+    scheduled_info: 'તમારી સવારી સફળતાપૂર્વક શેડ્યૂલ કરવામાં આવી છે.',
+    scheduled_for: 'માટે શેડ્યૂલ કરેલ',
+    share_ride: 'સવારી શેર કરો',
+    available_seats: 'ઉપલબ્ધ બેઠકો',
+    ride_sharing: 'રાઇડ શેરિંગ',
+    join_ride: 'સવારીમાં જોડાઓ',
+    no_shared_rides: 'કોઈ શેર કરેલી સવારી ઉપલબ્ધ નથી',
+    joined_riders: 'જોડાયેલા સવારો',
+    waiting_for_others: 'અન્ય લોકો જોડાવાની રાહ જોઈ રહ્યા છે...'
+  }
+};
+
+const RIDE_TYPES = [
+  { id: 'Auto', nameKey: 'auto_ricksaw', price: 40, time: '2 min', icon: '🛺' },
+  { id: 'Economy', nameKey: 'economy_cab', price: 80, time: '3 min', icon: '🚗' },
+  { id: 'Premium', nameKey: 'premium_cab', price: 150, time: '5 min', icon: '🚐' },
+];
+
+const LOCATIONS = {
+  RRU: { nameKey: 'rru_name', lat: 23.15457840755294, lng: 72.88497367116464, addressKey: 'rru_address' },
+  GATE1: { nameKey: 'gate1_name', lat: 23.156126049358633, lng: 72.88457494201678, addressKey: 'gate1_address' },
+  GATE2: { nameKey: 'gate2_name', lat: 23.15204555996699, lng: 72.88004845953762, addressKey: 'gate2_address' },
+  DAHEGAM: { nameKey: 'dahegam_name', lat: 23.1691, lng: 72.8124, addressKey: 'dahegam_address' }
+};
+
+export default function RiderHome() {
+  const { profile, user } = useAuth();
+  const { initiateCall } = useCall();
+  const lang = (profile?.language as 'en' | 'hi' | 'gu') || 'en';
+  const t = translations[lang];
+
+  const navigate = useNavigate();
+
+  // Safety redirect if role changed to driver
+  useEffect(() => {
+    if (profile?.role === 'driver') {
+      navigate('/', { replace: true });
+    }
+  }, [profile?.role, navigate]);
+
+  const { location, path, loading: locationLoading } = useGeolocation();
+  const [step, setStep] = useState<'home' | 'searching' | 'selecting' | 'ride' | 'scheduled_success'>('home');
+  const [pickup, setPickup] = useState(t[LOCATIONS.RRU.nameKey]);
+  const [destination, setDestination] = useState(t[LOCATIONS.DAHEGAM.nameKey]);
+  const [pickupCoords, setPickupCoords] = useState<{ lat: number, lng: number }>({ lat: LOCATIONS.RRU.lat, lng: LOCATIONS.RRU.lng });
+  const [destinationCoords, setDestinationCoords] = useState<{ lat: number, lng: number }>({ lat: LOCATIONS.DAHEGAM.lat, lng: LOCATIONS.DAHEGAM.lng });
+  const [selectedRide, setSelectedRide] = useState(RIDE_TYPES[0]);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [currentRideId, setCurrentRideId] = useState<string | null>(null);
+  const [activeRide, setActiveRide] = useState<any>(null);
+  const [driverLocation, setDriverLocation] = useState<{ lat: number, lng: number } | null>(null);
+  const [driverPath, setDriverPath] = useState<Array<{ lat: number, lng: number }>>([]);
+  const [predefinedPath, setPredefinedPath] = useState<Array<{ lat: number, lng: number }>>([]);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [searchingFor, setSearchingFor] = useState<'pickup' | 'destination' | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [distanceInfo, setDistanceInfo] = useState<{ distance: string, duration: string } | null>(null);
+  const [isScheduling, setIsScheduling] = useState(false);
+  const [isShared, setIsShared] = useState(false);
+  const [availableSeats, setAvailableSeats] = useState(1);
+  const [scheduledDate, setScheduledDate] = useState<Date | null>(null);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [eta, setEta] = useState<number | null>(null);
+  const [routeSteps, setRouteSteps] = useState<any[]>([]);
+  const [showDirections, setShowDirections] = useState(false);
+  const [onlineDrivers, setOnlineDrivers] = useState<any[]>([]);
+  const [currentAddress, setCurrentAddress] = useState<string | null>(null);
+  const [isSOSModalOpen, setIsSOSModalOpen] = useState(false);
+  const [isSOSLoading, setIsSOSLoading] = useState(false);
+  const [joinedRiderProfiles, setJoinedRiderProfiles] = useState<any[]>([]);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Listen for unread notifications
+  useEffect(() => {
+    if (!user) return;
+    const q = query(
+      collection(db, 'notifications'),
+      where('userId', '==', user.uid),
+      where('read', '==', false)
+    );
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setUnreadCount(snapshot.size);
+    });
+    return () => unsubscribe();
+  }, [user]);
+
+  // Fetch joined rider profiles for shared rides
+  useEffect(() => {
+    if (!activeRide?.joinedRiders || activeRide.joinedRiders.length === 0) {
+      setJoinedRiderProfiles([]);
+      return;
+    }
+
+    const fetchProfiles = async () => {
+      try {
+        const profiles = await Promise.all(
+          activeRide.joinedRiders.map(async (uid: string) => {
+            const userSnap = await getDocFromFirestore(doc(db, 'users', uid));
+            if (userSnap.exists()) {
+              return { id: uid, ...userSnap.data() };
+            }
+            return { id: uid, displayName: 'Unknown Rider' };
+          })
+        );
+        setJoinedRiderProfiles(profiles);
+      } catch (error) {
+        console.error("Error fetching joined rider profiles:", error);
+      }
+    };
+
+    fetchProfiles();
+  }, [activeRide?.joinedRiders]);
+
+  const handleTriggerSOS = async () => {
+    if (!profile || !activeRide) return;
+    setIsSOSLoading(true);
+    try {
+      await addDoc(collection(db, 'support_tickets'), {
+        userId: profile.uid,
+        userEmail: profile.email,
+        type: 'sos',
+        priority: 'critical',
+        subject: 'EMERGENCY SOS TRIGGERED',
+        description: `Rider triggered SOS during active ride. Ride ID: ${currentRideId}. Driver ID: ${activeRide.driverId || 'N/A'}. Location: Lat ${location?.lat || pickupCoords.lat}, Lng ${location?.lng || pickupCoords.lng}`,
+        status: 'open',
+        rideId: currentRideId,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        location: location || pickupCoords
+      });
+      // Also send a push notification to admin topic if configured
+      await sendPushNotification('admin_sos', 'EMERGENCY SOS', `SOS Triggered by ${profile.displayName || 'Rider'}!`);
+      
+      // Trigger Twilio Call
+      try {
+        const idToken = await user.getIdToken();
+        const response = await fetch('/api/sos-call', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${idToken}`
+          },
+          body: JSON.stringify({
+            userId: profile.uid,
+            userName: profile.displayName,
+            location: location || pickupCoords,
+            rideId: currentRideId
+          }),
+        });
+        
+        if (!response.ok) {
+           const errorText = await response.text();
+           console.error("Failed to trigger Twilio call:", errorText);
+           alert(`SOS Alert sent, but automated phone call failed: ${errorText}`);
+        } else {
+           console.log("Twilio SOS call triggered successfully.");
+           alert('SOS Alert and automated phone call sent to administrators immediately.');
+        }
+      } catch (callError) {
+        console.error("Error calling SOS endpoint:", callError);
+        alert('SOS Alert sent, but automated phone call failed.');
+      }
+
+      setIsSOSModalOpen(false);
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, 'support_tickets');
+      alert('Failed to send SOS. Please call emergency services directly.');
+    } finally {
+      setIsSOSLoading(false);
+    }
+  };
+
+  // Handle search suggestions
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (searchQuery.length > 2) {
+        const results = await mapService.autosuggest(searchQuery);
+        setSuggestions(results);
+      } else {
+        setSuggestions([]);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const handleSelectSuggestion = (suggestion: any) => {
+    if (!suggestion || !suggestion.center || suggestion.center.length < 2) {
+      console.warn("Invalid suggestion selected:", suggestion);
+      return;
+    }
+    const coords = { lat: suggestion.center[1], lng: suggestion.center[0] };
+    if (searchingFor === 'pickup') {
+      setPickup(suggestion.placeName);
+      setPickupCoords(coords);
+    } else {
+      setDestination(suggestion.placeName);
+      setDestinationCoords(coords);
+    }
+    setSearchingFor(null);
+    setSearchQuery('');
+    setSuggestions([]);
+  };
+
+  // Update pickup when location is first available
+  useEffect(() => {
+    const resolveCurrentLocation = async () => {
+      if (location) {
+        // Try to get actual address for the driver
+        try {
+          if (location?.lat && location?.lng) {
+            const address = await mapService.reverseGeocode(location.lat, location.lng);
+            if (address && address !== 'Unknown Location') {
+              setCurrentAddress(address);
+            }
+          }
+        } catch (err) {
+          console.warn("Could not reverse geocode current location", err);
+        }
+      }
+    };
+    
+    resolveCurrentLocation();
+  }, [location]);
+
+  const defaultCenter = LOCATIONS.RRU;
+  const mapCenter = location || defaultCenter;
+
+  // Plan route automatically when pickup or destination changes
+  useEffect(() => {
+    const planRoute = async () => {
+      try {
+        const routeData = await mapService.getRoute(pickupCoords, destinationCoords);
+        if (routeData) {
+          setPredefinedPath(routeData.coordinates);
+          setRouteSteps(routeData.steps || []);
+          setDistanceInfo({
+            distance: (routeData.distance / 1000).toFixed(1) + ' km',
+            duration: Math.round(routeData.duration / 60) + ' min'
+          });
+        }
+      } catch (error) {
+        console.error("Error planning route:", error);
+      }
+    };
+
+    planRoute();
+  }, [pickupCoords, destinationCoords]);
+
+  // Listen for online drivers (only when needed to save quota)
+  useEffect(() => {
+    if (step !== 'home' && step !== 'selecting') return;
+
+    const q = query(
+      collection(db, 'users'),
+      where('role', '==', 'driver'),
+      where('isOnline', '==', true)
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const drivers = snapshot.docs
+        .map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }))
+        // Filter out stale drivers (not active in last 1 hour)
+        .filter((d: any) => {
+          if (!d.lastActive) return true; // If no lastActive, assume online since isOnline is true
+          const lastActive = d.lastActive.toDate ? d.lastActive.toDate() : new Date(d.lastActive);
+          // 1 hour = 3600000 ms
+          return Math.abs(new Date().getTime() - lastActive.getTime()) < 3600000;
+        });
+      
+      console.log('Online drivers updated:', drivers.length);
+      setOnlineDrivers(drivers);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.GET, 'users');
+    });
+
+    return () => unsubscribe();
+  }, [step]);
+
+  const swapLocations = () => {
+    const oldPickup = pickup;
+    const oldPickupCoords = pickupCoords;
+    setPickup(destination);
+    setPickupCoords(destinationCoords);
+    setDestination(oldPickup);
+    setDestinationCoords(oldPickupCoords);
+  };
+
+  // Recover active ride on mount
+  useEffect(() => {
+    if (!user) return;
+
+    const q = query(
+      collection(db, 'rides'),
+      where('riderId', '==', user.uid),
+      where('status', 'in', ['searching', 'accepted', 'arrived', 'in_progress'])
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      if (!snapshot.empty) {
+        const doc = snapshot.docs[0];
+        const ride = { id: doc.id, ...doc.data() } as any;
+        setCurrentRideId(ride.id);
+        setActiveRide(ride);
+        if (ride.status === 'searching') {
+          setStep('searching');
+        } else {
+          setStep('ride');
+        }
+      }
+    }, (error) => {
+      handleFirestoreError(error, OperationType.GET, 'rides');
+    });
+
+    return () => unsubscribe();
+  }, [user]);
+
+  const handleRequest = async () => {
+    if (!user) {
+      console.error("User not authenticated");
+      return;
+    }
+    if (!location) {
+      if (locationLoading) {
+        alert("Still determining your location. Please wait a moment.");
+      } else {
+        console.error("Location not available even after fallback");
+        alert("Location services are unavailable. Please check your browser settings.");
+      }
+      return;
+    }
+    
+    console.log("Requesting ride...", { pickup, destination, selectedRide });
+    
+    // Validate scheduled time if applicable
+    if (isScheduling && scheduledDate) {
+      const now = new Date();
+      const maxTime = addDays(now, 1);
+      if (isBefore(scheduledDate, now) || isAfter(scheduledDate, maxTime)) {
+        alert(t.invalid_time);
+        return;
+      }
+    }
+
+    setStep('searching');
+    
+    try {
+      const rideData = {
+        riderId: user.uid,
+        riderName: profile?.displayName || 'Rider',
+        rideOTP: profile?.rideOTP,
+        status: isScheduling ? 'scheduled' : 'searching',
+        pickup: {
+          address: pickup === 'Current Location' && currentAddress ? currentAddress : pickup,
+          lat: pickupCoords.lat,
+          lng: pickupCoords.lng
+        },
+        dropoff: {
+          address: destination,
+          lat: destinationCoords.lat,
+          lng: destinationCoords.lng
+        },
+        fare: selectedRide.price,
+        rideType: selectedRide.id,
+        distance: distanceInfo?.distance || '5.2 km',
+        duration: distanceInfo?.duration || '15 min',
+        createdAt: serverTimestamp(),
+        scheduledAt: isScheduling && scheduledDate ? scheduledDate.toISOString() : null,
+        isShared: isShared,
+        availableSeats: isShared ? availableSeats : 0,
+        joinedRiders: isShared ? [] : null,
+        paymentStatus: 'pending',
+        paymentMethod: 'wallet',
+        candidateDrivers: onlineDrivers.length > 0 ? onlineDrivers.map(d => d.id) : null // Broadcast to all online drivers if empty
+      };
+
+      const docRef = await addDoc(collection(db, 'rides'), rideData);
+      
+      if (isScheduling) {
+        setStep('scheduled_success');
+      } else {
+        setCurrentRideId(docRef.id);
+        console.log("Ride request created with ID:", docRef.id);
+
+        // Notify candidate drivers
+        const driversToNotify = (rideData.candidateDrivers && rideData.candidateDrivers.length > 0) 
+          ? rideData.candidateDrivers 
+          : onlineDrivers.map(d => d.id);
+
+        if (driversToNotify.length > 0) {
+          console.log(`Notifying ${driversToNotify.length} drivers...`);
+          driversToNotify.forEach(driverId => {
+            sendPushNotification(
+              driverId,
+              'New Ride Request',
+              `New ${t[selectedRide.nameKey]} request from ${profile?.displayName || 'Rider'}`,
+              { rideId: docRef.id }
+            ).catch(err => console.error(`Error notifying driver ${driverId}:`, err));
+          });
+        } else {
+          console.log("No online drivers to notify.");
+        }
+      }
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, 'rides');
+      setStep('selecting');
+    }
+  };
+
+  const handleCancelRide = async () => {
+    if (!currentRideId) return;
+    try {
+      // If there's an active driver, notify them and reset their status
+      if (activeRide?.driverId) {
+        await sendPushNotification(
+          activeRide.driverId,
+          'Ride Cancelled',
+          'The rider has cancelled the ride.'
+        );
+        // Reset driver status to online
+        await updateDoc(doc(db, 'drivers', activeRide.driverId), {
+          status: 'online'
+        }).catch(() => {});
+      }
+
+      await updateDoc(doc(db, 'rides', currentRideId), {
+        status: 'cancelled',
+        cancelledAt: serverTimestamp(),
+        cancelledBy: 'rider'
+      });
+      setStep('home');
+      setCurrentRideId(null);
+      setActiveRide(null);
+      setDriverLocation(null);
+      setDriverPath([]);
+      setPredefinedPath([]);
+      setEta(null);
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, `rides/${currentRideId}`);
+    }
+  };
+
+  useEffect(() => {
+    if (!currentRideId) return;
+
+    const unsubscribe = onSnapshot(doc(db, 'rides', currentRideId), (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setActiveRide({ ...data, id: docSnap.id });
+        
+        if (['accepted', 'arrived', 'in_progress'].includes(data.status)) {
+          setStep('ride');
+        } else if (data.status === 'completed') {
+          setStep('home');
+          setCurrentRideId(null);
+          setActiveRide(null);
+          setDriverLocation(null);
+          setDriverPath([]);
+          setPredefinedPath([]);
+          setEta(null);
+          alert("Ride completed! Thank you for riding with CampusMobility.");
+        } else if (data.status === 'cancelled') {
+          setStep('home');
+          setCurrentRideId(null);
+          setActiveRide(null);
+          setDriverLocation(null);
+          setDriverPath([]);
+          setPredefinedPath([]);
+          setEta(null);
+        }
+      }
+    }, (error) => {
+      handleFirestoreError(error, OperationType.GET, `rides/${currentRideId}`);
+    });
+
+    return () => unsubscribe();
+  }, [currentRideId]);
+
+  // Separate effect for tracking driver location when ride is active
+  useEffect(() => {
+    if (!activeRide?.driverId || activeRide?.status !== 'accepted') {
+      setDriverLocation(null);
+      return;
+    }
+
+    const unsubDriver = onSnapshot(doc(db, 'users', activeRide.driverId), async (userSnap) => {
+      if (userSnap.exists()) {
+        const userData = userSnap.data();
+        if (userData.currentLocation?.lat && userData.currentLocation?.lng) {
+          const newLoc = { lat: userData.currentLocation.lat, lng: userData.currentLocation.lng };
+          setDriverLocation(newLoc);
+          
+          // Update ETA and driver path from Map
+          if (activeRide.pickup?.lat && activeRide.pickup?.lng) {
+            const pickupLoc = { lat: activeRide.pickup.lat, lng: activeRide.pickup.lng };
+            
+            // Get ETA
+            const newEta = await mapService.getETA(newLoc, pickupLoc);
+            if (newEta !== null) setEta(newEta);
+
+            // Get path from driver to pickup
+            const routeData = await mapService.getRoute(newLoc, pickupLoc);
+            if (routeData && routeData.coordinates) {
+              setDriverPath(routeData.coordinates);
+            }
+          }
+        }
+      }
+    }, (error) => {
+      handleFirestoreError(error, OperationType.GET, `users/${activeRide.driverId}`);
+    });
+
+    return () => unsubDriver();
+  }, [activeRide?.driverId, activeRide?.status]);
+
+  const isRideActive = activeRide && ['accepted', 'arrived', 'in_progress'].includes(activeRide.status);
+  const showMap = isRideActive || step === 'searching';
+
+  return (
+    <div className="h-screen w-screen bg-black overflow-hidden relative font-sans">
+      {/* Map Background */}
+      <div className="absolute inset-0 z-0">
+        {showMap ? (
+          <Map 
+            center={mapCenter} 
+            onMarkerClick={(m) => console.log('Marker clicked:', m)}
+            markers={[
+              ...(location?.lat && location?.lng ? [{ id: 'user-loc', lat: location.lat, lng: location.lng, type: 'user' as const, title: 'You' }] : []),
+              ...(driverLocation?.lat && driverLocation?.lng ? [{ id: 'driver-active', lat: driverLocation.lat, lng: driverLocation.lng, type: 'driver' as const, title: activeRide?.driverName || 'Driver' }] : []),
+              // Show online drivers when not on a trip or searching
+              ...(!isRideActive ? onlineDrivers
+                .filter(d => d.currentLocation?.lat && d.currentLocation?.lng)
+                .map(d => ({
+                  id: `driver-${d.id}`,
+                  lat: d.currentLocation.lat,
+                  lng: d.currentLocation.lng,
+                  type: 'driver' as const,
+                  title: d.displayName || 'Driver'
+                })) : []),
+              ...(predefinedPath.length > 0 && predefinedPath[0]?.lat && predefinedPath[predefinedPath.length - 1]?.lat ? [
+                { id: 'pickup', lat: predefinedPath[0].lat, lng: predefinedPath[0].lng, type: 'pickup' as const, title: 'Pickup' },
+                { id: 'dropoff', lat: predefinedPath[predefinedPath.length - 1].lat, lng: predefinedPath[predefinedPath.length - 1].lng, type: 'dropoff' as const, title: 'Dropoff' }
+              ] : [])
+            ]}
+            path={driverPath.length > 0 ? driverPath : (predefinedPath.length > 0 ? predefinedPath : path)}
+          />
+        ) : (
+          <div className="w-full h-full bg-zinc-950 flex flex-col items-center justify-center relative overflow-hidden">
+            {/* Ambient background elements */}
+            <div className="absolute inset-0 opacity-20">
+              <img 
+                src="https://images.unsplash.com/photo-1449156001935-d2863fb72690?auto=format&fit=crop&q=80&w=2000" 
+                alt="Campus Background"
+                className="w-full h-full object-cover blur-sm"
+                referrerPolicy="no-referrer"
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black" />
+            </div>
+            
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="relative z-10 flex flex-col items-center"
+            >
+              <div className="w-24 h-24 mb-6 relative">
+                <div className="absolute inset-0 bg-emerald-500/20 rounded-full animate-ping" />
+                <div className="relative bg-zinc-900 rounded-full w-full h-full flex items-center justify-center border border-zinc-800 shadow-2xl">
+                  <Car size={40} className="text-emerald-500" />
+                </div>
+              </div>
+              <Logo className="w-24 h-24" />
+              <div className="mt-4 flex flex-col items-center gap-1">
+                <p className="text-zinc-500 font-black tracking-[0.3em] uppercase text-[10px]">Campus Mobility</p>
+                <div className="h-0.5 w-12 bg-emerald-500/50 rounded-full" />
+              </div>
+            </motion.div>
+
+            {/* Decorative grid */}
+            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-5 pointer-events-none" />
+          </div>
+        )}
+      </div>
+
+      {/* Header / Menu Trigger */}
+      <div className="absolute top-6 left-6 right-6 z-20 flex items-center justify-between pointer-events-none">
+        <button 
+          onClick={() => setIsMenuOpen(true)}
+          className="w-12 h-12 bg-zinc-900 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform border border-zinc-800 pointer-events-auto"
+        >
+          <div className="space-y-1">
+            <div className="w-5 h-0.5 bg-zinc-50"></div>
+            <div className="w-3 h-0.5 bg-zinc-50"></div>
+            <div className="w-5 h-0.5 bg-zinc-50"></div>
+          </div>
+        </button>
+        
+        <div className="flex items-center gap-4 pointer-events-auto">
+          {locationLoading && (
+            <div className="bg-zinc-900/80 backdrop-blur-md px-4 py-2 rounded-full shadow-lg flex items-center gap-2 border border-zinc-800">
+              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-50">{t.locating}</span>
+            </div>
+          )}
+          <button 
+            onClick={() => setIsNotificationsOpen(true)}
+            className="w-12 h-12 bg-zinc-900 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform border border-zinc-800 relative"
+          >
+            <Bell size={20} className="text-zinc-50" />
+            {unreadCount > 0 && (
+              <span className="absolute top-2 right-2 w-4 h-4 bg-emerald-500 text-black text-[10px] font-black rounded-full flex items-center justify-center border-2 border-zinc-900">
+                {unreadCount}
+              </span>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Side Menu */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMenuOpen(false)}
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm z-40"
+            />
+            <motion.div 
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              className="absolute top-0 left-0 h-full w-[85vw] max-w-72 bg-zinc-950 z-50 p-6 sm:p-8 flex flex-col border-r border-zinc-800"
+            >
+              <div className="flex items-center gap-4 mb-8 sm:mb-12">
+                <div className="w-16 h-16 bg-zinc-900 rounded-full flex items-center justify-center overflow-hidden border border-zinc-800">
+                  {profile?.photoURL ? (
+                    <img src={profile.photoURL} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    <User size={32} className="text-zinc-600" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg text-zinc-50">{profile?.displayName || 'User'}</h3>
+                  <p className="text-zinc-500 text-sm">{t.rider_profile}</p>
+                </div>
+              </div>
+
+              <nav className="flex-1 space-y-6">
+                <button 
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    navigate('/ride-sharing');
+                  }}
+                  className="flex items-center gap-4 w-full text-zinc-400 hover:text-zinc-50 font-semibold transition-colors"
+                >
+                  <Users size={20} /> {t.ride_sharing}
+                </button>
+                <button 
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    navigate('/history');
+                  }}
+                  className="flex items-center gap-4 w-full text-zinc-400 hover:text-zinc-50 font-semibold transition-colors"
+                >
+                  <Clock size={20} /> {t.your_trips}
+                </button>
+                <button className="flex items-center gap-4 w-full text-zinc-400 hover:text-zinc-50 font-semibold transition-colors">
+                  <CreditCard size={20} /> {t.wallet}
+                </button>
+                <button 
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    navigate('/support');
+                  }}
+                  className="flex items-center gap-4 w-full text-zinc-400 hover:text-zinc-50 font-semibold transition-colors"
+                >
+                  <HelpCircle size={20} /> {t.support}
+                </button>
+                <button 
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    navigate('/profile');
+                  }}
+                  className="flex items-center gap-4 w-full text-zinc-400 hover:text-zinc-50 font-semibold transition-colors"
+                >
+                  <Settings size={20} /> {t.settings}
+                </button>
+              </nav>
+
+              <button 
+                onClick={() => auth.signOut()}
+                className="flex items-center gap-4 text-red-500 font-bold mt-auto"
+              >
+                <LogOut size={20} /> {t.sign_out}
+              </button>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Main UI Overlay */}
+      <div className="absolute inset-x-0 bottom-0 z-20 pointer-events-none">
+        <div className="max-w-xl mx-auto p-4 sm:p-6 pb-safe pointer-events-auto">
+          <AnimatePresence mode="wait">
+            {step === 'home' && (
+              <motion.div 
+                key="home"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 20, opacity: 0 }}
+                className="glass-panel rounded-[32px] p-6 space-y-6"
+              >
+                <div className="space-y-1">
+                  <p className="text-[10px] text-emerald-500 font-black uppercase tracking-[0.2em]">{t.welcome_back}</p>
+                  <h2 className="text-2xl font-black tracking-tight font-display text-white">{profile?.displayName || 'Rider'}</h2>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-black tracking-tight font-display uppercase tracking-widest text-zinc-400">{t.where_to}</h2>
+                  <button 
+                    onClick={swapLocations}
+                    className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
+                  >
+                    <ArrowUpDown size={18} className="text-emerald-500" />
+                  </button>
+                </div>
+                
+                <div className="space-y-3 relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 w-0.5 h-8 bg-zinc-800" />
+                  <div className="relative group">
+                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 w-2 h-2 bg-emerald-500 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                    <button 
+                      onClick={() => {
+                        setSearchingFor('pickup');
+                        setSearchQuery(pickup);
+                      }}
+                      className="w-full bg-white/5 rounded-2xl py-4 pl-10 pr-4 font-bold text-zinc-300 text-sm border border-white/5 group-hover:bg-white/10 transition-colors text-left"
+                    >
+                      {pickup}
+                    </button>
+                  </div>
+                  <div className="relative group">
+                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 w-2 h-2 bg-red-500 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.5)]" />
+                    <button 
+                      onClick={() => {
+                        setSearchingFor('destination');
+                        setSearchQuery(destination);
+                      }}
+                      className="w-full bg-white/5 rounded-2xl py-4 pl-10 pr-4 font-bold text-zinc-100 text-sm border border-white/5 group-hover:bg-white/10 transition-colors text-left"
+                    >
+                      {destination}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  {[LOCATIONS.GATE1, LOCATIONS.GATE2, LOCATIONS.DAHEGAM].map((loc) => (
+                    <button
+                      key={loc.nameKey}
+                      onClick={() => {
+                        setDestination(t[loc.nameKey]);
+                        setDestinationCoords({ lat: loc.lat, lng: loc.lng });
+                      }}
+                      className="flex items-center gap-2 p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-colors text-left"
+                    >
+                      <MapPin size={12} className="text-emerald-500 shrink-0" />
+                      <span className="text-[10px] font-bold text-zinc-400 truncate uppercase tracking-wider">{t[loc.nameKey]}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <button 
+                  onClick={() => setStep('selecting')}
+                  className="w-full bg-emerald-500 text-black py-4 rounded-2xl font-black text-lg premium-button shadow-[0_20px_40px_rgba(16,185,129,0.2)]"
+                >
+                  {t.request_ride}
+                </button>
+              </motion.div>
+            )}
+
+            {step === 'selecting' && (
+              <motion.div 
+                key="selecting"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 20, opacity: 0 }}
+                className="glass-panel rounded-[32px] overflow-hidden"
+              >
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <button onClick={() => setStep('home')} className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-zinc-400 hover:text-white transition-colors">
+                      <ChevronRight className="rotate-180" size={20} />
+                    </button>
+                    <h2 className="font-black font-display text-lg uppercase tracking-widest">{t.choose_ride}</h2>
+                    <div className="w-10" />
+                  </div>
+
+                  <div className="space-y-3 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
+                    {RIDE_TYPES.map((type) => (
+                      <button 
+                        key={type.id}
+                        onClick={() => setSelectedRide(type)}
+                        className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all border ${
+                          selectedRide.id === type.id 
+                            ? 'bg-emerald-500/10 border-emerald-500/50 shadow-[0_0_20px_rgba(16,185,129,0.1)]' 
+                            : 'bg-white/5 border-white/5 hover:bg-white/10'
+                        }`}
+                      >
+                        <div className="w-14 h-14 bg-zinc-800 rounded-xl flex items-center justify-center text-3xl shadow-inner">
+                          {type.icon}
+                        </div>
+                        <div className="flex-1 text-left">
+                          <p className={`font-black text-sm ${selectedRide.id === type.id ? 'text-emerald-400' : 'text-white'}`}>{t[type.nameKey]}</p>
+                          <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">
+                            {type.time} • {distanceInfo?.distance || '...'}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-black text-lg">₹{type.price}</p>
+                          <p className="text-[8px] text-zinc-500 font-bold uppercase tracking-widest">Estimated</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="p-6 bg-white/5 border-t border-white/5 flex flex-col gap-4">
+                  <div className="flex items-center justify-between px-2">
+                    <div className="flex items-center gap-2 text-zinc-400">
+                      <CreditCard size={16} />
+                      <span className="font-bold text-xs uppercase tracking-widest">Personal • UPI</span>
+                    </div>
+                    {distanceInfo && (
+                      <div className="text-right">
+                        <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Total Duration</p>
+                        <p className="text-sm font-black text-emerald-500">{distanceInfo.duration}</p>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {isScheduling && scheduledDate && (
+                    <div className="space-y-3">
+                      <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-4 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Clock className="text-emerald-500" size={18} />
+                          <div>
+                            <p className="text-[10px] text-emerald-500 font-black uppercase tracking-widest">{t.schedule_confirm}</p>
+                            <p className="text-sm font-black text-white">{format(scheduledDate, 'PPp')}</p>
+                          </div>
+                        </div>
+                        <button 
+                          onClick={() => {
+                            setIsScheduling(false);
+                            setScheduledDate(null);
+                          }}
+                          className="text-zinc-500 hover:text-white transition-colors"
+                        >
+                          <LogOut size={16} className="rotate-180" />
+                        </button>
+                      </div>
+
+                      <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center">
+                              <User className="text-emerald-500" size={16} />
+                            </div>
+                            <span className="text-sm font-bold text-zinc-300 uppercase tracking-wider">{t.share_ride}</span>
+                          </div>
+                          <button 
+                            onClick={() => setIsShared(!isShared)}
+                            className={`w-12 h-6 rounded-full transition-colors relative ${isShared ? 'bg-emerald-500' : 'bg-zinc-800'}`}
+                          >
+                            <motion.div 
+                              animate={{ x: isShared ? 24 : 4 }}
+                              className="absolute top-1 left-0 w-4 h-4 bg-white rounded-full shadow-lg"
+                            />
+                          </button>
+                        </div>
+
+                        {isShared && (
+                          <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                            <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">{t.available_seats}</span>
+                            <div className="flex items-center gap-4">
+                              <button 
+                                onClick={() => setAvailableSeats(Math.max(1, availableSeats - 1))}
+                                className="w-8 h-8 bg-white/5 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
+                              >
+                                -
+                              </button>
+                              <span className="font-black text-white w-4 text-center">{availableSeats}</span>
+                              <button 
+                                onClick={() => setAvailableSeats(Math.min(selectedRide.id === 'Premium' ? 5 : 3, availableSeats + 1))}
+                                className="w-8 h-8 bg-white/5 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
+                              >
+                                +
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <button 
+                      onClick={() => setShowTimePicker(true)}
+                      className={`py-4 rounded-2xl font-black text-sm transition-all border flex items-center justify-center gap-2 ${
+                        isScheduling 
+                          ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30' 
+                          : 'bg-white/5 text-zinc-400 border-white/5 hover:bg-white/10'
+                      }`}
+                    >
+                      <Clock size={18} />
+                      {isScheduling ? 'Change' : t.schedule_ride}
+                    </button>
+                    <button 
+                      onClick={handleRequest}
+                      className="bg-emerald-500 text-black py-4 rounded-2xl font-black text-sm premium-button shadow-[0_20px_40px_rgba(16,185,129,0.2)]"
+                    >
+                      {isScheduling ? 'Confirm' : t.confirm_ride}
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {step === 'searching' && (
+              <motion.div 
+                key="searching"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 20, opacity: 0 }}
+                className="glass-panel rounded-[32px] p-8 text-center space-y-6"
+              >
+                <div className="relative w-24 h-24 mx-auto">
+                  <motion.div 
+                    animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0.2, 0.5] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="absolute inset-0 bg-emerald-500 rounded-full"
+                  />
+                  <div className="absolute inset-2 bg-zinc-900 rounded-full flex items-center justify-center border border-emerald-500/30">
+                    <Car className="text-emerald-500 animate-pulse" size={32} />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <h2 className="text-xl font-black font-display tracking-tight">{t.finding_ride}</h2>
+                  <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">{t.finding_driver}</p>
+                </div>
+
+                {activeRide?.isShared && (
+                  <div className="p-4 bg-white/5 rounded-2xl border border-white/5 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">{t.joined_riders || 'Joined Riders'}</p>
+                      <span className="bg-emerald-500/20 text-emerald-500 text-[10px] font-black px-2 py-0.5 rounded-full border border-emerald-500/30">
+                        {joinedRiderProfiles.length} / {activeRide.availableSeats + joinedRiderProfiles.length}
+                      </span>
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-2 justify-center">
+                      {joinedRiderProfiles.length > 0 ? (
+                        joinedRiderProfiles.map((rider) => (
+                          <div key={rider.id} className="flex flex-col items-center gap-1 bg-zinc-800/50 p-2 rounded-xl border border-white/5">
+                            <div className="flex items-center gap-2">
+                              <div className="w-6 h-6 bg-emerald-500/20 rounded-lg overflow-hidden border border-emerald-500/30">
+                                <img src={rider.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${rider.id}`} alt={rider.displayName} className="w-full h-full object-cover" />
+                              </div>
+                              <span className="text-[10px] font-bold text-zinc-300">{rider.displayName || 'Rider'}</span>
+                            </div>
+                            {rider.phoneNumber && (
+                              <span className="text-[9px] text-emerald-400 font-mono">{rider.phoneNumber}</span>
+                            )}
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-[10px] text-zinc-600 font-bold italic">{t.waiting_for_others || 'Waiting for others to join...'}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex justify-center gap-1">
+                  {[0, 1, 2].map(i => (
+                    <motion.div
+                      key={i}
+                      animate={{ y: [0, -4, 0] }}
+                      transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.1 }}
+                      className="w-1.5 h-1.5 bg-emerald-500 rounded-full"
+                    />
+                  ))}
+                </div>
+
+                <button 
+                  onClick={handleCancelRide}
+                  className="w-full bg-white/5 text-zinc-400 py-4 rounded-2xl font-black text-sm hover:bg-white/10 transition-all border border-white/5"
+                >
+                  {t.cancel_request}
+                </button>
+              </motion.div>
+            )}
+
+            {step === 'scheduled_success' && (
+              <motion.div 
+                key="scheduled_success"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 20, opacity: 0 }}
+                className="glass-panel rounded-[32px] p-8 text-center space-y-6"
+              >
+                <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto border border-emerald-500/30">
+                  <Clock className="text-emerald-500" size={40} />
+                </div>
+
+                <div className="space-y-2">
+                  <h2 className="text-2xl font-black font-display tracking-tight text-white">{t.ride_scheduled}</h2>
+                  <p className="text-zinc-400 text-sm font-medium">{t.scheduled_info || 'Your ride has been successfully scheduled.'}</p>
+                </div>
+
+                <div className="bg-white/5 rounded-2xl p-6 space-y-4 border border-white/5 text-left">
+                  <div className="flex items-start gap-3">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                    <div>
+                      <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">{t.pickup_label}</p>
+                      <p className="text-sm font-bold text-zinc-200 line-clamp-1">{pickup === 'Current Location' ? currentAddress : pickup}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <div className="w-2 h-2 rounded-full bg-orange-500 mt-1.5 shadow-[0_0_10px_rgba(249,115,22,0.5)]" />
+                    <div>
+                      <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">{t.destination_label}</p>
+                      <p className="text-sm font-bold text-zinc-200 line-clamp-1">{destination}</p>
+                    </div>
+                  </div>
+
+                  <div className="h-px bg-white/5" />
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">{t.scheduled_for}</p>
+                      <p className="text-sm font-bold text-emerald-500">
+                        {scheduledDate ? format(scheduledDate, 'MMM d, h:mm a') : 'N/A'}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">{t.ride_details}</p>
+                      <p className="text-sm font-bold text-zinc-200">{t[selectedRide.nameKey]}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={() => {
+                    setStep('home');
+                    setIsScheduling(false);
+                    setScheduledDate(null);
+                  }}
+                  className="w-full bg-emerald-500 text-black py-4 rounded-2xl font-black text-sm premium-button shadow-[0_20px_40px_rgba(16,185,129,0.2)]"
+                >
+                  {t.got_it}
+                </button>
+              </motion.div>
+            )}
+
+            {step === 'ride' && activeRide && (
+              <motion.div 
+                key="ride"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 20, opacity: 0 }}
+                className="glass-panel rounded-[32px] overflow-hidden"
+              >
+                <div className="p-6 space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 bg-zinc-800 rounded-2xl flex items-center justify-center text-3xl shadow-inner border border-white/5">
+                        {selectedRide.icon}
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-emerald-500 font-black uppercase tracking-widest mb-0.5">
+                          {activeRide.status === 'accepted' ? t.driver_coming : activeRide.status === 'arrived' ? t.driver_arrived : t.en_route}
+                        </p>
+                        <h2 className="text-lg font-black font-display tracking-tight uppercase">{activeRide.vehicleNo || 'GJ 01 AB 1234'}</h2>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">{t.otp}</p>
+                      <p className="text-xl font-black text-white tracking-tighter">{profile?.rideOTP || '----'}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/5">
+                    <div className="w-12 h-12 bg-zinc-800 rounded-xl overflow-hidden border border-white/10">
+                      <img src={activeRide.driverPhoto || `https://api.dicebear.com/7.x/avataaars/svg?seed=${activeRide.driverId}`} alt="Driver" className="w-full h-full object-cover" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-black text-sm">{activeRide.driverName || 'Rahul Sharma'}</p>
+                      <div className="flex items-center gap-1 text-amber-500">
+                        <span className="text-[10px] font-black">4.9</span>
+                        <div className="flex gap-0.5">
+                          {[...Array(5)].map((_, i) => (
+                            <div key={i} className="w-1.5 h-1.5 bg-amber-500 rounded-full opacity-30" />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => {
+                          if (currentRideId && activeRide.driverId) {
+                            initiateCall(currentRideId, activeRide.driverId, activeRide.driverName || 'Driver');
+                          }
+                        }}
+                        className="w-10 h-10 bg-emerald-500/10 text-emerald-500 rounded-xl flex items-center justify-center hover:bg-emerald-500/20 transition-colors"
+                      >
+                        <Phone size={18} />
+                      </button>
+                      <button className="w-10 h-10 bg-emerald-500/10 text-emerald-500 rounded-xl flex items-center justify-center hover:bg-emerald-500/20 transition-colors">
+                        <Bell size={18} />
+                      </button>
+                      <button className="w-10 h-10 bg-white/5 text-zinc-400 rounded-xl flex items-center justify-center hover:bg-white/10 transition-colors">
+                        <User size={18} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-6 bg-white/5 border-t border-white/5 flex gap-3">
+                  <button 
+                    onClick={() => setIsSOSModalOpen(true)}
+                    className="flex-1 bg-red-500/20 text-red-500 py-4 rounded-2xl font-black text-sm hover:bg-red-500/30 transition-all border border-red-500/30 flex items-center justify-center gap-2"
+                  >
+                    <ShieldAlert size={18} />
+                    {t.sos}
+                  </button>
+                  <button 
+                    onClick={handleCancelRide}
+                    className="flex-1 bg-white/5 text-zinc-300 py-4 rounded-2xl font-black text-sm hover:bg-white/10 transition-all border border-white/10"
+                  >
+                    {t.cancel}
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+      <AnimatePresence>
+        {searchingFor && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[70] bg-black/60 backdrop-blur-md flex flex-col"
+          >
+            <div className="p-6 bg-zinc-900/50 border-b border-white/10 flex items-center gap-4">
+              <button onClick={() => setSearchingFor(null)} className="text-zinc-400 hover:text-white">
+                <ChevronRight className="rotate-180" size={24} />
+              </button>
+              <div className="flex-1 relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
+                <input 
+                  autoFocus
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={searchingFor === 'pickup' ? t.search_pickup : t.search_destination}
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white font-bold focus:outline-none focus:border-emerald-500/50 transition-colors"
+                />
+              </div>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
+              {searchQuery.length < 3 && (
+                <div className="mb-6 space-y-2">
+                  <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest px-4 mb-3">{t.quick_selection}</p>
+                  <div className="grid grid-cols-2 gap-2 px-2">
+                      {[LOCATIONS.GATE1, LOCATIONS.GATE2, LOCATIONS.RRU, LOCATIONS.DAHEGAM].map((loc) => (
+                        <button
+                          key={loc.nameKey}
+                          onClick={() => handleSelectSuggestion({ placeName: t[loc.nameKey], placeAddress: t[loc.addressKey], center: [loc.lng, loc.lat] })}
+                          className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-colors text-left"
+                        >
+                        <MapPin size={14} className="text-emerald-500 shrink-0" />
+                        <span className="text-xs font-bold text-zinc-300 truncate">{t[loc.nameKey]}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {suggestions.length > 0 ? (
+                suggestions.map((s) => (
+                  <button 
+                    key={s.id}
+                    onClick={() => handleSelectSuggestion(s)}
+                    className="w-full flex items-start gap-4 p-4 rounded-2xl hover:bg-white/5 transition-colors text-left group"
+                  >
+                    <div className="w-10 h-10 bg-zinc-800 rounded-xl flex items-center justify-center text-zinc-500 group-hover:text-emerald-500 transition-colors">
+                      <MapPin size={20} />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-bold text-white">{s.placeName}</p>
+                      <p className="text-xs text-zinc-500 truncate">{s.placeAddress}</p>
+                    </div>
+                  </button>
+                ))
+              ) : searchQuery.length > 2 ? (
+                <div className="text-center py-12">
+                  <p className="text-zinc-500 font-bold text-sm uppercase tracking-widest">{t.no_locations}</p>
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-zinc-500 font-bold text-sm uppercase tracking-widest">{t.type_to_search}</p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* directions modal */}
+      <AnimatePresence>
+        {showDirections && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md"
+          >
+            <motion.div 
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              className="glass-panel w-full max-w-md rounded-t-[40px] sm:rounded-[40px] overflow-hidden flex flex-col max-h-[90vh] sm:max-h-[80vh]"
+            >
+              <div className="p-6 border-b border-white/10 flex items-center justify-between sticky top-0 bg-zinc-900/50 backdrop-blur-xl z-10">
+                <div>
+                  <h3 className="font-black font-display text-lg tracking-tight">{t.trip_directions}</h3>
+                  <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest truncate max-w-[200px]">{pickup} to {destination}</p>
+                </div>
+                <button 
+                  onClick={() => setShowDirections(false)}
+                  className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center hover:bg-white/10 transition-colors"
+                >
+                  <ChevronRight className="rotate-90 text-zinc-400" />
+                </button>
+              </div>
+              
+              <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+                {routeSteps.length > 0 ? (
+                  routeSteps.map((step, i) => (
+                    <div key={i} className="flex gap-4 relative group">
+                      {i < routeSteps.length - 1 && (
+                        <div className="absolute left-[11px] top-8 bottom-[-24px] w-[2px] bg-white/5 group-hover:bg-emerald-500/20 transition-colors" />
+                      )}
+                      <div className="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-[10px] text-emerald-500 font-black shrink-0 z-10 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+                        {i + 1}
+                      </div>
+                      <div className="flex-1 pb-2">
+                        <p className="text-sm font-bold text-zinc-200 leading-snug group-hover:text-white transition-colors">
+                          {step.instruction}
+                        </p>
+                        <div className="flex items-center gap-3 mt-2">
+                          <span className="bg-white/5 px-2 py-0.5 rounded-md text-[9px] font-black text-zinc-500 uppercase tracking-wider border border-white/5">
+                            {(step.distance / 1000).toFixed(2)} km
+                          </span>
+                          <span className="bg-white/5 px-2 py-0.5 rounded-md text-[9px] font-black text-zinc-500 uppercase tracking-wider border border-white/5">
+                            {Math.round(step.duration / 60)} min
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-12">
+                    <Navigation className="mx-auto text-zinc-800 mb-4" size={48} />
+                    <p className="text-zinc-500 font-bold text-xs uppercase tracking-widest">{t.no_directions}</p>
+                  </div>
+                )}
+              </div>
+              
+              <div className="p-6 bg-white/5 border-t border-white/10">
+                <button 
+                  onClick={() => setShowDirections(false)}
+                  className="w-full bg-white text-black py-4 rounded-2xl font-black text-sm premium-button"
+                >
+                  {t.got_it}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showTimePicker && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-6"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="bg-zinc-900 border border-emerald-500/30 rounded-3xl p-8 max-w-sm w-full text-center shadow-[0_0_50px_rgba(16,185,129,0.2)]"
+            >
+              <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-emerald-500/30">
+                <Clock className="w-10 h-10 text-emerald-500" />
+              </div>
+              <h2 className="text-2xl font-black text-white uppercase tracking-tight mb-2">{t.select_time}</h2>
+              <p className="text-zinc-400 text-sm mb-8">
+                {t.invalid_time}
+              </p>
+              
+              <input 
+                type="datetime-local"
+                className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white font-bold focus:outline-none focus:border-emerald-500/50 transition-colors mb-8"
+                min={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
+                max={format(addDays(new Date(), 1), "yyyy-MM-dd'T'HH:mm")}
+                value={scheduledDate ? format(scheduledDate, "yyyy-MM-dd'T'HH:mm") : ''}
+                onChange={(e) => setScheduledDate(new Date(e.target.value))}
+              />
+
+              <div className="space-y-3">
+                <button 
+                  onClick={() => {
+                    if (scheduledDate && isAfter(scheduledDate, new Date()) && isBefore(scheduledDate, addDays(new Date(), 1))) {
+                      setIsScheduling(true);
+                      setShowTimePicker(false);
+                    } else {
+                      alert(t.invalid_time);
+                    }
+                  }}
+                  className="w-full bg-emerald-500 text-black py-4 rounded-2xl font-black text-sm hover:bg-emerald-600 transition-colors shadow-lg shadow-emerald-500/20"
+                >
+                  {t.confirm_ride}
+                </button>
+                <button 
+                  onClick={() => {
+                    setShowTimePicker(false);
+                    if (!isScheduling) setScheduledDate(null);
+                  }}
+                  className="w-full bg-white/5 text-white py-4 rounded-2xl font-black text-sm hover:bg-white/10 transition-colors border border-white/5"
+                >
+                  {t.cancel}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {isSOSModalOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-6"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="bg-zinc-900 border border-red-500/30 rounded-3xl p-8 max-w-sm w-full text-center shadow-[0_0_50px_rgba(239,68,68,0.2)]"
+            >
+              <div className="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-red-500/30">
+                <ShieldAlert className="w-10 h-10 text-red-500" />
+              </div>
+              <h2 className="text-2xl font-black text-white uppercase tracking-tight mb-2">{t.emergency_sos}</h2>
+              <p className="text-zinc-400 text-sm mb-8">
+                {t.sos_description}
+              </p>
+              
+              <div className="space-y-3">
+                <button 
+                  onClick={handleTriggerSOS}
+                  disabled={isSOSLoading}
+                  className="w-full bg-red-500 text-white py-4 rounded-2xl font-black text-sm hover:bg-red-600 transition-colors shadow-lg shadow-red-500/20 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isSOSLoading ? (
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <ShieldAlert size={18} />
+                      {t.trigger_sos}
+                    </>
+                  )}
+                </button>
+                <button 
+                  onClick={() => setIsSOSModalOpen(false)}
+                  disabled={isSOSLoading}
+                  className="w-full bg-white/5 text-white py-4 rounded-2xl font-black text-sm hover:bg-white/10 transition-colors border border-white/5"
+                >
+                  {t.cancel}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <NotificationsPanel 
+        isOpen={isNotificationsOpen} 
+        onClose={() => setIsNotificationsOpen(false)} 
+      />
+    </div>
+  );
+}
