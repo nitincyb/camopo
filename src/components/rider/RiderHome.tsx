@@ -1059,20 +1059,21 @@ export default function RiderHome() {
                     setSelectedRide(type);
                     setShowBooking(true);
                   }}
-                  className="relative z-10 flex-1 flex flex-col items-center justify-center gap-3 py-6 bg-gradient-to-br from-[#2a2f38] to-[#1c1f26] rounded-[24px] shadow-[-3px_-3px_8px_rgba(255,255,255,0.04),4px_4px_10px_rgba(0,0,0,0.4)] hover:shadow-[-5px_-5px_12px_rgba(255,255,255,0.06),6px_6px_15px_rgba(0,0,0,0.5)] hover:scale-[1.05] hover:brightness-105 transition-all duration-400 ease-in-out cursor-pointer group overflow-hidden pointer-events-auto"
+                  className="relative z-10 flex-1 flex flex-col items-center justify-center gap-3.5 py-7 bg-[#181a20] rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.4)] border border-white/[0.06] hover:border-white/[0.12] hover:scale-[1.05] hover:-translate-y-[4px] hover:shadow-[0_16px_40px_rgba(0,0,0,0.6)] transition-all duration-300 ease-in-out cursor-pointer group overflow-hidden pointer-events-auto"
                 >
-                  {/* Diffused inner glow (light inside clay) */}
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.15)_0%,transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-in-out pointer-events-none" />
+                  {/* Faint ambient glow on hover */}
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.06)_0%,transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-in-out pointer-events-none" />
                   
-                  {/* Engraved Icon Well */}
-                  <div className="relative z-10 flex items-center justify-center w-[52px] h-[52px] rounded-[18px] bg-[#21252d] shadow-[inset_2px_2px_5px_rgba(0,0,0,0.5),inset_-2px_-2px_4px_rgba(255,255,255,0.03)] group-hover:shadow-[inset_1px_1px_2px_rgba(0,0,0,0.3),inset_-1px_-1px_2px_rgba(255,255,255,0.02)] transition-shadow duration-400 ease-in-out">
-                    <div className="text-emerald-700/80 group-hover:text-emerald-400 group-hover:drop-shadow-[0_0_8px_rgba(16,185,129,0.5)] transition-all duration-400 ease-in-out">
-                      {getRideIcon(type.iconId, 32)}
-                    </div>
+                  {/* Subtle soft cinematic light sweep */}
+                  <div className="absolute top-0 left-[-100%] h-full w-[150%] bg-gradient-to-r from-transparent via-white/[0.04] to-transparent skew-x-[-20deg] group-hover:translate-x-[150%] transition-transform duration-[800ms] ease-in-out pointer-events-none" />
+                  
+                  {/* Clean Icon */}
+                  <div className="relative z-10 text-zinc-400 group-hover:text-emerald-400 transition-colors duration-300 drop-shadow-sm">
+                    {getRideIcon(type.iconId, 34)}
                   </div>
                   
-                  {/* Carved Text */}
-                  <span className="relative z-10 text-[12px] font-semibold tracking-wide text-zinc-500/90 group-hover:text-emerald-200 [text-shadow:0px_-1px_1px_rgba(0,0,0,0.8),0px_1px_1px_rgba(255,255,255,0.05)] group-hover:[text-shadow:0px_0px_8px_rgba(16,185,129,0.4)] transition-all duration-400 ease-in-out">
+                  {/* Clean Text */}
+                  <span className="relative z-10 text-xs font-medium tracking-wide text-zinc-500 group-hover:text-zinc-200 transition-colors duration-300">
                     {type.id}
                   </span>
                 </motion.button>
@@ -1084,20 +1085,21 @@ export default function RiderHome() {
                 transition={{ duration: 0.4, delay: 0.4 + RIDE_TYPES.length * 0.07, ease: [0.25, 0.46, 0.45, 0.94] }}
                 whileTap={{ scale: 0.95, transition: { duration: 0.1 } }}
                 onClick={() => navigate('/ride-sharing')}
-                className="relative z-10 flex-1 flex flex-col items-center justify-center gap-3 py-6 bg-gradient-to-br from-[#2a2f38] to-[#1c1f26] rounded-[24px] shadow-[-3px_-3px_8px_rgba(255,255,255,0.04),4px_4px_10px_rgba(0,0,0,0.4)] hover:shadow-[-5px_-5px_12px_rgba(255,255,255,0.06),6px_6px_15px_rgba(0,0,0,0.5)] hover:scale-[1.05] hover:brightness-105 transition-all duration-400 ease-in-out cursor-pointer group overflow-hidden pointer-events-auto"
+                className="relative z-10 flex-1 flex flex-col items-center justify-center gap-3.5 py-7 bg-[#181a20] rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.4)] border border-white/[0.06] hover:border-white/[0.12] hover:scale-[1.05] hover:-translate-y-[4px] hover:shadow-[0_16px_40px_rgba(0,0,0,0.6)] transition-all duration-300 ease-in-out cursor-pointer group overflow-hidden pointer-events-auto"
               >
-                {/* Diffused inner glow (light inside clay) */}
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(251,191,36,0.12)_0%,transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-in-out pointer-events-none" />
+                {/* Faint ambient glow on hover (yellow variant) */}
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(251,191,36,0.06)_0%,transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-in-out pointer-events-none" />
                 
-                {/* Engraved Icon Well */}
-                <div className="relative z-10 flex items-center justify-center w-[52px] h-[52px] rounded-[18px] bg-[#21252d] shadow-[inset_2px_2px_5px_rgba(0,0,0,0.5),inset_-2px_-2px_4px_rgba(255,255,255,0.03)] group-hover:shadow-[inset_1px_1px_2px_rgba(0,0,0,0.3),inset_-1px_-1px_2px_rgba(255,255,255,0.02)] transition-shadow duration-400 ease-in-out">
-                  <div className="text-yellow-700/80 group-hover:text-yellow-400 group-hover:drop-shadow-[0_0_8px_rgba(251,191,36,0.5)] transition-all duration-400 ease-in-out">
-                    <Users size={32} />
-                  </div>
+                {/* Subtle soft cinematic light sweep */}
+                <div className="absolute top-0 left-[-100%] h-full w-[150%] bg-gradient-to-r from-transparent via-white/[0.04] to-transparent skew-x-[-20deg] group-hover:translate-x-[150%] transition-transform duration-[800ms] ease-in-out pointer-events-none" />
+                
+                {/* Clean Icon */}
+                <div className="relative z-10 text-zinc-400 group-hover:text-yellow-400 transition-colors duration-300 drop-shadow-sm">
+                  <Users size={34} />
                 </div>
                 
-                {/* Carved Text */}
-                <span className="relative z-10 text-[12px] font-semibold tracking-wide text-zinc-500/90 group-hover:text-yellow-200 [text-shadow:0px_-1px_1px_rgba(0,0,0,0.8),0px_1px_1px_rgba(255,255,255,0.05)] group-hover:[text-shadow:0px_0px_8px_rgba(251,191,36,0.4)] transition-all duration-400 ease-in-out">
+                {/* Clean Text */}
+                <span className="relative z-10 text-xs font-medium tracking-wide text-zinc-500 group-hover:text-zinc-200 transition-colors duration-300">
                   Share
                 </span>
               </motion.button>
