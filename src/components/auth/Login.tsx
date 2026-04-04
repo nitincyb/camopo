@@ -12,17 +12,72 @@ import { logSecurityEvent } from '../../services/auditService';
 const VIDEO_URL = 'https://videos.pexels.com/video-files/3015510/3015510-hd_1920_1080_24fps.mp4';
 
 const RANDOM_HEADERS = [
+  // Class & Attendance Core
   { title: "Get moving", subtitle: "Sign in to start your journey" },
   { title: "By the students", subtitle: "For the students" },
   { title: "Made by RRU", subtitle: "With ❤️ and probably too much caffeine" },
-  { title: "Why did the student cross the road?", subtitle: "To catch the campus ride, obviously." },
-  { title: "I think, therefore I am...", subtitle: "...late for my 9 AM lecture." },
-  { title: "Time is an illusion.", subtitle: "But your class starts in 5 minutes. Hurry up." },
   { title: "Adventure awaits", subtitle: "Or just the library. We don't judge." },
+  { title: "Ready to roll?", subtitle: "Let's get you where you need to be." },
+  { title: "Is it a bird? Is it a plane?", subtitle: "No, it's just your ride arriving." },
+  { title: "Next stop:", subtitle: "Academic success (hopefully)." },
+  { title: "Buckle up", subtitle: "Your degree is waiting." },
+  { title: "Campus bounds", subtitle: "Taking you from A to B." },
+  { title: "Skip the sweat", subtitle: "Let us do the walking." },
+
+  // Time & Panic
+  { title: "Time is an illusion.", subtitle: "But your class starts in 5 minutes. Hurry up." },
+  { title: "Running late?", subtitle: "We can't bend time, but we can drive." },
+  { title: "The 8:59 AM Sprint", subtitle: "Let's get you there before the door locks." },
+  { title: "Professor already there?", subtitle: "Time to slip in the back silently." },
+  { title: "Attendance is mandatory.", subtitle: "Your walking is optional." },
+  { title: "Snooze button regrets?", subtitle: "We've all been there. Hop in." },
+  { title: "Don't run.", subtitle: "Riding is much more dignified." },
+  { title: "Beat the clock", subtitle: "Campus rides on demand." },
+  { title: "Out of time?", subtitle: "In to the cab." },
+  { title: "Deadlines closer than they appear", subtitle: "So is your ride." },
+
+  // Philosophical / Deep Humor
+  { title: "I think, therefore I am...", subtitle: "...late for my 9 AM lecture." },
   { title: "To be or not to be...", subtitle: "...on time. That is the question." },
   { title: "Schrödinger's Class", subtitle: "You are both present and absent until you arrive." },
-  { title: "Is it a bird? Is it a plane?", subtitle: "No, it's just your ride arriving." },
   { title: "Nihilism is exhausting.", subtitle: "Take a ride and rest your legs instead." },
+  { title: "If a tree falls in a forest...", subtitle: "...it still needs a driver to get to class." },
+  { title: "What is the meaning of life?", subtitle: "Passing this semester." },
+  { title: "Plato's Cave", subtitle: "Is just the basement study room. Let's get out." },
+  { title: "Existential dread?", subtitle: "At least you don't have to walk." },
+  { title: "We are stardust.", subtitle: "Stardust that really needs a ride right now." },
+  { title: "The absurd is born...", subtitle: "...from walking across campus in the sun." },
+
+  // Student Life Jokes
+  { title: "Why did the student cross the road?", subtitle: "To catch the campus ride, obviously." },
+  { title: "My GPA might drop", subtitle: "But our drivers won't drop you." },
+  { title: "Powered by coffee.", subtitle: "And electric motors." },
+  { title: "Assignments due at 11:59", subtitle: "Your ride arrives at 11:50." },
+  { title: "Group project meeting?", subtitle: "Don't be the one who's late." },
+  { title: "Library all-nighter?", subtitle: "We'll get you back to bed." },
+  { title: "Forgot your laptop charger?", subtitle: "Fastest U-turn on campus." },
+  { title: "Mess food awaits", subtitle: "Beat the lunch queue." },
+  { title: "Surviving on instant noodles?", subtitle: "At least your ride is premium." },
+  { title: "Midterms incoming", subtitle: " Brace for impact." },
+
+  // Random RRU Vibes
+  { title: "Welcome to RRU", subtitle: "Where every minute counts." },
+  { title: "Campus Mobility", subtitle: "Because running is for athletes." },
+  { title: "The smart way", subtitle: "To navigate the campus." },
+  { title: "Save your energy", subtitle: "You'll need it for the exams." },
+  { title: "A ride for a ride", subtitle: "Share the journey." },
+  { title: "Destination: Graduation", subtitle: "We're just helping you along the way." },
+  { title: "No more long walks", subtitle: "Just smooth rides." },
+  { title: "RRU's finest", subtitle: "Driven by the students." },
+  { title: "Your campus, your ride", subtitle: "Take control of your time." },
+  { title: "Less walking", subtitle: "More learning (or sleeping)." },
+
+  // Wholesome / Motivating
+  { title: "You got this.", subtitle: "One lecture at a time." },
+  { title: "Deep breaths.", subtitle: "Your ride is on the way." },
+  { title: "Make today count.", subtitle: "Starting with a good ride." },
+  { title: "Smile", subtitle: "You're doing great." },
+  { title: "A new day", subtitle: "A new journey." }
 ];
 
 export default function Login() {
