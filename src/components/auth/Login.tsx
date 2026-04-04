@@ -111,52 +111,63 @@ export default function Login() {
           </h1>
         </motion.div>
 
-        {/* ── Liquid Glass Login Section ── */}
+        {/* ── Authentic Liquid Glass Login Section ── */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.15, ease }}
           className="mt-auto w-full relative"
         >
-          {/* Enhanced Liquid Glass Container */}
+          {/* Authentic Liquid Glass Container */}
           <div
             className="relative p-6 sm:p-8 rounded-[2.5rem] overflow-hidden"
             style={{
-              background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.01) 100%)',
-              backdropFilter: 'blur(32px)',
-              WebkitBackdropFilter: 'blur(32px)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              boxShadow: '0 24px 64px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2), inset 0 -1px 1px rgba(255, 255, 255, 0.04)',
+              /* The base "frost" tint */
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              /* Soft overlay gradient representing light falling across the surface */
+              backgroundImage: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.02) 100%)',
+              /* Heavy blur for optical refraction depth */
+              backdropFilter: 'blur(40px) saturate(120%) brightness(1.1)',
+              WebkitBackdropFilter: 'blur(40px) saturate(120%) brightness(1.1)',
+              /* Refraction edge highlights (the defining feature of real liquid glass) */
+              boxShadow: `
+                0 4px 30px rgba(0, 0, 0, 0.5), 
+                inset 0 1px 1px rgba(255, 255, 255, 0.3), 
+                inset 0 -1px 2px rgba(0, 0, 0, 0.1),
+                inset -1px 0 2px rgba(255, 255, 255, 0.05),
+                inset 1px 0 2px rgba(255, 255, 255, 0.05)
+              `,
+              /* Core edge boundary */
+              border: '1px solid rgba(255, 255, 255, 0.15)',
             }}
           >
-            {/* Inner highlight reflection for liquid glass effect */}
+            {/* Liquid Surface Glare (diagonal swipe) */}
             <div
-              className="absolute top-0 left-0 right-0 h-px opacity-70"
-              style={{ background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent)' }}
-            />
-            {/* Soft ambient inner glow */}
-            <div
-              className="absolute inset-0 pointer-events-none rounded-[2.5rem]"
-              style={{ background: 'radial-gradient(circle at 50% 0%, rgba(255,255,255,0.05) 0%, transparent 60%)' }}
+              className="absolute pointer-events-none"
+              style={{
+                top: '-50%', left: '-50%', width: '200%', height: '200%',
+                background: 'linear-gradient(to bottom right, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 100%)',
+                transform: 'rotate(-15deg)',
+              }}
             />
 
-            <div className="relative z-10">
+            <div className="relative z-10 font-sans tracking-tight">
               {/* Header */}
-              <div className="mb-5 space-y-0.5">
-                <h2 className="text-2xl font-bold text-white tracking-tight">Get moving</h2>
-                <p className="text-zinc-400 text-sm">Sign in to start your journey</p>
+              <div className="mb-5 space-y-1">
+                <h2 className="text-[1.35rem] font-bold text-white tracking-tight">Get moving</h2>
+                <p className="text-zinc-300 text-xs font-medium">Sign in to start your journey</p>
               </div>
 
               {/* Error */}
               {error && (
-                <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-xs p-3 rounded-2xl text-left mb-4">
+                <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-xs p-3 rounded-2xl text-left mb-4">
                   {error}
                   <p className="mt-1 opacity-70">Tip: Ensure your domain is added to "Authorized Domains" in Firebase Console.</p>
                 </div>
               )}
 
               {/* Buttons */}
-              <div className="space-y-2.5">
+              <div className="space-y-3">
                 {/* Rider Login */}
                 <button
                   onClick={async () => {
@@ -164,7 +175,10 @@ export default function Login() {
                     await handleGoogleLogin();
                   }}
                   disabled={isVerifying}
-                  className="w-full flex items-center justify-center gap-3 bg-white text-zinc-900 font-semibold py-3.5 rounded-2xl transition-all hover:bg-zinc-100 active:scale-[0.98] disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-3 bg-white text-zinc-900 font-semibold py-3.5 rounded-2xl cursor-pointer transition-all hover:bg-zinc-100 active:scale-[0.98] disabled:opacity-50"
+                  style={{
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                  }}
                 >
                   {isVerifying ? (
                     <div className="w-5 h-5 border-2 border-zinc-300 border-t-zinc-800 rounded-full animate-spin" />
@@ -176,23 +190,29 @@ export default function Login() {
                       <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                     </svg>
                   )}
-                  <span>{isVerifying ? 'Verifying...' : 'Continue as Rider'}</span>
+                  <span className="text-[0.95rem]">{isVerifying ? 'Verifying...' : 'Continue as Rider'}</span>
                 </button>
 
                 {/* Driver Login */}
                 <button
                   onClick={() => setShowDriverCodeModal(true)}
                   disabled={isVerifying}
-                  className="w-full flex items-center justify-center gap-2 bg-black/50 text-white font-semibold py-3.5 rounded-2xl border border-white/10 hover:bg-black/70 transition-all active:scale-[0.98] disabled:opacity-50"
-                  style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
+                  className="w-full flex items-center justify-center gap-2 text-white font-semibold py-3.5 rounded-2xl cursor-pointer transition-all active:scale-[0.98] disabled:opacity-50"
+                  style={{
+                    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                    backdropFilter: 'blur(8px)',
+                    WebkitBackdropFilter: 'blur(8px)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.1), 0 2px 8px rgba(0, 0, 0, 0.2)',
+                  }}
                 >
-                  <LogIn size={18} />
-                  <span>Continue as Driver</span>
+                  <LogIn size={18} opacity={0.9} />
+                  <span className="text-[0.95rem] opacity-90">Continue as Driver</span>
                 </button>
               </div>
               
               {/* Footer */}
-              <p className="text-zinc-500/60 text-[10px] tracking-wide text-center mt-5 mb-2">
+              <p className="text-white/40 text-[9px] tracking-wider text-center mt-6">
                 By continuing, you agree to our Terms & Privacy Policy
               </p>
             </div>
