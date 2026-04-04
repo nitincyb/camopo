@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, MapPin, Navigation, Clock, CreditCard, ChevronRight, User, Settings, LogOut, Car, Bell, ArrowUpDown, HelpCircle, ShieldAlert, Users, Phone, Home, Wallet as WalletIcon } from 'lucide-react';
+import { Search, MapPin, Navigation, Clock, CreditCard, ChevronRight, User, Settings, LogOut, Car, Bell, ArrowUpDown, HelpCircle, ShieldAlert, Users, Phone, Home, Star, History, Truck } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import Map from '../shared/Map';
@@ -241,10 +241,19 @@ const translations = {
 };
 
 const RIDE_TYPES = [
-  { id: 'Auto', nameKey: 'auto_ricksaw', price: 40, time: '2 min', icon: '🛺' },
-  { id: 'Economy', nameKey: 'economy_cab', price: 80, time: '3 min', icon: '🚗' },
-  { id: 'Premium', nameKey: 'premium_cab', price: 150, time: '5 min', icon: '🚐' },
+  { id: 'Auto', nameKey: 'auto_ricksaw', price: 40, time: '2 min', iconId: 'auto' },
+  { id: 'Economy', nameKey: 'economy_cab', price: 80, time: '3 min', iconId: 'economy' },
+  { id: 'Premium', nameKey: 'premium_cab', price: 150, time: '5 min', iconId: 'premium' },
 ];
+
+const getRideIcon = (iconId: string, size = 28) => {
+  switch (iconId) {
+    case 'auto': return <Car size={size} />;
+    case 'economy': return <Car size={size} />;
+    case 'premium': return <Truck size={size} />;
+    default: return <Car size={size} />;
+  }
+};
 
 const LOCATIONS = {
   RRU: { nameKey: 'rru_name', lat: 23.15457840755294, lng: 72.88497367116464, addressKey: 'rru_address' },
@@ -300,6 +309,10 @@ export default function RiderHome() {
   const [joinedRiderProfiles, setJoinedRiderProfiles] = useState<any[]>([]);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedbackRating, setFeedbackRating] = useState(0);
+  const [feedbackText, setFeedbackText] = useState('');
+  const [completedRideInfo, setCompletedRideInfo] = useState<any>(null);
 
   // Listen for unread notifications
   useEffect(() => {
@@ -685,6 +698,10 @@ export default function RiderHome() {
         if (['accepted', 'arrived', 'in_progress'].includes(data.status)) {
           setStep('ride');
         } else if (data.status === 'completed') {
+          setCompletedRideInfo({ ...data, id: docSnap.id });
+          setShowFeedback(true);
+          setFeedbackRating(0);
+          setFeedbackText('');
           setStep('home');
           setCurrentRideId(null);
           setActiveRide(null);
@@ -692,7 +709,6 @@ export default function RiderHome() {
           setDriverPath([]);
           setPredefinedPath([]);
           setEta(null);
-          alert("Ride completed! Thank you for riding with CampusMobility.");
         } else if (data.status === 'cancelled') {
           setStep('home');
           setCurrentRideId(null);
@@ -748,7 +764,7 @@ export default function RiderHome() {
   }, [activeRide?.driverId, activeRide?.status]);
 
   const isRideActive = activeRide && ['accepted', 'arrived', 'in_progress'].includes(activeRide.status);
-  const showMap = isRideActive || step === 'searching';
+  const showMap = true;
 
   return (
     <div className="h-screen w-screen bg-black overflow-hidden relative font-sans">
@@ -851,6 +867,39 @@ export default function RiderHome() {
       {/* Main UI Overlay */}
       <div className="absolute inset-x-0 bottom-0 z-20 pointer-events-none">
         <div className="max-w-xl mx-auto p-4 sm:p-6 pb-safe pointer-events-auto">
+          {/* Services Quick Actions */}
+          {step === 'home' && !showBooking && (
+            <div className="mb-20">
+              <p className="text-xs font-bold text-zinc-500 mb-3 px-1">Quick Actions</p>
+              <div className="flex items-center gap-3">
+                {RIDE_TYPES.map((type) => (
+                  <button
+                    key={type.id}
+                    onClick={() => {
+                      setSelectedRide(type);
+                      setShowBooking(true);
+                    }}
+                    className="flex-1 flex flex-col items-center gap-2 py-3 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-700 transition-colors"
+                  >
+                    <div className="text-emerald-500">
+                      {getRideIcon(type.iconId, 22)}
+                    </div>
+                    <span className="text-[10px] font-bold text-zinc-400">{type.id}</span>
+                  </button>
+                ))}
+                <button
+                  onClick={() => navigate('/ride-sharing')}
+                  className="flex-1 flex flex-col items-center gap-2 py-3 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-700 transition-colors"
+                >
+                  <div className="text-emerald-500">
+                    <Users size={22} />
+                  </div>
+                  <span className="text-[10px] font-bold text-zinc-400">Share</span>
+                </button>
+              </div>
+            </div>
+          )}
+
           <AnimatePresence mode="wait">
             {step === 'home' && showBooking && (
               <motion.div 
@@ -964,8 +1013,8 @@ export default function RiderHome() {
                             : 'bg-white/5 border-white/5 hover:bg-white/10'
                         }`}
                       >
-                        <div className="w-14 h-14 bg-zinc-800 rounded-xl flex items-center justify-center text-3xl shadow-inner">
-                          {type.icon}
+                        <div className="w-14 h-14 bg-zinc-800 rounded-xl flex items-center justify-center shadow-inner text-zinc-300">
+                          {getRideIcon(type.iconId, 28)}
                         </div>
                         <div className="flex-1 text-left">
                           <p className={`font-black text-sm ${selectedRide.id === type.id ? 'text-emerald-400' : 'text-white'}`}>{t[type.nameKey]}</p>
@@ -1232,8 +1281,8 @@ export default function RiderHome() {
                 <div className="p-6 space-y-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 bg-zinc-800 rounded-2xl flex items-center justify-center text-3xl shadow-inner border border-white/5">
-                        {selectedRide.icon}
+                      <div className="w-14 h-14 bg-zinc-800 rounded-2xl flex items-center justify-center shadow-inner border border-white/5 text-zinc-300">
+                        {getRideIcon(selectedRide.iconId, 28)}
                       </div>
                       <div>
                         <p className="text-[10px] text-emerald-500 font-black uppercase tracking-widest mb-0.5">
@@ -1559,6 +1608,95 @@ export default function RiderHome() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Ride Feedback Bottom Sheet */}
+      <AnimatePresence>
+        {showFeedback && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[80] bg-black/70 flex items-end justify-center"
+          >
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="w-full max-w-md bg-zinc-900 border-t border-zinc-800 rounded-t-2xl p-6 space-y-5"
+            >
+              <div className="flex justify-center">
+                <div className="w-10 h-1 bg-zinc-700 rounded-full" />
+              </div>
+
+              <div className="text-center space-y-1">
+                <h3 className="text-lg font-bold text-white">How was your ride?</h3>
+                <p className="text-sm text-zinc-500">Rate your experience</p>
+              </div>
+
+              <div className="flex justify-center gap-3">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    onClick={() => setFeedbackRating(star)}
+                    className="p-1 transition-transform hover:scale-110"
+                  >
+                    <Star
+                      size={36}
+                      className={feedbackRating >= star ? 'text-amber-400 fill-amber-400' : 'text-zinc-700'}
+                    />
+                  </button>
+                ))}
+              </div>
+
+              <textarea
+                value={feedbackText}
+                onChange={(e) => setFeedbackText(e.target.value)}
+                placeholder="Any comments? (optional)"
+                rows={3}
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-4 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/50 resize-none"
+              />
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowFeedback(false);
+                    setCompletedRideInfo(null);
+                  }}
+                  className="flex-1 py-3.5 rounded-xl border border-zinc-800 text-zinc-400 font-bold text-sm hover:bg-zinc-800 transition-colors"
+                >
+                  Skip
+                </button>
+                <button
+                  onClick={async () => {
+                    if (feedbackRating > 0 && completedRideInfo) {
+                      try {
+                        await addDoc(collection(db, 'ride_feedback'), {
+                          rideId: completedRideInfo.id,
+                          riderId: user?.uid,
+                          driverId: completedRideInfo.driverId || null,
+                          rating: feedbackRating,
+                          comment: feedbackText,
+                          createdAt: serverTimestamp(),
+                        });
+                      } catch (e) {
+                        console.error('Failed to submit feedback:', e);
+                      }
+                    }
+                    setShowFeedback(false);
+                    setCompletedRideInfo(null);
+                  }}
+                  disabled={feedbackRating === 0}
+                  className="flex-1 py-3.5 rounded-xl bg-emerald-500 text-black font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-emerald-400 transition-colors"
+                >
+                  Submit
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <NotificationsPanel 
         isOpen={isNotificationsOpen} 
         onClose={() => setIsNotificationsOpen(false)} 
@@ -1567,41 +1705,43 @@ export default function RiderHome() {
       {/* Bottom Navigation Bar */}
       {!showBooking && step === 'home' && (
         <div className="absolute bottom-0 left-0 right-0 z-30">
-          <div className="bg-zinc-900/80 backdrop-blur-2xl border-t border-zinc-800 px-2 pb-safe">
+          <div className="bg-zinc-900 border-t border-zinc-800 px-2 pb-safe">
             <div className="max-w-xl mx-auto flex items-center justify-around py-2">
               <button 
                 className="flex flex-col items-center gap-1 py-2 px-3 text-emerald-500"
               >
                 <Home size={20} />
-                <span className="text-[9px] font-black uppercase tracking-widest">Home</span>
+                <span className="text-[9px] font-bold uppercase tracking-wider">Home</span>
               </button>
               <button 
                 onClick={() => navigate('/history')}
                 className="flex flex-col items-center gap-1 py-2 px-3 text-zinc-500 hover:text-zinc-300 transition-colors"
               >
-                <Clock size={20} />
-                <span className="text-[9px] font-black uppercase tracking-widest">{t.history}</span>
+                <History size={20} />
+                <span className="text-[9px] font-bold uppercase tracking-wider">{t.history}</span>
               </button>
               <button 
-                onClick={() => navigate('/wallet')}
-                className="flex flex-col items-center gap-1 py-2 px-3 text-zinc-500 hover:text-zinc-300 transition-colors"
+                onClick={() => navigate('/ride-sharing')}
+                className="relative flex flex-col items-center gap-1 py-1 px-4"
               >
-                <WalletIcon size={20} />
-                <span className="text-[9px] font-black uppercase tracking-widest">{t.wallet}</span>
+                <div className="w-12 h-12 -mt-5 bg-emerald-500 rounded-full flex items-center justify-center shadow-lg">
+                  <Users size={22} className="text-black" />
+                </div>
+                <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-500">Share</span>
               </button>
               <button 
                 onClick={() => navigate('/support')}
                 className="flex flex-col items-center gap-1 py-2 px-3 text-zinc-500 hover:text-zinc-300 transition-colors"
               >
                 <HelpCircle size={20} />
-                <span className="text-[9px] font-black uppercase tracking-widest">{t.support}</span>
+                <span className="text-[9px] font-bold uppercase tracking-wider">{t.support}</span>
               </button>
               <button 
                 onClick={() => navigate('/profile')}
                 className="flex flex-col items-center gap-1 py-2 px-3 text-zinc-500 hover:text-zinc-300 transition-colors"
               >
                 <User size={20} />
-                <span className="text-[9px] font-black uppercase tracking-widest">{t.profile}</span>
+                <span className="text-[9px] font-bold uppercase tracking-wider">{t.profile}</span>
               </button>
             </div>
           </div>
