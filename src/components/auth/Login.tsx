@@ -68,17 +68,21 @@ export default function Login() {
   const ease = [0.25, 0.46, 0.45, 0.94] as const;
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center relative overflow-hidden">
+    <div className="h-[100dvh] w-full flex flex-col items-center justify-center relative overflow-hidden bg-black selection:bg-emerald-500/30">
 
       {/* ── Video Background ── */}
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 z-0 bg-black">
         <video
           autoPlay
           loop
           muted
           playsInline
-          className="w-full h-full object-cover"
-          style={{ filter: 'brightness(0.45) saturate(0.8)' }}
+          className="absolute inset-0 w-full h-full object-cover object-center scale-[1.05]"
+          style={{ 
+            filter: 'brightness(0.45) saturate(0.8)',
+            transform: 'translateZ(0)',
+            willChange: 'transform'
+          }}
         >
           <source src={VIDEO_URL} type="video/mp4" />
         </video>
@@ -87,7 +91,13 @@ export default function Login() {
       </div>
 
       {/* ── Main Content ── */}
-      <div className="relative z-10 w-full flex-1 max-w-md px-6 flex flex-col pt-[15vh] pb-10">
+      <div 
+        className="relative z-10 w-full flex-1 max-w-md px-6 flex flex-col"
+        style={{ 
+          paddingTop: 'max(env(safe-area-inset-top, 4rem), 15dvh)',
+          paddingBottom: 'max(env(safe-area-inset-bottom, 2rem), 2rem)'
+        }}
+      >
 
         {/* Brand */}
         <motion.div
@@ -182,7 +192,7 @@ export default function Login() {
               </div>
               
               {/* Footer */}
-              <p className="text-zinc-500/60 text-[10px] tracking-wide text-center mt-5">
+              <p className="text-zinc-500/60 text-[10px] tracking-wide text-center mt-5 mb-2">
                 By continuing, you agree to our Terms & Privacy Policy
               </p>
             </div>
