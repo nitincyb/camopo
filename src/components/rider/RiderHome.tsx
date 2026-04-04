@@ -262,54 +262,28 @@ const LOCATIONS = {
   DAHEGAM: { nameKey: 'dahegam_name', lat: 23.1691, lng: 72.8124, addressKey: 'dahegam_address' }
 };
 
-// --- ScrambleText: Letter-by-letter reveal animation ---
-const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-
-function ScrambleText({ text, className = '' }: { text: string; className?: string }) {
-  const [display, setDisplay] = useState(text);
-  const frameRef = useRef<number>(0);
-  const startRef = useRef<number>(0);
-
-  useEffect(() => {
-    if (!text) return;
-    const duration = 600; // total ms
-    const staggerPerChar = 50; // ms delay per character
-
-    startRef.current = performance.now();
-
-    const animate = (now: number) => {
-      const elapsed = now - startRef.current;
-      let result = '';
-      for (let i = 0; i < text.length; i++) {
-        const charDelay = i * staggerPerChar;
-        const charElapsed = elapsed - charDelay;
-        if (text[i] === ' ') {
-          result += ' ';
-        } else if (charElapsed > duration * 0.6) {
-          result += text[i];
-        } else if (charElapsed > 0) {
-          result += CHARS[Math.floor(Math.random() * CHARS.length)];
-        } else {
-          result += CHARS[Math.floor(Math.random() * CHARS.length)];
-        }
-      }
-      setDisplay(result);
-      if (elapsed < duration + text.length * staggerPerChar) {
-        frameRef.current = requestAnimationFrame(animate);
-      } else {
-        setDisplay(text);
-      }
-    };
-
-    frameRef.current = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(frameRef.current);
-  }, [text]);
-
-  return <p className={className}>{display}</p>;
+// --- DepthRevealText: Blur-to-sharp depth animation ---
+function DepthRevealText({ text, className = '' }: { text: string; className?: string }) {
+  return (
+    <motion.p
+      className={className}
+      initial={{ opacity: 0, scale: 1.03, filter: 'blur(8px)' }}
+      animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+      transition={{
+        duration: 0.9,
+        ease: [0.25, 0.46, 0.45, 0.94],
+        opacity: { duration: 0.6 },
+        scale: { duration: 0.8, ease: [0.22, 1, 0.36, 1] },
+        filter: { duration: 1.0, ease: [0.25, 0.46, 0.45, 0.94] },
+      }}
+    >
+      {text}
+    </motion.p>
+  );
 }
 
-// --- SlideToBook: Gesture-based slider ---
-function SlideToBook({ onComplete, label }: { onComplete: () => void; label: string }) {
+// --- SlideToBook: Gesture-based slider with yellow accent ---
+function SlideToBook({ onComplete }: { onComplete: () => void }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [dragX, setDragX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -343,7 +317,7 @@ function SlideToBook({ onComplete, label }: { onComplete: () => void; label: str
   return (
     <div
       ref={trackRef}
-      className="relative h-14 bg-zinc-900 border border-zinc-800 rounded-full overflow-hidden select-none touch-none"
+      className="relative h-[56px] bg-zinc-900 border border-zinc-800 rounded-full overflow-hidden select-none touch-none"
       onMouseMove={handleDrag}
       onMouseUp={handleEnd}
       onMouseLeave={handleEnd}
@@ -352,22 +326,25 @@ function SlideToBook({ onComplete, label }: { onComplete: () => void; label: str
     >
       {/* Progress fill */}
       <div
-        className="absolute inset-y-0 left-0 bg-emerald-500/10 transition-none rounded-full"
-        style={{ width: dragX + 56 }}
+        className="absolute inset-y-0 left-0 rounded-full transition-none"
+        style={{ width: dragX + 56, backgroundColor: `rgba(234, 179, 8, ${0.08 + progress * 0.12})` }}
       />
       {/* Label */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <span
           className="text-sm font-medium text-zinc-500 transition-opacity"
-          style={{ opacity: 1 - progress * 2 }}
+          style={{ opacity: Math.max(0, 1 - progress * 2.5) }}
         >
-          Slide to book a ride
+          Slide to request ride
         </span>
       </div>
       {/* Thumb */}
       <div
-        className="absolute top-1 bottom-1 left-1 w-12 rounded-full bg-emerald-500 flex items-center justify-center cursor-grab active:cursor-grabbing transition-none"
-        style={{ transform: `translateX(${dragX}px)` }}
+        className="absolute top-1 bottom-1 left-1 w-12 rounded-full flex items-center justify-center cursor-grab active:cursor-grabbing transition-none"
+        style={{
+          transform: `translateX(${dragX}px)`,
+          backgroundColor: `rgb(234, 179, 8)`,
+        }}
         onMouseDown={(e) => { e.preventDefault(); setIsDragging(true); setCompleted(false); }}
         onTouchStart={() => { setIsDragging(true); setCompleted(false); }}
       >
@@ -954,28 +931,44 @@ export default function RiderHome() {
       {/* Personalized Home Screen */}
       {step === 'home' && !showBooking && (
         <div className="absolute inset-0 z-10 flex flex-col">
-          {/* Top section with greeting and notifications */}
-          <div className="px-5 pt-12 pb-4 flex items-start justify-between">
+
+          {/* Search Bar - Primary Entry Point */}
+          <div className="px-5 pt-12 pb-2">
+            <motion.button
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] }}
+              onClick={() => setShowBooking(true)}
+              className="w-full bg-zinc-900 rounded-2xl flex items-center gap-4 px-5 py-4 border border-zinc-800 hover:border-zinc-700 transition-colors active:scale-[0.98]"
+            >
+              <Search size={18} className="text-zinc-500 shrink-0" />
+              <span className="text-sm font-medium text-zinc-400">Where to?</span>
+              <ChevronRight size={16} className="text-zinc-600 ml-auto" />
+            </motion.button>
+          </div>
+
+          {/* Greeting + Username */}
+          <div className="px-5 pt-6 pb-2 flex items-start justify-between">
             <div className="flex-1">
               <motion.p
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
                 className="text-zinc-500 text-sm font-medium"
               >
-                {t.welcome_back}
+                {new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening'}
               </motion.p>
-              <ScrambleText
-                text={profile?.displayName || 'Rider'}
-                className="text-3xl font-bold text-white mt-1 tracking-tight"
+              <DepthRevealText
+                text={`Hi, ${profile?.displayName || 'Rider'}`}
+                className="text-[28px] font-semibold text-white mt-1 tracking-tight"
               />
             </div>
             <motion.button
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+              transition={{ duration: 0.3, delay: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
               onClick={() => setIsNotificationsOpen(true)}
-              className="w-11 h-11 bg-zinc-900 rounded-full flex items-center justify-center border border-zinc-800 relative mt-1"
+              className="w-11 h-11 bg-zinc-900 rounded-full flex items-center justify-center border border-zinc-800 relative mt-2"
             >
               <Bell size={18} className="text-zinc-300" />
               {unreadCount > 0 && (
@@ -986,83 +979,61 @@ export default function RiderHome() {
             </motion.button>
           </div>
 
-          {/* Search / Destination field */}
-          <div className="px-5 mb-6">
-            <motion.button
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.15, ease: [0.25, 0.46, 0.45, 0.94] }}
-              onClick={() => setShowBooking(true)}
-              className="w-full bg-zinc-900 rounded-2xl flex items-center gap-4 px-5 py-4 border border-zinc-800 hover:border-zinc-700 transition-colors active:scale-[0.98]"
-            >
-              <div className="w-8 h-8 bg-emerald-500/10 rounded-lg flex items-center justify-center">
-                <Search size={16} className="text-emerald-500" />
-              </div>
-              <div className="text-left">
-                <p className="text-[11px] text-zinc-600 font-medium">{t.where_to}</p>
-                <p className="text-sm text-zinc-300 font-medium">{destination || 'Enter destination'}</p>
-              </div>
-              <ChevronRight size={16} className="text-zinc-600 ml-auto" />
-            </motion.button>
-          </div>
-
-          {/* Services Grid */}
-          <div className="px-5 mb-6">
-            <motion.p
+          {/* Services Section */}
+          <div className="px-5 mt-8">
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.3, delay: 0.25 }}
-              className="text-xs font-medium text-zinc-500 mb-3 px-1"
+              transition={{ duration: 0.35, delay: 0.35 }}
+              className="flex items-baseline justify-between mb-4 px-1"
             >
-              Services
-            </motion.p>
+              <p className="text-sm font-medium text-zinc-300">Choose your ride</p>
+              <p className="text-[11px] text-zinc-600">Available near you</p>
+            </motion.div>
             <div className="flex items-center gap-3">
               {RIDE_TYPES.map((type, index) => (
                 <motion.button
                   key={type.id}
-                  initial={{ opacity: 0, y: 12 }}
+                  initial={{ opacity: 0, y: 14 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.35, delay: 0.3 + index * 0.06, ease: [0.25, 0.46, 0.45, 0.94] }}
-                  whileTap={{ scale: 0.93 }}
+                  transition={{ duration: 0.4, delay: 0.4 + index * 0.07, ease: [0.25, 0.46, 0.45, 0.94] }}
+                  whileTap={{ scale: 0.92, transition: { duration: 0.1 } }}
                   onClick={() => {
                     setSelectedRide(type);
                     setShowBooking(true);
                   }}
-                  className="flex-1 flex flex-col items-center gap-2.5 py-4 bg-zinc-900 border border-zinc-800 rounded-2xl hover:border-zinc-700 transition-colors group"
+                  className="flex-1 flex flex-col items-center gap-3 py-5 rounded-2xl transition-colors group"
                 >
-                  <div className="text-zinc-400 group-hover:text-emerald-500 transition-colors">
-                    {getRideIcon(type.iconId, 24)}
+                  <div className="text-amber-400 group-active:text-amber-300 transition-colors">
+                    {getRideIcon(type.iconId, 28)}
                   </div>
-                  <span className="text-[10px] font-medium text-zinc-500 group-hover:text-zinc-300 transition-colors">{type.id}</span>
+                  <span className="text-[11px] font-medium text-zinc-500 group-active:text-zinc-300 transition-colors">{type.id}</span>
                 </motion.button>
               ))}
               <motion.button
-                initial={{ opacity: 0, y: 12 }}
+                initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.35, delay: 0.3 + RIDE_TYPES.length * 0.06, ease: [0.25, 0.46, 0.45, 0.94] }}
-                whileTap={{ scale: 0.93 }}
+                transition={{ duration: 0.4, delay: 0.4 + RIDE_TYPES.length * 0.07, ease: [0.25, 0.46, 0.45, 0.94] }}
+                whileTap={{ scale: 0.92, transition: { duration: 0.1 } }}
                 onClick={() => navigate('/ride-sharing')}
-                className="flex-1 flex flex-col items-center gap-2.5 py-4 bg-zinc-900 border border-zinc-800 rounded-2xl hover:border-zinc-700 transition-colors group"
+                className="flex-1 flex flex-col items-center gap-3 py-5 rounded-2xl transition-colors group"
               >
-                <div className="text-zinc-400 group-hover:text-emerald-500 transition-colors">
-                  <Users size={24} />
+                <div className="text-amber-400 group-active:text-amber-300 transition-colors">
+                  <Users size={28} />
                 </div>
-                <span className="text-[10px] font-medium text-zinc-500 group-hover:text-zinc-300 transition-colors">Share</span>
+                <span className="text-[11px] font-medium text-zinc-500 group-active:text-zinc-300 transition-colors">Share</span>
               </motion.button>
             </div>
           </div>
 
-          {/* Slide to Book */}
+          {/* Slide to Request */}
           <div className="px-5 mt-auto mb-24">
             <motion.div
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+              transition={{ duration: 0.45, delay: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
             >
-              <SlideToBook
-                onComplete={() => setShowBooking(true)}
-                label={t.where_to}
-              />
+              <SlideToBook onComplete={() => setShowBooking(true)} />
             </motion.div>
           </div>
         </div>
