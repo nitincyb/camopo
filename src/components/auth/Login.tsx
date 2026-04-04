@@ -8,8 +8,8 @@ import { Capacitor } from '@capacitor/core';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 import { logSecurityEvent } from '../../services/auditService';
 
-// Calm, cinematic video — aerial road / city at dusk (UHD 4K for crisp mobile zooming)
-const VIDEO_URL = 'https://videos.pexels.com/video-files/3015510/3015510-uhd_2560_1440_24fps.mp4';
+// Calm, cinematic video — aerial road / city at dusk
+const VIDEO_URL = 'https://videos.pexels.com/video-files/3015510/3015510-hd_1920_1080_24fps.mp4';
 
 export default function Login() {
   const [error, setError] = useState<string | null>(null);
@@ -79,7 +79,7 @@ export default function Login() {
           playsInline
           className="absolute inset-0 w-full h-full object-cover object-center scale-[1.05]"
           style={{ 
-            filter: 'brightness(0.35) saturate(0.9)',
+            filter: 'brightness(0.45) saturate(0.8)',
             transform: 'translateZ(0)',
             willChange: 'transform'
           }}
@@ -111,44 +111,34 @@ export default function Login() {
           </h1>
         </motion.div>
 
-        {/* ── Authentic Liquid Glass Rectangle ── */}
+        {/* ── Authentic Liquid Glass Curved Box ── */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.15, ease }}
           className="mt-auto w-full relative"
         >
-          {/* Rectangular Liquid Glass Box */}
+          {/* Curved Liquid Glass Box */}
           <div
-            className="relative p-6 sm:p-8 rounded-2xl overflow-hidden"
+            className="relative p-6 sm:p-8 rounded-[2.5rem] overflow-hidden"
             style={{
-              /* Refined liquid glass tint */
-              backgroundColor: 'rgba(20, 20, 25, 0.45)',
-              /* High-end specular highlight gradient */
-              backgroundImage: 'linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.0) 40%, rgba(255, 255, 255, 0.05) 100%)',
-              /* Intense blur array for optical depth and refraction */
-              backdropFilter: 'blur(32px) saturate(140%) brightness(1.2)',
-              WebkitBackdropFilter: 'blur(32px) saturate(140%) brightness(1.2)',
-              /* Layered shadows for 3D realism: dark drop shadow + sharp inset reflections */
+              /* Simple frost tint without heavy gradient */
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              /* Intense blur array for depth */
+              backdropFilter: 'blur(40px) saturate(120%) brightness(1.1)',
+              WebkitBackdropFilter: 'blur(40px) saturate(120%) brightness(1.1)',
+              /* Gentle shadows for 3D realism */
               boxShadow: `
-                0 32px 64px -12px rgba(0, 0, 0, 0.6), 
-                inset 0 1px 1px rgba(255, 255, 255, 0.4),
-                inset 0 -1px 2px rgba(0, 0, 0, 0.2),
-                inset 1px 0 1px rgba(255, 255, 255, 0.1)
+                0 4px 30px rgba(0, 0, 0, 0.5), 
+                inset 0 1px 1px rgba(255, 255, 255, 0.3), 
+                inset 0 -1px 2px rgba(0, 0, 0, 0.1),
+                inset -1px 0 2px rgba(255, 255, 255, 0.05),
+                inset 1px 0 2px rgba(255, 255, 255, 0.05)
               `,
               /* Crisp glass edge */
-              border: '1px solid rgba(255, 255, 255, 0.2)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
             }}
           >
-            {/* Liquid Surface Glare (diagonal swipe) */}
-            <div
-              className="absolute pointer-events-none"
-              style={{
-                top: '-10%', left: '-20%', width: '150%', height: '150%',
-                background: 'linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.08) 30%, rgba(255,255,255,0) 60%)',
-                transform: 'skewX(-25deg)',
-              }}
-            />
 
             <div className="relative z-10 font-sans tracking-tight">
               {/* Header */}
