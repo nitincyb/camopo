@@ -77,7 +77,7 @@ const RANDOM_HEADERS = [
   { title: "Deep breaths.", subtitle: "Your ride is on the way." },
   { title: "Make today count.", subtitle: "Starting with a good ride." },
   { title: "Smile", subtitle: "You're doing great." },
-  { title: "A new day", subtitle: "A new journey." }
+  { title: "Bored in hostel room?", subtitle: "Walk pe chale? Nah, let's ride." }
 ];
 
 export default function Login() {
