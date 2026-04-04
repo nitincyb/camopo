@@ -108,40 +108,45 @@ export default function Login() {
           transition={{ duration: 0.6, delay: 0.15, ease }}
           className="mt-auto w-full relative"
         >
-          {/* Liquid Glass Container */}
+          {/* Enhanced Liquid Glass Container */}
           <div
-            className="relative p-6 sm:p-8 rounded-[2rem] overflow-hidden"
+            className="relative p-6 sm:p-8 rounded-[2.5rem] overflow-hidden"
             style={{
-              background: 'rgba(255, 255, 255, 0.04)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+              background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.01) 100%)',
+              backdropFilter: 'blur(32px)',
+              WebkitBackdropFilter: 'blur(32px)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              boxShadow: '0 24px 64px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2), inset 0 -1px 1px rgba(255, 255, 255, 0.04)',
             }}
           >
-            {/* Inner highlight reflection */}
+            {/* Inner highlight reflection for liquid glass effect */}
             <div
-              className="absolute top-0 left-0 right-0 h-px"
-              style={{ background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.15), transparent)' }}
+              className="absolute top-0 left-0 right-0 h-px opacity-70"
+              style={{ background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent)' }}
+            />
+            {/* Soft ambient inner glow */}
+            <div
+              className="absolute inset-0 pointer-events-none rounded-[2.5rem]"
+              style={{ background: 'radial-gradient(circle at 50% 0%, rgba(255,255,255,0.05) 0%, transparent 60%)' }}
             />
 
             <div className="relative z-10">
               {/* Header */}
-              <div className="mb-6 space-y-1">
-                <h2 className="text-2xl font-bold text-white">Get moving</h2>
+              <div className="mb-5 space-y-0.5">
+                <h2 className="text-2xl font-bold text-white tracking-tight">Get moving</h2>
                 <p className="text-zinc-400 text-sm">Sign in to start your journey</p>
               </div>
 
               {/* Error */}
               {error && (
-                <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-xs p-3 rounded-xl text-left mb-4">
+                <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-xs p-3 rounded-2xl text-left mb-4">
                   {error}
                   <p className="mt-1 opacity-70">Tip: Ensure your domain is added to "Authorized Domains" in Firebase Console.</p>
                 </div>
               )}
 
               {/* Buttons */}
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 {/* Rider Login */}
                 <button
                   onClick={async () => {
@@ -149,10 +154,7 @@ export default function Login() {
                     await handleGoogleLogin();
                   }}
                   disabled={isVerifying}
-                  className="w-full flex items-center justify-center gap-3 bg-white text-zinc-900 font-semibold py-3.5 rounded-xl transition-all active:scale-[0.97] disabled:opacity-50"
-                  style={{
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                  }}
+                  className="w-full flex items-center justify-center gap-3 bg-white text-zinc-900 font-semibold py-3.5 rounded-2xl transition-all hover:bg-zinc-100 active:scale-[0.98] disabled:opacity-50"
                 >
                   {isVerifying ? (
                     <div className="w-5 h-5 border-2 border-zinc-300 border-t-zinc-800 rounded-full animate-spin" />
@@ -171,10 +173,8 @@ export default function Login() {
                 <button
                   onClick={() => setShowDriverCodeModal(true)}
                   disabled={isVerifying}
-                  className="w-full flex items-center justify-center gap-2 bg-black text-white font-semibold py-3.5 rounded-xl border border-zinc-800 hover:bg-zinc-900 transition-all active:scale-[0.97] disabled:opacity-50"
-                  style={{
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                  }}
+                  className="w-full flex items-center justify-center gap-2 bg-black/50 text-white font-semibold py-3.5 rounded-2xl border border-white/10 hover:bg-black/70 transition-all active:scale-[0.98] disabled:opacity-50"
+                  style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
                 >
                   <LogIn size={18} />
                   <span>Continue as Driver</span>
@@ -182,7 +182,7 @@ export default function Login() {
               </div>
               
               {/* Footer */}
-              <p className="text-zinc-500/80 text-[10px] tracking-wide text-center mt-6">
+              <p className="text-zinc-500/60 text-[10px] tracking-wide text-center mt-5">
                 By continuing, you agree to our Terms & Privacy Policy
               </p>
             </div>
