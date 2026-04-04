@@ -1,5 +1,5 @@
 // CampusMobility Login - Version 2.0.0
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { signInWithPopup, signInWithCredential, GoogleAuthProvider, UserCredential } from 'firebase/auth';
 import { auth, googleProvider } from '../../firebase';
 import { LogIn, Key, X, ChevronRight } from 'lucide-react';
@@ -11,12 +11,32 @@ import { logSecurityEvent } from '../../services/auditService';
 // Calm, cinematic video — aerial road / city at dusk
 const VIDEO_URL = 'https://videos.pexels.com/video-files/3015510/3015510-hd_1920_1080_24fps.mp4';
 
+const RANDOM_HEADERS = [
+  { title: "Get moving", subtitle: "Sign in to start your journey" },
+  { title: "By the students", subtitle: "For the students" },
+  { title: "Made by RRU", subtitle: "With ❤️ and probably too much caffeine" },
+  { title: "Why did the student cross the road?", subtitle: "To catch the campus ride, obviously." },
+  { title: "I think, therefore I am...", subtitle: "...late for my 9 AM lecture." },
+  { title: "Time is an illusion.", subtitle: "But your class starts in 5 minutes. Hurry up." },
+  { title: "Adventure awaits", subtitle: "Or just the library. We don't judge." },
+  { title: "To be or not to be...", subtitle: "...on time. That is the question." },
+  { title: "Schrödinger's Class", subtitle: "You are both present and absent until you arrive." },
+  { title: "Is it a bird? Is it a plane?", subtitle: "No, it's just your ride arriving." },
+  { title: "Nihilism is exhausting.", subtitle: "Take a ride and rest your legs instead." },
+];
+
 export default function Login() {
   const [error, setError] = useState<string | null>(null);
   const [showDriverCodeModal, setShowDriverCodeModal] = useState(false);
   const [driverCode, setDriverCode] = useState('');
   const [codeError, setCodeError] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
+  const [headerContent, setHeaderContent] = useState(RANDOM_HEADERS[0]);
+
+  useEffect(() => {
+    const randomIdx = Math.floor(Math.random() * RANDOM_HEADERS.length);
+    setHeaderContent(RANDOM_HEADERS[randomIdx]);
+  }, []);
 
   const handleGoogleLogin = async () => {
     setError(null);
@@ -149,8 +169,8 @@ export default function Login() {
             <div className="relative z-10 font-sans tracking-tight">
               {/* Header */}
               <div className="mb-6 space-y-1">
-                <h2 className="text-2xl font-bold text-white tracking-tight">Get moving</h2>
-                <p className="text-zinc-300 text-xs font-semibold">Sign in to start your journey</p>
+                <h2 className="text-2xl font-bold text-white tracking-tight">{headerContent.title}</h2>
+                <p className="text-zinc-300 text-xs font-semibold">{headerContent.subtitle}</p>
               </div>
 
               {/* Error */}
