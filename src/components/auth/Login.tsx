@@ -8,8 +8,8 @@ import { Capacitor } from '@capacitor/core';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 import { logSecurityEvent } from '../../services/auditService';
 
-// Calm, cinematic video — aerial road / city at dusk
-const VIDEO_URL = 'https://videos.pexels.com/video-files/3015510/3015510-hd_1920_1080_24fps.mp4';
+// Calm, cinematic video — aerial road / city at dusk (UHD 4K for crisp mobile zooming)
+const VIDEO_URL = 'https://videos.pexels.com/video-files/3015510/3015510-uhd_2560_1440_24fps.mp4';
 
 export default function Login() {
   const [error, setError] = useState<string | null>(null);
@@ -79,7 +79,7 @@ export default function Login() {
           playsInline
           className="absolute inset-0 w-full h-full object-cover object-center scale-[1.05]"
           style={{ 
-            filter: 'brightness(0.45) saturate(0.8)',
+            filter: 'brightness(0.35) saturate(0.9)',
             transform: 'translateZ(0)',
             willChange: 'transform'
           }}
@@ -111,51 +111,50 @@ export default function Login() {
           </h1>
         </motion.div>
 
-        {/* ── Authentic Liquid Glass Login Section ── */}
+        {/* ── Authentic Liquid Glass Rectangle ── */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.15, ease }}
           className="mt-auto w-full relative"
         >
-          {/* Authentic Liquid Glass Container */}
+          {/* Rectangular Liquid Glass Box */}
           <div
-            className="relative p-6 sm:p-8 rounded-[2.5rem] overflow-hidden"
+            className="relative p-6 sm:p-8 rounded-2xl overflow-hidden"
             style={{
-              /* The base "frost" tint */
-              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-              /* Soft overlay gradient representing light falling across the surface */
-              backgroundImage: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.02) 100%)',
-              /* Heavy blur for optical refraction depth */
-              backdropFilter: 'blur(40px) saturate(120%) brightness(1.1)',
-              WebkitBackdropFilter: 'blur(40px) saturate(120%) brightness(1.1)',
-              /* Refraction edge highlights (the defining feature of real liquid glass) */
+              /* Refined liquid glass tint */
+              backgroundColor: 'rgba(20, 20, 25, 0.45)',
+              /* High-end specular highlight gradient */
+              backgroundImage: 'linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.0) 40%, rgba(255, 255, 255, 0.05) 100%)',
+              /* Intense blur array for optical depth and refraction */
+              backdropFilter: 'blur(32px) saturate(140%) brightness(1.2)',
+              WebkitBackdropFilter: 'blur(32px) saturate(140%) brightness(1.2)',
+              /* Layered shadows for 3D realism: dark drop shadow + sharp inset reflections */
               boxShadow: `
-                0 4px 30px rgba(0, 0, 0, 0.5), 
-                inset 0 1px 1px rgba(255, 255, 255, 0.3), 
-                inset 0 -1px 2px rgba(0, 0, 0, 0.1),
-                inset -1px 0 2px rgba(255, 255, 255, 0.05),
-                inset 1px 0 2px rgba(255, 255, 255, 0.05)
+                0 32px 64px -12px rgba(0, 0, 0, 0.6), 
+                inset 0 1px 1px rgba(255, 255, 255, 0.4),
+                inset 0 -1px 2px rgba(0, 0, 0, 0.2),
+                inset 1px 0 1px rgba(255, 255, 255, 0.1)
               `,
-              /* Core edge boundary */
-              border: '1px solid rgba(255, 255, 255, 0.15)',
+              /* Crisp glass edge */
+              border: '1px solid rgba(255, 255, 255, 0.2)',
             }}
           >
             {/* Liquid Surface Glare (diagonal swipe) */}
             <div
               className="absolute pointer-events-none"
               style={{
-                top: '-50%', left: '-50%', width: '200%', height: '200%',
-                background: 'linear-gradient(to bottom right, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 100%)',
-                transform: 'rotate(-15deg)',
+                top: '-10%', left: '-20%', width: '150%', height: '150%',
+                background: 'linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.08) 30%, rgba(255,255,255,0) 60%)',
+                transform: 'skewX(-25deg)',
               }}
             />
 
             <div className="relative z-10 font-sans tracking-tight">
               {/* Header */}
-              <div className="mb-5 space-y-1">
-                <h2 className="text-[1.35rem] font-bold text-white tracking-tight">Get moving</h2>
-                <p className="text-zinc-300 text-xs font-medium">Sign in to start your journey</p>
+              <div className="mb-6 space-y-1">
+                <h2 className="text-2xl font-bold text-white tracking-tight">Get moving</h2>
+                <p className="text-zinc-300 text-xs font-semibold">Sign in to start your journey</p>
               </div>
 
               {/* Error */}
@@ -175,13 +174,11 @@ export default function Login() {
                     await handleGoogleLogin();
                   }}
                   disabled={isVerifying}
-                  className="w-full flex items-center justify-center gap-3 bg-white text-zinc-900 font-semibold py-3.5 rounded-2xl cursor-pointer transition-all hover:bg-zinc-100 active:scale-[0.98] disabled:opacity-50"
-                  style={{
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                  }}
+                  className="w-full flex items-center justify-center gap-3 bg-white text-black font-bold py-3.5 rounded-xl cursor-pointer transition-all hover:bg-zinc-100 active:scale-[0.98] disabled:opacity-50"
+                  style={{ boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)' }}
                 >
                   {isVerifying ? (
-                    <div className="w-5 h-5 border-2 border-zinc-300 border-t-zinc-800 rounded-full animate-spin" />
+                    <div className="w-5 h-5 border-2 border-zinc-200 border-t-zinc-900 rounded-full animate-spin" />
                   ) : (
                     <svg width="18" height="18" viewBox="0 0 24 24" className="shrink-0">
                       <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
@@ -197,17 +194,15 @@ export default function Login() {
                 <button
                   onClick={() => setShowDriverCodeModal(true)}
                   disabled={isVerifying}
-                  className="w-full flex items-center justify-center gap-2 text-white font-semibold py-3.5 rounded-2xl cursor-pointer transition-all active:scale-[0.98] disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-2 bg-black/60 text-white font-bold py-3.5 rounded-xl cursor-pointer transition-all active:scale-[0.98] disabled:opacity-50"
                   style={{
-                    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-                    backdropFilter: 'blur(8px)',
-                    WebkitBackdropFilter: 'blur(8px)',
+                    backdropFilter: 'blur(12px)',
+                    WebkitBackdropFilter: 'blur(12px)',
                     border: '1px solid rgba(255, 255, 255, 0.1)',
-                    boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.1), 0 2px 8px rgba(0, 0, 0, 0.2)',
                   }}
                 >
-                  <LogIn size={18} opacity={0.9} />
-                  <span className="text-[0.95rem] opacity-90">Continue as Driver</span>
+                  <LogIn size={18} />
+                  <span className="text-[0.95rem]">Continue as Driver</span>
                 </button>
               </div>
               
