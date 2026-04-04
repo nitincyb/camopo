@@ -101,72 +101,93 @@ export default function Login() {
           </h1>
         </motion.div>
 
-        {/* ── Minimal Login Section ── */}
+        {/* ── Liquid Glass Login Section ── */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.15, ease }}
-          className="mt-auto"
+          className="mt-auto w-full relative"
         >
-          {/* Header */}
-          <div className="mb-6 space-y-1">
-            <h2 className="text-2xl font-bold text-white">Get moving</h2>
-            <p className="text-zinc-400 text-sm">Sign in to start your journey</p>
-          </div>
+          {/* Liquid Glass Container */}
+          <div
+            className="relative p-6 sm:p-8 rounded-[2rem] overflow-hidden"
+            style={{
+              background: 'rgba(255, 255, 255, 0.04)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+            }}
+          >
+            {/* Inner highlight reflection */}
+            <div
+              className="absolute top-0 left-0 right-0 h-px"
+              style={{ background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.15), transparent)' }}
+            />
 
-          {/* Error */}
-          {error && (
-            <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-xs p-3 rounded-xl text-left mb-4">
-              {error}
-              <p className="mt-1 opacity-70">Tip: Ensure your domain is added to "Authorized Domains" in Firebase Console.</p>
-            </div>
-          )}
+            <div className="relative z-10">
+              {/* Header */}
+              <div className="mb-6 space-y-1">
+                <h2 className="text-2xl font-bold text-white">Get moving</h2>
+                <p className="text-zinc-400 text-sm">Sign in to start your journey</p>
+              </div>
 
-          {/* Buttons */}
-          <div className="space-y-3">
-            {/* Rider Login */}
-            <button
-              onClick={async () => {
-                localStorage.setItem('desiredRole', 'rider');
-                await handleGoogleLogin();
-              }}
-              disabled={isVerifying}
-              className="w-full flex items-center justify-center gap-3 bg-white text-zinc-900 font-semibold py-3.5 rounded-xl transition-all active:scale-[0.97] disabled:opacity-50"
-            >
-              {isVerifying ? (
-                <div className="w-5 h-5 border-2 border-zinc-300 border-t-zinc-800 rounded-full animate-spin" />
-              ) : (
-                <svg width="18" height="18" viewBox="0 0 24 24" className="shrink-0">
-                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
-                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                </svg>
+              {/* Error */}
+              {error && (
+                <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-xs p-3 rounded-xl text-left mb-4">
+                  {error}
+                  <p className="mt-1 opacity-70">Tip: Ensure your domain is added to "Authorized Domains" in Firebase Console.</p>
+                </div>
               )}
-              <span>{isVerifying ? 'Verifying...' : 'Continue as Rider'}</span>
-            </button>
 
-            {/* Driver Login */}
-            <button
-              onClick={() => setShowDriverCodeModal(true)}
-              disabled={isVerifying}
-              className="w-full flex items-center justify-center gap-2 bg-black text-white font-semibold py-3.5 rounded-xl border border-zinc-800 transition-all active:scale-[0.97] disabled:opacity-50"
-            >
-              <LogIn size={18} />
-              <span>Continue as Driver</span>
-            </button>
+              {/* Buttons */}
+              <div className="space-y-3">
+                {/* Rider Login */}
+                <button
+                  onClick={async () => {
+                    localStorage.setItem('desiredRole', 'rider');
+                    await handleGoogleLogin();
+                  }}
+                  disabled={isVerifying}
+                  className="w-full flex items-center justify-center gap-3 bg-white text-zinc-900 font-semibold py-3.5 rounded-xl transition-all active:scale-[0.97] disabled:opacity-50"
+                  style={{
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                  }}
+                >
+                  {isVerifying ? (
+                    <div className="w-5 h-5 border-2 border-zinc-300 border-t-zinc-800 rounded-full animate-spin" />
+                  ) : (
+                    <svg width="18" height="18" viewBox="0 0 24 24" className="shrink-0">
+                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                  )}
+                  <span>{isVerifying ? 'Verifying...' : 'Continue as Rider'}</span>
+                </button>
+
+                {/* Driver Login */}
+                <button
+                  onClick={() => setShowDriverCodeModal(true)}
+                  disabled={isVerifying}
+                  className="w-full flex items-center justify-center gap-2 bg-black text-white font-semibold py-3.5 rounded-xl border border-zinc-800 hover:bg-zinc-900 transition-all active:scale-[0.97] disabled:opacity-50"
+                  style={{
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                  }}
+                >
+                  <LogIn size={18} />
+                  <span>Continue as Driver</span>
+                </button>
+              </div>
+              
+              {/* Footer */}
+              <p className="text-zinc-500/80 text-[10px] tracking-wide text-center mt-6">
+                By continuing, you agree to our Terms & Privacy Policy
+              </p>
+            </div>
           </div>
         </motion.div>
-
-        {/* Footer */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.6, ease }}
-          className="text-zinc-600 text-[10px] tracking-wide text-center mt-6"
-        >
-          By continuing, you agree to our Terms & Privacy Policy
-        </motion.p>
       </div>
 
       {/* ── Driver Access Code Modal ── */}
