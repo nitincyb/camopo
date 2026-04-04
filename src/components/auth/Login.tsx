@@ -111,32 +111,49 @@ export default function Login() {
           </h1>
         </motion.div>
 
-        {/* ── Authentic Liquid Glass Curved Box ── */}
+        {/* ── Cinematic Liquid Glass Container ── */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.15, ease }}
           className="mt-auto w-full relative"
         >
-          {/* Curved Liquid Glass Box */}
+          {/* Animated Breathing Green Background Glow */}
+          <motion.div
+            animate={{
+              opacity: [0.5, 1, 0.5],
+              scale: [0.99, 1.02, 0.99],
+            }}
+            transition={{
+              duration: 3.5,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            className="absolute -inset-[1px] rounded-[2.6rem]"
+            style={{
+              /* Rotating-style or sweeping green aura */
+              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.8), rgba(0,0,0,0) 40%, rgba(0,0,0,0) 60%, rgba(16, 185, 129, 0.8))',
+              filter: 'blur(10px)'
+            }}
+          />
+
+          {/* Curved Cinematic Liquid Glass Box */}
           <div
             className="relative p-6 sm:p-8 rounded-[2.5rem] overflow-hidden"
             style={{
-              /* Simple frost tint without heavy gradient */
-              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-              /* Intense blur array for depth */
-              backdropFilter: 'blur(40px) saturate(120%) brightness(1.1)',
-              WebkitBackdropFilter: 'blur(40px) saturate(120%) brightness(1.1)',
-              /* Gentle shadows for 3D realism */
+              /* Deep transparent liquid tint */
+              backgroundColor: 'rgba(0, 0, 0, 0.35)',
+              /* Intense blur array for true liquid refraction depth */
+              backdropFilter: 'blur(40px) saturate(130%)',
+              WebkitBackdropFilter: 'blur(40px) saturate(130%)',
+              /* Clean interior shadows without harsh white gradients */
               boxShadow: `
-                0 4px 30px rgba(0, 0, 0, 0.5), 
-                inset 0 1px 1px rgba(255, 255, 255, 0.3), 
-                inset 0 -1px 2px rgba(0, 0, 0, 0.1),
-                inset -1px 0 2px rgba(255, 255, 255, 0.05),
-                inset 1px 0 2px rgba(255, 255, 255, 0.05)
+                0 24px 60px rgba(0, 0, 0, 0.8),
+                inset 0 0 0 1px rgba(16, 185, 129, 0.15),
+                inset 0 4px 20px rgba(16, 185, 129, 0.05)
               `,
-              /* Crisp glass edge */
-              border: '1px solid rgba(255, 255, 255, 0.15)',
+              /* Nearly invisible glass edge, relies on the glow */
+              border: '1px solid rgba(255, 255, 255, 0.03)',
             }}
           >
 
