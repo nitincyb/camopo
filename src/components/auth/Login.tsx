@@ -10,8 +10,8 @@ import { logSecurityEvent } from '../../services/auditService';
 
 // Reliable 4K video sources (CDN-hosted, no hotlink block)
 const VIDEO_SOURCES = [
-  'https://cdn.pixabay.com/video/2020/07/30/45367-446936970_large.mp4',
-  'https://cdn.pixabay.com/video/2024/02/12/200571-912389498_large.mp4',
+  'https://assets.mixkit.co/videos/preview/mixkit-night-city-with-illuminated-buildings-and-traffic-33230-large.mp4',
+  'https://assets.mixkit.co/videos/preview/mixkit-city-traffic-on-a-bridge-at-night-32860-large.mp4',
 ];
 
 export default function Login() {
