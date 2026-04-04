@@ -118,44 +118,33 @@ export default function Login() {
           transition={{ duration: 0.6, delay: 0.15, ease }}
           className="mt-auto w-full relative"
         >
-          {/* Animated Breathing Green Background Glow */}
-          <motion.div
-            animate={{
-              opacity: [0.5, 1, 0.5],
-              scale: [0.99, 1.02, 0.99],
-            }}
-            transition={{
-              duration: 3.5,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-            className="absolute -inset-[1px] rounded-[2.6rem]"
-            style={{
-              /* Rotating-style or sweeping green aura */
-              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.8), rgba(0,0,0,0) 40%, rgba(0,0,0,0) 60%, rgba(16, 185, 129, 0.8))',
-              filter: 'blur(10px)'
-            }}
-          />
+          {/* Animated Moving Light Border Wrapper (1px padding acts as the border) */}
+          <div className="relative rounded-[2.5rem] p-[1px] overflow-hidden">
+            
+            {/* Spinning Light Source (Colorless so it blends exactly with video background) */}
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+              className="absolute inset-[-100%] rounded-full opacity-60"
+              style={{
+                background: 'conic-gradient(from 0deg, transparent 0%, transparent 35%, rgba(255, 255, 255, 0.4) 45%, rgba(255, 255, 255, 0.8) 50%, rgba(255, 255, 255, 0.4) 55%, transparent 65%, transparent 100%)',
+              }}
+            />
 
-          {/* Curved Cinematic Liquid Glass Box */}
-          <div
-            className="relative p-6 sm:p-8 rounded-[2.5rem] overflow-hidden"
-            style={{
-              /* Deep transparent liquid tint */
-              backgroundColor: 'rgba(0, 0, 0, 0.35)',
-              /* Intense blur array for true liquid refraction depth */
-              backdropFilter: 'blur(40px) saturate(130%)',
-              WebkitBackdropFilter: 'blur(40px) saturate(130%)',
-              /* Clean interior shadows without harsh white gradients */
-              boxShadow: `
-                0 24px 60px rgba(0, 0, 0, 0.8),
-                inset 0 0 0 1px rgba(16, 185, 129, 0.15),
-                inset 0 4px 20px rgba(16, 185, 129, 0.05)
-              `,
-              /* Nearly invisible glass edge, relies on the glow */
-              border: '1px solid rgba(255, 255, 255, 0.03)',
-            }}
-          >
+            {/* Curved Cinematic Liquid Glass Box */}
+            <div
+              className="relative p-6 sm:p-8 rounded-[2.45rem] overflow-hidden z-10 h-full w-full"
+              style={{
+                /* Extremely dark/transparent liquid tint so video colors bleed through easily */
+                backgroundColor: 'rgba(0, 0, 0, 0.35)',
+                /* Intense 40px blur array for true liquid refraction depth */
+                backdropFilter: 'blur(40px) saturate(140%) brightness(1.1)',
+                WebkitBackdropFilter: 'blur(40px) saturate(140%) brightness(1.1)',
+                /* Deep interior shadow for the cinematic darkness without white streaks */
+                boxShadow: '0 24px 60px rgba(0, 0, 0, 0.8), inset 0 2px 20px rgba(0, 0, 0, 0.3)',
+                /* No inner border; the parent container's 1px padding is the border */
+              }}
+            >
 
             <div className="relative z-10 font-sans tracking-tight">
               {/* Header */}
@@ -218,6 +207,7 @@ export default function Login() {
                 By continuing, you agree to our Terms & Privacy Policy
               </p>
             </div>
+          </div>
           </div>
         </motion.div>
       </div>
