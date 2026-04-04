@@ -1,4 +1,4 @@
-// CampusMobility Login - Version 2.0.0
+// CampusMobility Login - Version 3.0.0
 import React, { useState } from 'react';
 import { signInWithPopup, signInWithCredential, GoogleAuthProvider, UserCredential } from 'firebase/auth';
 import { auth, googleProvider } from '../../firebase';
@@ -8,8 +8,11 @@ import { Capacitor } from '@capacitor/core';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 import { logSecurityEvent } from '../../services/auditService';
 
-// Cinematic night city traffic — smooth, ambient, calm
-const VIDEO_URL = 'https://videos.pexels.com/video-files/1723106/1723106-hd_1920_1080_30fps.mp4';
+// Reliable 4K video sources (CDN-hosted, no hotlink block)
+const VIDEO_SOURCES = [
+  'https://cdn.pixabay.com/video/2020/07/30/45367-446936970_large.mp4',
+  'https://cdn.pixabay.com/video/2024/02/12/200571-912389498_large.mp4',
+];
 
 export default function Login() {
   const [error, setError] = useState<string | null>(null);
@@ -17,6 +20,7 @@ export default function Login() {
   const [driverCode, setDriverCode] = useState('');
   const [codeError, setCodeError] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
+  const [videoLoaded, setVideoLoaded] = useState(false);
 
   const handleGoogleLogin = async () => {
     setError(null);
@@ -68,152 +72,98 @@ export default function Login() {
   const ease = [0.25, 0.46, 0.45, 0.94] as const;
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center relative overflow-hidden">
+    <div className="min-h-screen w-full flex flex-col items-center justify-end relative overflow-hidden bg-black">
 
-      {/* ── Video Background ── */}
-      <div className="absolute inset-0 z-0">
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="w-full h-full object-cover"
-          style={{ filter: 'brightness(0.45) saturate(0.8)' }}
-        >
-          <source src={VIDEO_URL} type="video/mp4" />
-        </video>
-        {/* Dark gradient overlay for readability */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
-      </div>
+      {/* ── 4K Video Background ── */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        onCanPlay={() => setVideoLoaded(true)}
+        className="absolute inset-0 w-full h-full object-cover z-0"
+        style={{
+          opacity: videoLoaded ? 1 : 0,
+          transition: 'opacity 1s ease',
+        }}
+      >
+        {VIDEO_SOURCES.map((src, i) => (
+          <source key={i} src={src} type="video/mp4" />
+        ))}
+      </video>
 
-      {/* ── Main Content ── */}
-      <div className="relative z-10 w-full max-w-md px-6">
+      {/* Dark gradient overlay */}
+      <div className="absolute inset-0 z-[1]" style={{
+        background: 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.6) 70%, rgba(0,0,0,0.92) 100%)',
+      }} />
 
-        {/* Brand */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease }}
-          className="text-center mb-10"
-        >
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-white leading-tight">
-            Campus<span className="text-emerald-400">Mobility</span>
-          </h1>
-          <div className="flex items-center justify-center gap-3 mt-3">
-            <div className="h-px w-8 bg-zinc-600" />
-            <p className="text-zinc-500 text-[10px] font-medium tracking-[0.2em] uppercase">
-              Premium Mobility
-            </p>
-            <div className="h-px w-8 bg-zinc-600" />
+      {/* ── Brand (top center) ── */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, ease }}
+        className="absolute top-16 left-0 right-0 z-10 text-center"
+      >
+        <h1 className="text-3xl font-bold tracking-tight text-white">
+          Campus<span className="text-emerald-400">Mobility</span>
+        </h1>
+      </motion.div>
+
+      {/* ── Minimal Login Section (bottom) ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, delay: 0.2, ease }}
+        className="relative z-10 w-full max-w-md px-6 pb-10 pt-6"
+      >
+        {/* Subtitle */}
+        <p className="text-white text-xl font-semibold mb-1">Get moving</p>
+        <p className="text-zinc-400 text-sm mb-6">Sign in to start your journey</p>
+
+        {/* Error */}
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-xs p-3 rounded-xl mb-4">
+            {error}
           </div>
-        </motion.div>
+        )}
 
-        {/* ── Glass Login Panel ── */}
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.15, ease }}
-          className="relative rounded-[28px] overflow-hidden"
+        {/* Rider — White button with Google icon */}
+        <button
+          onClick={async () => {
+            localStorage.setItem('desiredRole', 'rider');
+            await handleGoogleLogin();
+          }}
+          disabled={isVerifying}
+          className="w-full flex items-center justify-center gap-3 bg-white text-zinc-900 font-medium py-3.5 rounded-xl transition-all active:scale-[0.97] disabled:opacity-50"
         >
-          {/* Glass surface */}
-          <div
-            className="relative p-7 sm:p-8 space-y-7"
-            style={{
-              background: 'rgba(12, 12, 14, 0.65)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255, 255, 255, 0.07)',
-              boxShadow: '0 24px 48px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
-            }}
-          >
-            {/* Inner top highlight (reflection) */}
-            <div
-              className="absolute top-0 left-[10%] right-[10%] h-px"
-              style={{ background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent)' }}
-            />
+          {isVerifying ? (
+            <div className="w-5 h-5 border-2 border-zinc-300 border-t-zinc-800 rounded-full animate-spin" />
+          ) : (
+            <svg width="18" height="18" viewBox="0 0 24 24" className="shrink-0">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+          )}
+          <span className="text-sm">{isVerifying ? 'Signing in...' : 'Continue as Rider'}</span>
+        </button>
 
-            {/* Heading */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.3, ease }}
-            >
-              <h2 className="text-2xl font-semibold text-white">Welcome back</h2>
-              <p className="text-zinc-500 text-sm mt-1">Sign in to start your journey</p>
-            </motion.div>
-
-            {/* Error */}
-            {error && (
-              <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-xs p-3 rounded-xl text-left">
-                {error}
-                <p className="mt-1 opacity-70">Tip: Ensure your domain is added to "Authorized Domains" in Firebase Console.</p>
-              </div>
-            )}
-
-            {/* Buttons */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4, ease }}
-              className="space-y-3"
-            >
-              {/* Rider Login — White solid button */}
-              <button
-                onClick={async () => {
-                  localStorage.setItem('desiredRole', 'rider');
-                  await handleGoogleLogin();
-                }}
-                disabled={isVerifying}
-                className="w-full flex items-center justify-center gap-3 bg-white text-zinc-900 font-semibold py-4 px-6 rounded-2xl transition-all active:scale-[0.97] hover:bg-zinc-100 disabled:opacity-50 shadow-lg shadow-white/5"
-              >
-                {isVerifying ? (
-                  <div className="w-5 h-5 border-2 border-zinc-400 border-t-zinc-900 rounded-full animate-spin" />
-                ) : (
-                  <svg width="18" height="18" viewBox="0 0 24 24" className="shrink-0">
-                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
-                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                  </svg>
-                )}
-                <span className="text-sm">{isVerifying ? 'Signing in...' : 'Continue as Rider'}</span>
-              </button>
-
-              {/* Divider */}
-              <div className="flex items-center gap-3 py-1">
-                <div className="flex-1 h-px bg-white/5" />
-                <span className="text-[10px] text-zinc-600 uppercase tracking-wider">or</span>
-                <div className="flex-1 h-px bg-white/5" />
-              </div>
-
-              {/* Driver Login — Emerald button with depth */}
-              <button
-                onClick={() => setShowDriverCodeModal(true)}
-                disabled={isVerifying}
-                className="w-full flex items-center justify-center gap-3 font-semibold py-4 px-6 rounded-2xl transition-all active:scale-[0.97] disabled:opacity-50"
-                style={{
-                  background: 'linear-gradient(135deg, #10b981, #059669)',
-                  color: 'white',
-                  boxShadow: '0 4px 14px rgba(16, 185, 129, 0.25), inset 0 1px 0 rgba(255,255,255,0.15)',
-                }}
-              >
-                <LogIn size={18} className="shrink-0" />
-                <span className="text-sm">Continue as Driver</span>
-              </button>
-            </motion.div>
-          </div>
-        </motion.div>
+        {/* Driver — Outline button */}
+        <button
+          onClick={() => setShowDriverCodeModal(true)}
+          disabled={isVerifying}
+          className="w-full flex items-center justify-center gap-2.5 font-medium py-3.5 rounded-xl mt-3 transition-all active:scale-[0.97] disabled:opacity-50 border border-zinc-700 text-white"
+        >
+          <LogIn size={16} />
+          <span className="text-sm">Continue as Driver</span>
+        </button>
 
         {/* Footer */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.6, ease }}
-          className="text-zinc-600 text-[10px] uppercase tracking-widest text-center mt-8"
-        >
+        <p className="text-zinc-600 text-[10px] text-center mt-6 tracking-wide">
           By continuing, you agree to our Terms & Privacy Policy
-        </motion.p>
-      </div>
+        </p>
+      </motion.div>
 
       {/* ── Driver Access Code Modal ── */}
       <AnimatePresence>
@@ -222,22 +172,15 @@ export default function Login() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            className="fixed inset-0 z-[70] flex items-center justify-center p-4"
-            style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)', backdropFilter: 'blur(4px)' }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[70] flex items-end justify-center bg-black/60"
           >
             <motion.div
-              initial={{ scale: 0.95, y: 16 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, y: 16 }}
+              initial={{ y: 100 }}
+              animate={{ y: 0 }}
+              exit={{ y: 100 }}
               transition={{ duration: 0.3, ease }}
-              className="w-full max-w-sm rounded-3xl p-6 relative overflow-hidden"
-              style={{
-                background: 'rgba(24, 24, 27, 0.95)',
-                backdropFilter: 'blur(16px)',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                boxShadow: '0 24px 48px rgba(0, 0, 0, 0.5)',
-              }}
+              className="w-full max-w-md bg-zinc-900 rounded-t-3xl p-6 pb-10 relative"
             >
               <button
                 onClick={() => {
@@ -245,59 +188,42 @@ export default function Login() {
                   setCodeError('');
                   setDriverCode('');
                 }}
-                className="absolute top-4 right-4 p-2 text-zinc-500 hover:text-zinc-50 transition-colors"
+                className="absolute top-4 right-4 p-2 text-zinc-500 hover:text-white transition-colors"
               >
                 <X size={20} />
               </button>
 
-              <div className="w-12 h-12 bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-500 mb-4">
-                <Key size={24} />
-              </div>
+              <div className="w-10 h-1 bg-zinc-700 rounded-full mx-auto mb-6" />
 
-              <h3 className="text-xl font-semibold text-zinc-50 mb-2">Driver Access</h3>
-              <p className="text-sm text-zinc-400 mb-6">
-                Enter the driver access code provided by administration.
-              </p>
-
-              <div className="space-y-4">
-                <div>
-                  <input
-                    type="text"
-                    placeholder="Enter Access Code"
-                    value={driverCode}
-                    onChange={(e) => {
-                      setDriverCode(e.target.value);
-                      setCodeError('');
-                    }}
-                    onKeyDown={(e) => e.key === 'Enter' && handleDriverSubmit()}
-                    className="w-full rounded-xl px-4 py-3.5 text-zinc-50 placeholder-zinc-600 focus:outline-none transition-all uppercase font-medium"
-                    style={{
-                      background: 'rgba(255, 255, 255, 0.06)',
-                      border: '1px solid rgba(255, 255, 255, 0.08)',
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = 'rgba(16, 185, 129, 0.5)';
-                      e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = 'rgba(255, 255, 255, 0.08)';
-                      e.target.style.boxShadow = 'none';
-                    }}
-                  />
-                  {codeError && <p className="text-red-500 text-xs mt-2">{codeError}</p>}
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-500">
+                  <Key size={18} />
                 </div>
-
-                <button
-                  onClick={handleDriverSubmit}
-                  className="w-full py-3.5 bg-emerald-500 text-black font-semibold rounded-xl hover:bg-emerald-400 transition-all active:scale-[0.97]"
-                >
-                  Verify & Login
-                </button>
-
-                <p className="text-[10px] text-zinc-500 text-center">
-                  Existing drivers: Enter the code to log in on a new device.
-                </p>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">Driver Access</h3>
+                  <p className="text-xs text-zinc-500">Enter your access code</p>
+                </div>
               </div>
+
+              <input
+                type="text"
+                placeholder="Access Code"
+                value={driverCode}
+                onChange={(e) => {
+                  setDriverCode(e.target.value);
+                  setCodeError('');
+                }}
+                onKeyDown={(e) => e.key === 'Enter' && handleDriverSubmit()}
+                className="w-full bg-zinc-800 rounded-xl px-4 py-3.5 text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-all uppercase font-medium text-sm"
+              />
+              {codeError && <p className="text-red-500 text-xs mt-2">{codeError}</p>}
+
+              <button
+                onClick={handleDriverSubmit}
+                className="w-full py-3.5 bg-emerald-500 text-black font-semibold rounded-xl mt-4 transition-all active:scale-[0.97]"
+              >
+                Verify & Login
+              </button>
             </motion.div>
           </motion.div>
         )}
