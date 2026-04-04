@@ -68,7 +68,7 @@ export default function Login() {
   const ease = [0.25, 0.46, 0.45, 0.94] as const;
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-between relative overflow-hidden pb-10 pt-16">
+    <div className="min-h-screen w-full flex flex-col items-center justify-center relative overflow-hidden">
 
       {/* ── Video Background ── */}
       <div className="absolute inset-0 z-0">
@@ -87,7 +87,7 @@ export default function Login() {
       </div>
 
       {/* ── Main Content ── */}
-      <div className="relative z-10 w-full max-w-md px-6">
+      <div className="relative z-10 w-full flex-1 max-w-md px-6 flex flex-col pt-[15vh] pb-10">
 
         {/* Brand */}
         <motion.div
