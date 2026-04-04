@@ -1059,12 +1059,17 @@ export default function RiderHome() {
                     setSelectedRide(type);
                     setShowBooking(true);
                   }}
-                  className="flex-1 flex flex-col items-center gap-3 py-5 rounded-2xl transition-colors group"
+                  className="relative z-10 flex-1 flex flex-col items-center gap-3 py-6 bg-zinc-800/40 rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.2)] border border-white/5 hover:border-emerald-500/20 hover:scale-[1.04] hover:shadow-[0_8px_20px_rgba(16,185,129,0.15)] transition-all duration-300 ease-out group overflow-hidden"
                 >
-                  <div className="text-emerald-500 group-active:text-emerald-400 transition-colors">
+                  {/* Subtle glowing impulse background */}
+                  <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500/0 via-emerald-500/5 to-yellow-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-in-out pointer-events-none" />
+                  {/* Sweep logic */}
+                  <div className="absolute top-0 left-0 h-full w-[200%] bg-gradient-to-r from-transparent via-emerald-400/20 to-transparent -translate-x-[100%] group-hover:translate-x-[50%] skew-x-[-15deg] transition-transform duration-500 ease-in-out pointer-events-none" />
+                  
+                  <div className="relative z-10 text-emerald-500 group-active:text-emerald-400 transition-colors">
                     {getRideIcon(type.iconId, 28)}
                   </div>
-                  <span className="text-[11px] font-medium text-zinc-500 group-active:text-zinc-300 transition-colors">{type.id}</span>
+                  <span className="relative z-10 text-[11px] font-medium text-zinc-500 group-active:text-zinc-300 transition-colors">{type.id}</span>
                 </motion.button>
               ))}
               <motion.button
@@ -1073,12 +1078,15 @@ export default function RiderHome() {
                 transition={{ duration: 0.4, delay: 0.4 + RIDE_TYPES.length * 0.07, ease: [0.25, 0.46, 0.45, 0.94] }}
                 whileTap={{ scale: 0.92, transition: { duration: 0.1 } }}
                 onClick={() => navigate('/ride-sharing')}
-                className="flex-1 flex flex-col items-center gap-3 py-5 rounded-2xl transition-colors group"
+                className="relative z-10 flex-1 flex flex-col items-center gap-3 py-6 bg-zinc-800/40 rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.2)] border border-white/5 hover:border-emerald-500/20 hover:scale-[1.04] hover:shadow-[0_8px_20px_rgba(16,185,129,0.15)] transition-all duration-300 ease-out group overflow-hidden"
               >
-                <div className="text-emerald-500 group-active:text-emerald-400 transition-colors">
+                <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500/0 via-emerald-500/5 to-yellow-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-in-out pointer-events-none" />
+                <div className="absolute top-0 left-0 h-full w-[200%] bg-gradient-to-r from-transparent via-emerald-400/20 to-transparent -translate-x-[100%] group-hover:translate-x-[50%] skew-x-[-15deg] transition-transform duration-500 ease-in-out pointer-events-none" />
+                
+                <div className="relative z-10 text-emerald-500 group-active:text-emerald-400 transition-colors">
                   <Users size={28} />
                 </div>
-                <span className="text-[11px] font-medium text-zinc-500 group-active:text-zinc-300 transition-colors">Share</span>
+                <span className="relative z-10 text-[11px] font-medium text-zinc-500 group-active:text-zinc-300 transition-colors">Share</span>
               </motion.button>
             </div>
           </div>
