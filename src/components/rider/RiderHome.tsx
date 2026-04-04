@@ -1059,17 +1059,18 @@ export default function RiderHome() {
                     setSelectedRide(type);
                     setShowBooking(true);
                   }}
-                  className="relative z-10 flex-1 flex flex-col items-center gap-3 py-6 bg-zinc-800/40 rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.2)] border border-white/5 hover:border-emerald-500/20 hover:scale-[1.04] hover:shadow-[0_8px_20px_rgba(16,185,129,0.15)] transition-all duration-300 ease-out group overflow-hidden"
+                  className="relative z-10 flex-1 flex flex-col items-center gap-3.5 py-7 bg-gradient-to-b from-[#1a1d24] to-[#0f1115] rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.05)] border border-white/[0.04] hover:border-emerald-500/[0.15] hover:scale-[1.06] hover:-translate-y-[4px] hover:shadow-[0_8px_20px_rgba(0,0,0,0.5),0_0_12px_rgba(16,185,129,0.15)] transition-all duration-300 ease-in-out cursor-pointer group overflow-hidden pointer-events-auto"
                 >
-                  {/* Subtle glowing impulse background */}
-                  <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500/0 via-emerald-500/5 to-yellow-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-in-out pointer-events-none" />
-                  {/* Sweep logic */}
-                  <div className="absolute top-0 left-0 h-full w-[200%] bg-gradient-to-r from-transparent via-emerald-400/20 to-transparent -translate-x-[100%] group-hover:translate-x-[50%] skew-x-[-15deg] transition-transform duration-500 ease-in-out pointer-events-none" />
+                  {/* Subtle glowing ambient pulse */}
+                  <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-500 pointer-events-none" />
                   
-                  <div className="relative z-10 text-emerald-500 group-active:text-emerald-400 transition-colors">
-                    {getRideIcon(type.iconId, 28)}
+                  {/* Cinematic light streak sweep */}
+                  <div className="absolute top-0 left-[-100%] h-full w-[150%] bg-gradient-to-r from-transparent via-emerald-400/20 to-transparent skew-x-[-20deg] group-hover:translate-x-[150%] transition-transform duration-700 ease-in-out pointer-events-none" />
+                  
+                  <div className="relative z-10 text-emerald-500 group-hover:text-emerald-300 transition-colors duration-300 drop-shadow-[0_0_8px_rgba(16,185,129,0.2)]">
+                    {getRideIcon(type.iconId, 32)}
                   </div>
-                  <span className="relative z-10 text-[11px] font-medium text-zinc-500 group-active:text-zinc-300 transition-colors">{type.id}</span>
+                  <span className="relative z-10 text-[11px] font-medium text-zinc-400 group-hover:text-emerald-50 drop-shadow-sm transition-colors duration-300">{type.id}</span>
                 </motion.button>
               ))}
               <motion.button
@@ -1078,15 +1079,18 @@ export default function RiderHome() {
                 transition={{ duration: 0.4, delay: 0.4 + RIDE_TYPES.length * 0.07, ease: [0.25, 0.46, 0.45, 0.94] }}
                 whileTap={{ scale: 0.92, transition: { duration: 0.1 } }}
                 onClick={() => navigate('/ride-sharing')}
-                className="relative z-10 flex-1 flex flex-col items-center gap-3 py-6 bg-zinc-800/40 rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.2)] border border-white/5 hover:border-emerald-500/20 hover:scale-[1.04] hover:shadow-[0_8px_20px_rgba(16,185,129,0.15)] transition-all duration-300 ease-out group overflow-hidden"
+                className="relative z-10 flex-1 flex flex-col items-center gap-3.5 py-7 bg-gradient-to-b from-[#1a1d24] to-[#0f1115] rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.05)] border border-white/[0.04] hover:border-yellow-500/[0.15] hover:scale-[1.06] hover:-translate-y-[4px] hover:shadow-[0_8px_20px_rgba(0,0,0,0.5),0_0_12px_rgba(251,191,36,0.15)] transition-all duration-300 ease-in-out cursor-pointer group overflow-hidden pointer-events-auto"
               >
-                <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500/0 via-emerald-500/5 to-yellow-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-in-out pointer-events-none" />
-                <div className="absolute top-0 left-0 h-full w-[200%] bg-gradient-to-r from-transparent via-emerald-400/20 to-transparent -translate-x-[100%] group-hover:translate-x-[50%] skew-x-[-15deg] transition-transform duration-500 ease-in-out pointer-events-none" />
+                {/* Subtle glowing ambient pulse */}
+                <div className="absolute inset-0 bg-yellow-500/5 opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-500 pointer-events-none" />
                 
-                <div className="relative z-10 text-emerald-500 group-active:text-emerald-400 transition-colors">
-                  <Users size={28} />
+                {/* Cinematic light streak sweep */}
+                <div className="absolute top-0 left-[-100%] h-full w-[150%] bg-gradient-to-r from-transparent via-yellow-400/20 to-transparent skew-x-[-20deg] group-hover:translate-x-[150%] transition-transform duration-700 ease-in-out pointer-events-none" />
+                
+                <div className="relative z-10 text-emerald-500 group-hover:text-yellow-300 transition-colors duration-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.2)]">
+                  <Users size={32} />
                 </div>
-                <span className="relative z-10 text-[11px] font-medium text-zinc-500 group-active:text-zinc-300 transition-colors">Share</span>
+                <span className="relative z-10 text-[11px] font-medium text-zinc-400 group-hover:text-yellow-50 drop-shadow-sm transition-colors duration-300">Share</span>
               </motion.button>
             </div>
           </div>
