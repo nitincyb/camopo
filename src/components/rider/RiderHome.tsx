@@ -262,28 +262,88 @@ const LOCATIONS = {
   DAHEGAM: { nameKey: 'dahegam_name', lat: 23.1691, lng: 72.8124, addressKey: 'dahegam_address' }
 };
 
-// --- DepthRevealText: Blur-to-sharp depth animation ---
-function DepthRevealText({ text, className = '' }: { text: string; className?: string }) {
+// --- CinematicScramble: Smooth scramble + depth animation ---
+const SCRAMBLE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+
+function CinematicScramble({ text, className = '' }: { text: string; className?: string }) {
+  const [display, setDisplay] = useState('');
+  const [phase, setPhase] = useState<'scramble' | 'done'>('scramble');
+  const frameRef = useRef(0);
+  const startRef = useRef(0);
+
+  useEffect(() => {
+    if (!text) return;
+
+    const totalDuration = 1200;
+    const resolveStart = 300;
+
+    // Generate a stable random seed per character
+    const seed = text.split('').map(() => Math.floor(Math.random() * SCRAMBLE_CHARS.length));
+
+    startRef.current = performance.now();
+    setPhase('scramble');
+
+    const animate = (now: number) => {
+      const elapsed = now - startRef.current;
+      const progress = Math.min(elapsed / totalDuration, 1);
+
+      if (progress >= 1) {
+        setDisplay(text);
+        setPhase('done');
+        return;
+      }
+
+      let result = '';
+      for (let i = 0; i < text.length; i++) {
+        if (text[i] === ' ') {
+          result += ' ';
+          continue;
+        }
+
+        // Each character has a resolve threshold based on its position
+        const charThreshold = resolveStart / totalDuration + (i / text.length) * 0.5;
+
+        if (progress > charThreshold) {
+          result += text[i];
+        } else {
+          // Cycle through chars deterministically using time, not pure random
+          const cycleSpeed = 4;
+          const idx = (seed[i] + Math.floor(elapsed / (50 + i * 8)) * cycleSpeed) % SCRAMBLE_CHARS.length;
+          result += SCRAMBLE_CHARS[idx];
+        }
+      }
+
+      setDisplay(result);
+      frameRef.current = requestAnimationFrame(animate);
+    };
+
+    frameRef.current = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frameRef.current);
+  }, [text]);
+
   return (
     <motion.p
       className={className}
-      initial={{ opacity: 0, scale: 1.03, filter: 'blur(8px)' }}
-      animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+      initial={{ opacity: 0, scale: 1.03, filter: 'blur(6px)' }}
+      animate={{
+        opacity: 1,
+        scale: 1,
+        filter: 'blur(0px)',
+      }}
       transition={{
-        duration: 0.9,
-        ease: [0.25, 0.46, 0.45, 0.94],
-        opacity: { duration: 0.6 },
-        scale: { duration: 0.8, ease: [0.22, 1, 0.36, 1] },
-        filter: { duration: 1.0, ease: [0.25, 0.46, 0.45, 0.94] },
+        duration: 1.0,
+        ease: [0.22, 1, 0.36, 1],
+        opacity: { duration: 0.5 },
+        filter: { duration: 1.2, ease: [0.25, 0.46, 0.45, 0.94] },
       }}
     >
-      {text}
+      {display}
     </motion.p>
   );
 }
 
-// --- SlideToBook: Gesture-based slider with yellow accent ---
-function SlideToBook({ onComplete }: { onComplete: () => void }) {
+// --- SlideToBook: Gesture-based slider (green accent) ---
+function SlideToBook({ onComplete, label = 'Slide to request ride' }: { onComplete: () => void; label?: string }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [dragX, setDragX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -327,7 +387,7 @@ function SlideToBook({ onComplete }: { onComplete: () => void }) {
       {/* Progress fill */}
       <div
         className="absolute inset-y-0 left-0 rounded-full transition-none"
-        style={{ width: dragX + 56, backgroundColor: `rgba(234, 179, 8, ${0.08 + progress * 0.12})` }}
+        style={{ width: dragX + 56, backgroundColor: `rgba(16, 185, 129, ${0.1 + progress * 0.15})` }}
       />
       {/* Label */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -335,16 +395,13 @@ function SlideToBook({ onComplete }: { onComplete: () => void }) {
           className="text-sm font-medium text-zinc-500 transition-opacity"
           style={{ opacity: Math.max(0, 1 - progress * 2.5) }}
         >
-          Slide to request ride
+          {label}
         </span>
       </div>
       {/* Thumb */}
       <div
-        className="absolute top-1 bottom-1 left-1 w-12 rounded-full flex items-center justify-center cursor-grab active:cursor-grabbing transition-none"
-        style={{
-          transform: `translateX(${dragX}px)`,
-          backgroundColor: `rgb(234, 179, 8)`,
-        }}
+        className="absolute top-1 bottom-1 left-1 w-12 rounded-full bg-emerald-500 flex items-center justify-center cursor-grab active:cursor-grabbing transition-none"
+        style={{ transform: `translateX(${dragX}px)` }}
         onMouseDown={(e) => { e.preventDefault(); setIsDragging(true); setCompleted(false); }}
         onTouchStart={() => { setIsDragging(true); setCompleted(false); }}
       >
@@ -958,7 +1015,7 @@ export default function RiderHome() {
               >
                 {new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening'}
               </motion.p>
-              <DepthRevealText
+              <CinematicScramble
                 text={`Hi, ${profile?.displayName || 'Rider'}`}
                 className="text-[28px] font-semibold text-white mt-1 tracking-tight"
               />
@@ -972,7 +1029,7 @@ export default function RiderHome() {
             >
               <Bell size={18} className="text-zinc-300" />
               {unreadCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-amber-400 text-black text-[9px] font-bold rounded-full flex items-center justify-center">
+                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-emerald-500 text-black text-[9px] font-bold rounded-full flex items-center justify-center">
                   {unreadCount}
                 </span>
               )}
@@ -1004,7 +1061,7 @@ export default function RiderHome() {
                   }}
                   className="flex-1 flex flex-col items-center gap-3 py-5 rounded-2xl transition-colors group"
                 >
-                  <div className="text-amber-400 group-active:text-amber-300 transition-colors">
+                  <div className="text-emerald-500 group-active:text-emerald-400 transition-colors">
                     {getRideIcon(type.iconId, 28)}
                   </div>
                   <span className="text-[11px] font-medium text-zinc-500 group-active:text-zinc-300 transition-colors">{type.id}</span>
@@ -1018,7 +1075,7 @@ export default function RiderHome() {
                 onClick={() => navigate('/ride-sharing')}
                 className="flex-1 flex flex-col items-center gap-3 py-5 rounded-2xl transition-colors group"
               >
-                <div className="text-amber-400 group-active:text-amber-300 transition-colors">
+                <div className="text-emerald-500 group-active:text-emerald-400 transition-colors">
                   <Users size={28} />
                 </div>
                 <span className="text-[11px] font-medium text-zinc-500 group-active:text-zinc-300 transition-colors">Share</span>
@@ -1026,16 +1083,7 @@ export default function RiderHome() {
             </div>
           </div>
 
-          {/* Slide to Request */}
-          <div className="px-5 mt-auto mb-24">
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
-            >
-              <SlideToBook onComplete={() => setShowBooking(true)} />
-            </motion.div>
-          </div>
+
         </div>
       )}
 
@@ -1119,12 +1167,10 @@ export default function RiderHome() {
                   ))}
                 </div>
 
-                <button 
-                  onClick={() => setStep('selecting')}
-                  className="w-full bg-emerald-500 text-black py-4 rounded-2xl font-black text-lg premium-button shadow-[0_20px_40px_rgba(16,185,129,0.2)]"
-                >
-                  {t.request_ride}
-                </button>
+                <SlideToBook
+                  onComplete={() => setStep('selecting')}
+                  label={t.request_ride}
+                />
               </motion.div>
             )}
 
