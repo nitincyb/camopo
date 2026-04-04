@@ -1103,7 +1103,12 @@ export default function RiderHome() {
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
                     <p className="text-[10px] text-emerald-500 font-black uppercase tracking-[0.2em]">{t.welcome_back}</p>
-                    <h2 className="text-2xl font-black tracking-tight font-display text-white">{profile?.displayName || 'Rider'}</h2>
+                    <h2 className="text-2xl font-black tracking-tight font-display text-white">
+                      <span className="block">Hi,</span>
+                      <span className="inline-block origin-left text-[115%] hover:bg-gradient-to-r hover:from-emerald-400 hover:to-yellow-400 hover:bg-clip-text hover:text-transparent hover:scale-105 hover:drop-shadow-[0_0_12px_rgba(16,185,129,0.5)] transition-all duration-300 ease-in-out">
+                        {profile?.displayName || 'Rider'}
+                      </span>
+                    </h2>
                   </div>
                   <button 
                     onClick={() => setShowBooking(false)}
