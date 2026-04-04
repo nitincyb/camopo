@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Search, MapPin, Navigation, Clock, CreditCard, ChevronRight, User, Settings, LogOut, Car, Bell, ArrowUpDown, HelpCircle, ShieldAlert, Users, Phone, Home, Star, History, Truck } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
@@ -261,6 +261,121 @@ const LOCATIONS = {
   GATE2: { nameKey: 'gate2_name', lat: 23.15204555996699, lng: 72.88004845953762, addressKey: 'gate2_address' },
   DAHEGAM: { nameKey: 'dahegam_name', lat: 23.1691, lng: 72.8124, addressKey: 'dahegam_address' }
 };
+
+// --- ScrambleText: Letter-by-letter reveal animation ---
+const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+
+function ScrambleText({ text, className = '' }: { text: string; className?: string }) {
+  const [display, setDisplay] = useState(text);
+  const frameRef = useRef<number>(0);
+  const startRef = useRef<number>(0);
+
+  useEffect(() => {
+    if (!text) return;
+    const duration = 600; // total ms
+    const staggerPerChar = 50; // ms delay per character
+
+    startRef.current = performance.now();
+
+    const animate = (now: number) => {
+      const elapsed = now - startRef.current;
+      let result = '';
+      for (let i = 0; i < text.length; i++) {
+        const charDelay = i * staggerPerChar;
+        const charElapsed = elapsed - charDelay;
+        if (text[i] === ' ') {
+          result += ' ';
+        } else if (charElapsed > duration * 0.6) {
+          result += text[i];
+        } else if (charElapsed > 0) {
+          result += CHARS[Math.floor(Math.random() * CHARS.length)];
+        } else {
+          result += CHARS[Math.floor(Math.random() * CHARS.length)];
+        }
+      }
+      setDisplay(result);
+      if (elapsed < duration + text.length * staggerPerChar) {
+        frameRef.current = requestAnimationFrame(animate);
+      } else {
+        setDisplay(text);
+      }
+    };
+
+    frameRef.current = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frameRef.current);
+  }, [text]);
+
+  return <p className={className}>{display}</p>;
+}
+
+// --- SlideToBook: Gesture-based slider ---
+function SlideToBook({ onComplete, label }: { onComplete: () => void; label: string }) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [dragX, setDragX] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [completed, setCompleted] = useState(false);
+  const threshold = 0.75;
+
+  const handleDrag = useCallback((e: React.TouchEvent | React.MouseEvent) => {
+    if (!isDragging || !trackRef.current || completed) return;
+    const track = trackRef.current.getBoundingClientRect();
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const x = Math.max(0, Math.min(clientX - track.left - 28, track.width - 56));
+    setDragX(x);
+
+    if (x / (track.width - 56) >= threshold) {
+      setCompleted(true);
+      setIsDragging(false);
+      setDragX(track.width - 56);
+      setTimeout(onComplete, 200);
+    }
+  }, [isDragging, completed, onComplete]);
+
+  const handleEnd = useCallback(() => {
+    if (!completed) {
+      setDragX(0);
+    }
+    setIsDragging(false);
+  }, [completed]);
+
+  const progress = trackRef.current ? dragX / (trackRef.current.getBoundingClientRect().width - 56) : 0;
+
+  return (
+    <div
+      ref={trackRef}
+      className="relative h-14 bg-zinc-900 border border-zinc-800 rounded-full overflow-hidden select-none touch-none"
+      onMouseMove={handleDrag}
+      onMouseUp={handleEnd}
+      onMouseLeave={handleEnd}
+      onTouchMove={handleDrag}
+      onTouchEnd={handleEnd}
+    >
+      {/* Progress fill */}
+      <div
+        className="absolute inset-y-0 left-0 bg-emerald-500/10 transition-none rounded-full"
+        style={{ width: dragX + 56 }}
+      />
+      {/* Label */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <span
+          className="text-sm font-medium text-zinc-500 transition-opacity"
+          style={{ opacity: 1 - progress * 2 }}
+        >
+          Slide to book a ride
+        </span>
+      </div>
+      {/* Thumb */}
+      <div
+        className="absolute top-1 bottom-1 left-1 w-12 rounded-full bg-emerald-500 flex items-center justify-center cursor-grab active:cursor-grabbing transition-none"
+        style={{ transform: `translateX(${dragX}px)` }}
+        onMouseDown={(e) => { e.preventDefault(); setIsDragging(true); setCompleted(false); }}
+        onTouchStart={() => { setIsDragging(true); setCompleted(false); }}
+      >
+        <ChevronRight size={20} className="text-black" />
+      </div>
+    </div>
+  );
+}
 
 export default function RiderHome() {
   const { profile, user } = useAuth();
@@ -764,7 +879,7 @@ export default function RiderHome() {
   }, [activeRide?.driverId, activeRide?.status]);
 
   const isRideActive = activeRide && ['accepted', 'arrived', 'in_progress'].includes(activeRide.status);
-  const showMap = true;
+  const showMap = isRideActive || step === 'searching' || step === 'selecting';
 
   return (
     <div className="h-screen w-screen bg-black overflow-hidden relative font-sans">
@@ -795,110 +910,167 @@ export default function RiderHome() {
             path={driverPath.length > 0 ? driverPath : (predefinedPath.length > 0 ? predefinedPath : path)}
           />
         ) : (
-          <div className="w-full h-full bg-zinc-950 flex flex-col items-center justify-center relative overflow-hidden">
-            {/* Ambient background elements */}
-            <div className="absolute inset-0 opacity-20">
-              <img 
-                src="https://images.unsplash.com/photo-1449156001935-d2863fb72690?auto=format&fit=crop&q=80&w=2000" 
-                alt="Campus Background"
-                className="w-full h-full object-cover blur-sm"
-                referrerPolicy="no-referrer"
-              />
-              <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black" />
-            </div>
-            
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="relative z-10 flex flex-col items-center"
-            >
-              <div className="w-24 h-24 mb-6 relative">
-                <div className="absolute inset-0 bg-emerald-500/20 rounded-full animate-ping" />
-                <div className="relative bg-zinc-900 rounded-full w-full h-full flex items-center justify-center border border-zinc-800 shadow-2xl">
-                  <Car size={40} className="text-emerald-500" />
-                </div>
-              </div>
-              <Logo className="w-24 h-24" />
-              <div className="mt-4 flex flex-col items-center gap-1">
-                <p className="text-zinc-500 font-black tracking-[0.3em] uppercase text-[10px]">Campus Mobility</p>
-                <div className="h-0.5 w-12 bg-emerald-500/50 rounded-full" />
-              </div>
-            </motion.div>
-
-            {/* Decorative grid */}
-            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-5 pointer-events-none" />
+          <div className="w-full h-full bg-zinc-950 relative overflow-hidden">
+            <div className="absolute inset-0 bg-zinc-950" />
           </div>
         )}
       </div>
 
-      {/* Top Search Bar */}
-      <div className="absolute top-6 left-4 right-4 z-20 flex items-center gap-3 pointer-events-none">
-        <button 
-          onClick={() => {
-            setShowBooking(true);
-          }}
-          className="flex-1 bg-zinc-900/80 backdrop-blur-md rounded-full shadow-2xl flex items-center gap-3 px-5 py-3.5 border border-zinc-800 pointer-events-auto hover:bg-zinc-900 transition-colors"
-        >
-          <Search size={18} className="text-zinc-500 shrink-0" />
-          <span className="text-sm font-bold text-zinc-400 truncate">{t.where_to}</span>
-        </button>
-        
-        <div className="flex items-center gap-2 pointer-events-auto">
-          {locationLoading && (
-            <div className="bg-zinc-900/80 backdrop-blur-md px-3 py-2 rounded-full shadow-lg flex items-center gap-2 border border-zinc-800">
-              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-50">{t.locating}</span>
-            </div>
-          )}
+      {/* Top Bar - only show on non-home or when booking */}
+      {(step !== 'home' || showBooking) && (
+        <div className="absolute top-6 left-4 right-4 z-20 flex items-center gap-3 pointer-events-none">
           <button 
-            onClick={() => setIsNotificationsOpen(true)}
-            className="w-12 h-12 bg-zinc-900 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform border border-zinc-800 relative"
+            onClick={() => {
+              setShowBooking(true);
+            }}
+            className="flex-1 bg-zinc-900 rounded-full flex items-center gap-3 px-5 py-3.5 border border-zinc-800 pointer-events-auto hover:border-zinc-700 transition-colors"
           >
-            <Bell size={20} className="text-zinc-50" />
-            {unreadCount > 0 && (
-              <span className="absolute top-2 right-2 w-4 h-4 bg-emerald-500 text-black text-[10px] font-black rounded-full flex items-center justify-center border-2 border-zinc-900">
-                {unreadCount}
-              </span>
-            )}
+            <Search size={18} className="text-zinc-500 shrink-0" />
+            <span className="text-sm font-bold text-zinc-400 truncate">{t.where_to}</span>
           </button>
+          
+          <div className="flex items-center gap-2 pointer-events-auto">
+            {locationLoading && (
+              <div className="bg-zinc-900 px-3 py-2 rounded-full flex items-center gap-2 border border-zinc-800">
+                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-50">{t.locating}</span>
+              </div>
+            )}
+            <button 
+              onClick={() => setIsNotificationsOpen(true)}
+              className="w-12 h-12 bg-zinc-900 rounded-full flex items-center justify-center hover:bg-zinc-800 transition-colors border border-zinc-800 relative"
+            >
+              <Bell size={20} className="text-zinc-50" />
+              {unreadCount > 0 && (
+                <span className="absolute top-2 right-2 w-4 h-4 bg-emerald-500 text-black text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-zinc-900">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Personalized Home Screen */}
+      {step === 'home' && !showBooking && (
+        <div className="absolute inset-0 z-10 flex flex-col">
+          {/* Top section with greeting and notifications */}
+          <div className="px-5 pt-12 pb-4 flex items-start justify-between">
+            <div className="flex-1">
+              <motion.p
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+                className="text-zinc-500 text-sm font-medium"
+              >
+                {t.welcome_back}
+              </motion.p>
+              <ScrambleText
+                text={profile?.displayName || 'Rider'}
+                className="text-3xl font-bold text-white mt-1 tracking-tight"
+              />
+            </div>
+            <motion.button
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+              onClick={() => setIsNotificationsOpen(true)}
+              className="w-11 h-11 bg-zinc-900 rounded-full flex items-center justify-center border border-zinc-800 relative mt-1"
+            >
+              <Bell size={18} className="text-zinc-300" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-amber-400 text-black text-[9px] font-bold rounded-full flex items-center justify-center">
+                  {unreadCount}
+                </span>
+              )}
+            </motion.button>
+          </div>
+
+          {/* Search / Destination field */}
+          <div className="px-5 mb-6">
+            <motion.button
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.15, ease: [0.25, 0.46, 0.45, 0.94] }}
+              onClick={() => setShowBooking(true)}
+              className="w-full bg-zinc-900 rounded-2xl flex items-center gap-4 px-5 py-4 border border-zinc-800 hover:border-zinc-700 transition-colors active:scale-[0.98]"
+            >
+              <div className="w-8 h-8 bg-emerald-500/10 rounded-lg flex items-center justify-center">
+                <Search size={16} className="text-emerald-500" />
+              </div>
+              <div className="text-left">
+                <p className="text-[11px] text-zinc-600 font-medium">{t.where_to}</p>
+                <p className="text-sm text-zinc-300 font-medium">{destination || 'Enter destination'}</p>
+              </div>
+              <ChevronRight size={16} className="text-zinc-600 ml-auto" />
+            </motion.button>
+          </div>
+
+          {/* Services Grid */}
+          <div className="px-5 mb-6">
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3, delay: 0.25 }}
+              className="text-xs font-medium text-zinc-500 mb-3 px-1"
+            >
+              Services
+            </motion.p>
+            <div className="flex items-center gap-3">
+              {RIDE_TYPES.map((type, index) => (
+                <motion.button
+                  key={type.id}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.35, delay: 0.3 + index * 0.06, ease: [0.25, 0.46, 0.45, 0.94] }}
+                  whileTap={{ scale: 0.93 }}
+                  onClick={() => {
+                    setSelectedRide(type);
+                    setShowBooking(true);
+                  }}
+                  className="flex-1 flex flex-col items-center gap-2.5 py-4 bg-zinc-900 border border-zinc-800 rounded-2xl hover:border-zinc-700 transition-colors group"
+                >
+                  <div className="text-zinc-400 group-hover:text-emerald-500 transition-colors">
+                    {getRideIcon(type.iconId, 24)}
+                  </div>
+                  <span className="text-[10px] font-medium text-zinc-500 group-hover:text-zinc-300 transition-colors">{type.id}</span>
+                </motion.button>
+              ))}
+              <motion.button
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, delay: 0.3 + RIDE_TYPES.length * 0.06, ease: [0.25, 0.46, 0.45, 0.94] }}
+                whileTap={{ scale: 0.93 }}
+                onClick={() => navigate('/ride-sharing')}
+                className="flex-1 flex flex-col items-center gap-2.5 py-4 bg-zinc-900 border border-zinc-800 rounded-2xl hover:border-zinc-700 transition-colors group"
+              >
+                <div className="text-zinc-400 group-hover:text-emerald-500 transition-colors">
+                  <Users size={24} />
+                </div>
+                <span className="text-[10px] font-medium text-zinc-500 group-hover:text-zinc-300 transition-colors">Share</span>
+              </motion.button>
+            </div>
+          </div>
+
+          {/* Slide to Book */}
+          <div className="px-5 mt-auto mb-24">
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+            >
+              <SlideToBook
+                onComplete={() => setShowBooking(true)}
+                label={t.where_to}
+              />
+            </motion.div>
+          </div>
+        </div>
+      )}
 
       {/* Main UI Overlay */}
       <div className="absolute inset-x-0 bottom-0 z-20 pointer-events-none">
         <div className="max-w-xl mx-auto p-4 sm:p-6 pb-safe pointer-events-auto">
-          {/* Services Quick Actions */}
-          {step === 'home' && !showBooking && (
-            <div className="mb-20">
-              <p className="text-xs font-bold text-zinc-500 mb-3 px-1">Quick Actions</p>
-              <div className="flex items-center gap-3">
-                {RIDE_TYPES.map((type) => (
-                  <button
-                    key={type.id}
-                    onClick={() => {
-                      setSelectedRide(type);
-                      setShowBooking(true);
-                    }}
-                    className="flex-1 flex flex-col items-center gap-2 py-3 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-700 transition-colors"
-                  >
-                    <div className="text-emerald-500">
-                      {getRideIcon(type.iconId, 22)}
-                    </div>
-                    <span className="text-[10px] font-bold text-zinc-400">{type.id}</span>
-                  </button>
-                ))}
-                <button
-                  onClick={() => navigate('/ride-sharing')}
-                  className="flex-1 flex flex-col items-center gap-2 py-3 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-700 transition-colors"
-                >
-                  <div className="text-emerald-500">
-                    <Users size={22} />
-                  </div>
-                  <span className="text-[10px] font-bold text-zinc-400">Share</span>
-                </button>
-              </div>
-            </div>
-          )}
 
           <AnimatePresence mode="wait">
             {step === 'home' && showBooking && (
