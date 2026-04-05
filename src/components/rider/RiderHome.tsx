@@ -256,6 +256,7 @@ const SmartSlider = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const x = useMotionValue(0);
 
   useEffect(() => {
@@ -280,6 +281,7 @@ const SmartSlider = ({
   const opacity = useTransform(x, [0, maxDrag * 0.8], [1, 0]);
 
   const handleDragEnd = (e: any, info: any) => {
+    setIsDragging(false);
     if (info.offset.x >= maxDrag * 0.85) {
       setIsConfirmed(true);
       if (navigator.vibrate) navigator.vibrate(50);
@@ -293,10 +295,14 @@ const SmartSlider = ({
     }
   };
 
+  const handleDragStart = () => {
+    setIsDragging(true);
+  };
+
   return (
     <div 
       ref={containerRef}
-      className={`relative w-[calc(100%-32px)] mx-auto h-[52px] rounded-[99px] overflow-hidden transition-all duration-300 ${isConfirmed ? 'scale-[1.02]' : ''}`}
+      className={`relative w-[calc(100%-0px)] mx-auto h-[52px] rounded-[99px] overflow-hidden transition-all duration-300 ${isConfirmed ? 'scale-[1.02]' : ''}`}
       style={{
         backgroundColor: 'rgba(255, 255, 255, 0.05)',
         border: trackBorder
@@ -307,9 +313,9 @@ const SmartSlider = ({
         <div 
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.04) 50%, transparent 100%)',
+            background: isDragging && !isGreen ? 'linear-gradient(90deg, transparent 0%, rgba(245, 158, 11, 0.15) 50%, transparent 100%)' : 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.04) 50%, transparent 100%)',
             backgroundSize: '200% 100%',
-            animation: 'shimmer 2.5s ease-in-out infinite'
+            animation: `shimmer ${isDragging ? '0.6s' : '2.5s'} ease-in-out infinite`
           }}
         />
       )}
@@ -326,7 +332,7 @@ const SmartSlider = ({
 
       {/* Confirmed Text */}
       <div 
-        className="absolute inset-0 flex items-center justify-center transition-opacity duration-300 z-10 pointer-events-none"
+        className="absolute inset-0 flex items-center justify-center transition-opacity duration-200 z-10 pointer-events-none"
         style={{ opacity: isConfirmed ? 1 : 0 }}
       >
         <span className="font-dm font-medium text-[13px] text-white">
@@ -340,18 +346,18 @@ const SmartSlider = ({
         dragConstraints={{ left: 0, right: maxDrag }}
         dragElastic={0}
         dragMomentum={false}
+        onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
         animate={{ 
           width: isConfirmed ? containerWidth - (padding * 2) : thumbWidth,
           backgroundColor: isConfirmed ? successColor : undefined
         }}
-        transition={{ type: "spring", bounce: 0, duration: 0.3 }}
-        className="absolute flex items-center justify-center z-20 overflow-hidden"
+        transition={{ type: "spring", stiffness: 300, damping: 25, duration: 0.35 }}
+        className="absolute flex items-center justify-center z-20 overflow-visible"
         style={{ 
           x,
           left: padding, 
-          top: '50%',
-          marginTop: '-22px', 
+          top: padding,
           height: '44px',
           borderRadius: '99px',
           background: isConfirmed ? undefined : thumbGradient,
@@ -361,7 +367,10 @@ const SmartSlider = ({
       >
         <motion.div 
           animate={{ opacity: isConfirmed ? 0 : 1 }}
-          className="flex items-center shrink-0 w-[44px] justify-center"
+          className="flex items-center shrink-0 w-[44px] justify-center absolute left-0 h-full origin-center"
+          style={{
+            animation: isConfirmed ? 'confirmBurst 0.3s ease-out forwards' : isDragging ? 'dragVibrate 0.08s linear infinite' : `hapticPulse 3s ease-in-out infinite ${isGreen ? '0s' : '1.5s'}`
+          }}
         >
           {icon || (
             <>
@@ -1365,66 +1374,65 @@ export default function RiderHome() {
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
                 transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-                className="relative overflow-hidden w-full sm:-mx-6 -mx-4 sm:-mb-6 pt-2 isolate flex flex-col h-auto max-h-[92vh]"
+                className="fixed bottom-0 left-0 right-0 z-[60] flex flex-col h-auto max-h-[92vh] w-[100vw]"
                 style={{
-                  borderRadius: '32px 32px 0 0',
-                  paddingTop: '2px',
-                  paddingLeft: '2px',
-                  paddingRight: '2px',
+                  borderRadius: '24px 24px 0 0',
                   boxShadow: '0 -4px 30px rgba(0, 0, 0, 0.4)',
-                  transform: 'translateZ(0)'
+                  paddingBottom: 'env(safe-area-inset-bottom, 20px)',
+                  backgroundColor: '#0B0E0C',
                 }}
               >
                 {/* Cinematic animated edge light */}
                 <div 
-                  className="absolute inset-[-100%] z-[0] pointer-events-none"
-                  style={{
-                    background: 'conic-gradient(from 0deg, transparent 0%, transparent 40%, rgba(34, 197, 94, 0.15) 45%, rgba(34, 197, 94, 0.6) 50%, rgba(34, 197, 94, 0.15) 55%, transparent 60%, transparent 100%)',
-                    willChange: 'transform',
-                    animation: 'cinematic-spin 8s linear infinite'
-                  }}
-                />
-
-                {/* Solid inner core */}
-                <div 
-                  className="relative z-10 w-full flex-1 flex flex-col pt-[12px] pb-[28px] overflow-y-auto custom-scrollbar"
-                  style={{
-                    backgroundColor: '#0B0E0C',
-                    borderRadius: '32px 32px 0 0',
-                  }}
+                  className="absolute inset-[0] z-[0] pointer-events-none overflow-hidden rounded-t-[24px]"
                 >
+                  <div 
+                    className="absolute inset-[-100%]"
+                    style={{
+                      background: 'conic-gradient(from 0deg, transparent 0%, transparent 40%, rgba(34, 197, 94, 0.15) 45%, rgba(34, 197, 94, 0.6) 50%, rgba(34, 197, 94, 0.15) 55%, transparent 60%, transparent 100%)',
+                      willChange: 'transform',
+                      animation: 'cinematic-spin 8s linear infinite'
+                    }}
+                  />
+                  {/* The inner core covering the glow so just edges show */}
+                  <div className="absolute inset-[2px] bg-[#0B0E0C] rounded-t-[24px]" />
+                </div>
+
+                {/* Content Container positioned over the background */}
+                <div className="relative z-10 w-full max-w-[420px] mx-auto flex-1 flex flex-col pt-[12px] px-[16px] overflow-y-auto custom-scrollbar">
                   {/* Inner highlight */}
-                  <div className="absolute inset-0 rounded-t-[32px] pointer-events-none z-0" style={{ background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, transparent 30%)' }} />
+                  <div className="absolute inset-0 rounded-t-[24px] pointer-events-none z-0" style={{ background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, transparent 30%)' }} />
                   
                   {/* Vehicle Cards */}
-                  <div className="flex flex-col gap-[6px] px-0 w-full z-10 shrink-0">
+                  <div className="flex flex-col gap-[6px] w-full z-10 shrink-0">
                     {RIDE_TYPES.map((type) => {
                       const isSelected = selectedRide.id === type.id;
                       return (
                       <button 
                         key={type.id}
                         onClick={() => setSelectedRide(type)}
-                        className={`relative mx-[16px] h-[68px] flex items-center justify-between px-[16px] rounded-[16px] transition-all overflow-hidden ${isSelected ? 'animate-[borderPulse_0.4s_ease-out_forwards]' : ''}`}
+                        className={`relative w-full h-[68px] flex items-center justify-between px-[16px] rounded-[16px] transition-all overflow-hidden ${isSelected ? 'animate-[selectCard_0.25s_ease-out_forwards]' : ''}`}
                         style={{
-                          background: isSelected ? 'rgba(34, 197, 94, 0.08)' : 'rgba(255, 255, 255, 0.03)',
-                          border: isSelected ? '1.5px solid #22C55E' : '1px solid rgba(255, 255, 255, 0.07)'
+                          background: isSelected ? 'rgba(74, 222, 128, 0.10)' : 'rgba(255, 255, 255, 0.03)',
+                          border: isSelected ? '2px solid transparent' : '1px solid rgba(255, 255, 255, 0.07)',
+                          boxShadow: isSelected ? '0 0 20px rgba(74,222,128,0.12), inset 0 0 0 0 transparent' : 'none'
                         }}
                       >
                         {isSelected && (
                           <motion.div 
                             initial={{ x: '-100%', y: '-50%' }}
                             animate={{ x: 0, y: '-50%' }}
-                            transition={{ duration: 0.25, ease: 'easeOut' }}
-                            className="absolute left-0 top-1/2 w-[3px] h-[36px] bg-[#22C55E] rounded-r-[3px]" 
+                            transition={{ duration: 0.20, ease: 'easeOut' }}
+                            className="absolute left-0 top-1/2 w-[3px] h-[100%] bg-[#4ADE80] opacity-100" 
                           />
                         )}
                         
                         <div className="flex items-center gap-[16px] h-full flex-1 min-w-0">
-                          <div className="w-[44px] h-[44px] flex items-center justify-center shrink-0">
-                            {getRideIcon(type.iconId, 44)}
+                          <div className="w-[40px] h-[40px] flex items-center justify-center shrink-0">
+                            {getRideIcon(type.iconId, 40)}
                           </div>
                           <div className="flex flex-col items-start justify-center flex-1 min-w-0 mr-2">
-                            <p className="font-sora font-semibold text-[15px] leading-tight text-[rgba(255,255,255,0.92)] whitespace-nowrap overflow-hidden text-ellipsis w-full text-left">{t[type.nameKey]}</p>
+                            <p className="font-sora font-semibold text-[14px] leading-tight text-[rgba(255,255,255,0.92)] whitespace-nowrap overflow-hidden text-ellipsis w-full text-left">{t[type.nameKey]}</p>
                             <p className="text-[11px] font-dm uppercase tracking-widest mt-1" style={{ color: 'rgba(255,255,255,0.40)' }}>
                               {type.time} • {distanceInfo?.distance || '...'}
                             </p>

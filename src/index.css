@@ -42,10 +42,32 @@
   50% { opacity: 1; }
 }
 
-@keyframes borderPulse {
-  0%   { box-shadow: 0 0 0 0px rgba(34,197,94,0.5); }
-  50%  { box-shadow: 0 0 0 4px rgba(34,197,94,0.15); }
-  100% { box-shadow: 0 0 0 0px rgba(34,197,94,0); }
+@keyframes selectCard {
+  0% { box-shadow: 0 0 0 0 rgba(74,222,128,0.7); border-color: rgba(74,222,128,0.3); }
+  40% { box-shadow: 0 0 0 6px rgba(74,222,128,0.25); border-color: #4ADE80; }
+  100% { box-shadow: 0 0 0 0 rgba(74,222,128,0); border-color: #4ADE80; }
+}
+
+@keyframes hapticPulse {
+  0%, 100% { transform: scale(1); }
+  4% { transform: scale(0.92); }
+  8% { transform: scale(1.06); }
+  12% { transform: scale(0.96); }
+  16% { transform: scale(1.02); }
+  20% { transform: scale(1); }
+}
+
+@keyframes dragVibrate {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-1.5deg); }
+  75% { transform: rotate(1.5deg); }
+}
+
+@keyframes confirmBurst {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.15); }
+  70% { transform: scale(0.95); }
+  100% { transform: scale(1); }
 }
 
 @keyframes shimmer {
