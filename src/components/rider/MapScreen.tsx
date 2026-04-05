@@ -188,12 +188,11 @@ export default function MapScreen() {
           animate={{ height: panelHeight }}
           transition={{ type: 'spring', stiffness: 320, damping: 36 }}
           style={{
-            borderRadius: '24px',
-            background: 'rgba(0, 0, 0, 0.85)',
+            borderRadius: '28px 28px 0 0',
+            background: 'rgba(13, 15, 14, 0.8)',
             backdropFilter: `blur(${blurAmount})`,
             WebkitBackdropFilter: `blur(${blurAmount})`,
-            border: '1px solid rgba(255,255,255,0.08)',
-            boxShadow: 'inset 0 0 20px rgba(255,255,255,0.05)',
+            boxShadow: '0 -12px 48px rgba(34,197,94,0.08)',
           }}
         >
           {/* ── Drag Handle ─────────────────────────────────────────────── */}
@@ -217,37 +216,34 @@ export default function MapScreen() {
           <div className="flex-1 overflow-hidden flex flex-col px-5 pb-6 gap-4">
 
             {/* Location Inputs Container */}
-            <div className="relative flex flex-col pl-4 pr-3 py-4 rounded-3xl border border-white/[0.08] bg-white/[0.02] shadow-[0_8px_32px_rgba(0,0,0,0.4)] backdrop-blur-md">
+            <div className="relative flex flex-col px-4 py-4 rounded-2xl bg-[#0B0E0C] shadow-[inset_0_1px_4px_rgba(255,255,255,0.02)]">
               {/* Connecting Wire */}
-              <div className="absolute left-[33px] top-[46px] bottom-[46px] w-[2px] bg-gradient-to-b from-[#22c55e]/60 to-white/20 rounded-full z-0" />
+              <div className="absolute left-[26px] top-[40px] bottom-[40px] w-0 border-l-[1.5px] border-dashed border-[#22c55e]/40 z-0" />
               
               {/* From Row */}
-              <div className="flex items-center gap-4 px-2 py-2 relative z-10">
-                <div className="w-3.5 h-3.5 rounded-full border-[3px] border-[#22c55e] bg-[#0a0a0a] flex-shrink-0 box-border" />
+              <div className="flex items-center gap-4 py-1 relative z-10">
+                <div className="w-[10px] h-[10px] rounded-full bg-[#22c55e] flex items-center justify-center flex-shrink-0">
+                  <div className="w-[4px] h-[4px] bg-white rounded-full" />
+                </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-zinc-500 mb-0.5">From</p>
-                  <p className="text-base font-semibold text-white truncate">
+                  <p className="text-[9px] tracking-[0.2em] font-dm font-light uppercase text-[#7AAF8A] mb-0.5">From</p>
+                  <p className="text-[17px] font-sora font-semibold text-[#F4F4F0] truncate">
                     {location ? 'Current Location' : 'Locating…'}
                   </p>
                 </div>
-                <button className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors">
-                  <Navigation2 size={16} className="text-[#22c55e]" />
-                </button>
+                <div className="w-[38px] h-[38px] rounded-full bg-[#1A2E1E] flex items-center justify-center flex-shrink-0">
+                  <Navigation2 size={20} className="text-[#22C55E]" strokeWidth={2} />
+                </div>
               </div>
 
-              {/* Subtle internal divider */}
-              <div className="ml-11 mr-3 h-[1px] bg-white-[0.04] my-2" />
+              {/* 24px gap area */}
+              <div className="h-[24px]" />
 
               {/* To Row */}
-              <div
-                className="flex items-center gap-4 px-2 py-2 rounded-2xl transition-colors duration-200 relative z-10"
-                style={{
-                  background: isFocused ? 'rgba(255,255,255,0.04)' : 'transparent',
-                }}
-              >
-                <div className="w-3 h-3 bg-white rounded-sm flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#22c55e]/90 mb-0.5">To</p>
+              <div className="flex items-center gap-4 py-1 relative z-10">
+                <div className="w-[10px] h-[10px] border-[2px] border-white rounded-[1px] flex-shrink-0" />
+                <div className="flex-1 min-w-0 flex flex-col justify-center">
+                  <p className="text-[9px] tracking-[0.2em] font-dm font-light uppercase text-[#7AAF8A] mb-0.5">To</p>
                   <input
                     ref={inputRef}
                     type="text"
@@ -256,15 +252,15 @@ export default function MapScreen() {
                     onFocus={handleFocusInput}
                     onBlur={() => setIsFocused(false)}
                     placeholder="Where to?"
-                    className="w-full bg-transparent text-lg font-bold text-white placeholder:text-zinc-600 outline-none"
+                    className="w-full bg-transparent text-[17px] font-sora font-semibold text-[#F4F4F0] placeholder:text-[#3D4D40] outline-none"
                   />
                 </div>
                 {toValue.length > 0 && (
                   <button
                     onClick={() => { setToValue(''); setSuggestions([]); }}
-                    className="flex-shrink-0 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors text-white"
+                    className="w-[38px] h-[38px] rounded-full flex items-center justify-center text-white"
                   >
-                    <X size={14} />
+                    <X size={20} />
                   </button>
                 )}
               </div>
@@ -285,74 +281,72 @@ export default function MapScreen() {
                   {/* Suggestions from API */}
                   {suggestions.length > 0 ? (
                     <>
-                      <p className="text-[10px] font-black uppercase tracking-widest px-3 pb-1"
-                         style={{ color: 'rgba(255,255,255,0.3)' }}>
+                      <p className="text-[10px] tracking-[0.35em] uppercase text-[#5A6B5E] font-dm px-4 pb-2">
                         Results
                       </p>
-                      {suggestions.map((s) => (
-                        <button
-                          key={s.id}
-                          onClick={() => {
-                            setToValue(s.placeName);
-                            setSuggestions([]);
-                            snapTo(false);
-                          }}
-                          className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left transition-colors duration-150"
-                          style={{ background: 'rgba(255,255,255,0.04)' }}
-                          onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.08)')}
-                          onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.04)')}
-                        >
-                          <div
-                            className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                            style={{ background: 'rgba(255,255,255,0.07)' }}
-                          >
-                            <MapPin size={16} className="text-zinc-400" />
+                      <div className="flex flex-col gap-[12px]">
+                        {suggestions.map((s, idx) => (
+                          <div key={s.id}>
+                            <button
+                              onClick={() => {
+                                setToValue(s.placeName);
+                                setSuggestions([]);
+                                snapTo(false);
+                              }}
+                              className="w-full h-[64px] flex items-center gap-4 px-[16px] rounded-xl text-left hover:bg-[#141A15] hover:border hover:border-[#1E2B1F] border border-transparent transition-colors"
+                            >
+                              <div className="w-[40px] h-[40px] rounded-full bg-[#141A15] flex items-center justify-center flex-shrink-0">
+                                <MapPin size={20} className="text-[#22c55e]" />
+                              </div>
+                              <div className="flex-1 min-w-0 flex flex-col justify-center">
+                                <p className="text-[17px] font-sora font-semibold text-[#F4F4F0] truncate">{s.placeName}</p>
+                                <p className="text-[13px] font-dm font-normal text-[#8A9A8E] truncate">{s.placeAddress}</p>
+                              </div>
+                            </button>
+                            {idx !== suggestions.length - 1 && (
+                              <div className="h-[0.5px] bg-[#1A2318] mx-[16px] mt-[12px]" />
+                            )}
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-white truncate">{s.placeName}</p>
-                            <p className="text-[11px] text-zinc-500 truncate">{s.placeAddress}</p>
-                          </div>
-                        </button>
-                      ))}
+                        ))}
+                      </div>
                     </>
                   ) : toValue.length === 0 ? (
                     /* Quick locations when input is empty */
                     <>
-                      <p className="text-[10px] font-black uppercase tracking-widest px-3 pb-1"
-                         style={{ color: 'rgba(255,255,255,0.3)' }}>
+                      <p className="text-[10px] tracking-[0.35em] uppercase text-[#5A6B5E] font-dm px-4 pb-2 pt-2">
                         Recent & Nearby
                       </p>
-                      {QUICK_LOCATIONS.map((loc) => (
-                        <button
-                          key={loc.id}
-                          onClick={() => {
-                            setToValue(loc.name);
-                            snapTo(false);
-                          }}
-                          className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left transition-colors duration-150"
-                          style={{ background: 'rgba(255,255,255,0.04)' }}
-                          onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.08)')}
-                          onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.04)')}
-                        >
-                          <div
-                            className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                            style={{ background: 'rgba(16,185,129,0.1)' }}
-                          >
-                            <Clock size={15} className="text-emerald-500" />
+                      <div className="flex flex-col gap-[12px]">
+                        {QUICK_LOCATIONS.map((loc, idx) => (
+                          <div key={loc.id}>
+                            <button
+                              onClick={() => {
+                                setToValue(loc.name);
+                                snapTo(false);
+                              }}
+                              className="w-full h-[64px] flex items-center gap-4 px-[16px] rounded-xl text-left hover:bg-[#141A15] hover:border hover:border-[#1E2B1F] border border-transparent transition-colors"
+                            >
+                              <div className="w-[40px] h-[40px] rounded-full bg-[#141A15] flex items-center justify-center flex-shrink-0">
+                                <Clock size={20} className="text-[#22c55e]" />
+                              </div>
+                              <div className="flex-1 min-w-0 flex flex-col justify-center">
+                                <p className="text-[17px] font-sora font-semibold text-[#F4F4F0] truncate">{loc.name}</p>
+                                <p className="text-[13px] font-dm font-normal text-[#8A9A8E] truncate">{loc.address}</p>
+                              </div>
+                            </button>
+                            {idx !== QUICK_LOCATIONS.length - 1 && (
+                              <div className="h-[0.5px] bg-[#1A2318] mx-[16px] mt-[12px]" />
+                            )}
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-white truncate">{loc.name}</p>
-                            <p className="text-[11px] text-zinc-500 truncate">{loc.address}</p>
-                          </div>
-                        </button>
-                      ))}
+                        ))}
+                      </div>
                     </>
                   ) : (
                     /* Searching state */
                     <div className="flex flex-col items-center justify-center py-10 gap-2">
-                      <Search size={28} className="text-zinc-700" />
-                      <p className="text-xs font-bold text-zinc-600 uppercase tracking-widest">
-                        Type to search locations
+                      <Search size={28} className="text-[#5A6B5E]" />
+                      <p className="text-[10px] tracking-[0.35em] font-dm font-bold text-[#5A6B5E] uppercase mt-2">
+                        Type to search
                       </p>
                     </div>
                   )}
@@ -364,7 +358,7 @@ export default function MapScreen() {
             {!expanded && toValue.length > 0 && (
               <button
                 onClick={() => navigate('/', { state: { destination: toValue, intent: 'select_ride' } })}
-                className="w-full bg-[#22c55e] text-black py-4 rounded-xl font-bold text-sm hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center mt-3"
+                className="w-full h-[52px] rounded-[20px] bg-gradient-to-r from-[#22C55E] to-[#16A34A] text-black font-sora font-semibold text-[15px] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center mt-2"
               >
                 Confirm Destination
               </button>
