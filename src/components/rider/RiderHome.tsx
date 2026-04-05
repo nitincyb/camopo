@@ -248,10 +248,10 @@ const RIDE_TYPES = [
 
 const getRideIcon = (iconId: string) => {
   switch (iconId) {
-    case 'auto': return <img src="https://www.uber-assets.com/image/upload/f_auto,q_auto:eco,c_fill,h_368,w_552/v1648431773/assets/1d/db8c56-0204-4ce4-81ce-56a11a07fe98/original/Uber_Auto_558x372_pixels_Desktop.png" alt="Auto" className="w-full h-full object-contain drop-shadow-2xl" />;
-    case 'economy': return <img src="https://www.uber-assets.com/image/upload/f_auto,q_auto:eco,c_fill,h_368,w_552/v1548646918/assets/e9/2eeb8f-3764-4e26-8b17-5905a75e7e85/original/2.png" alt="Car" className="w-full h-full object-contain drop-shadow-2xl" />;
-    case 'premium': return <img src="https://www.uber-assets.com/image/upload/f_auto,q_auto:eco,c_fill,h_368,w_552/v1548646935/assets/64/463870-05e8-4660-8451-9ffdf6e98774/original/3.png" alt="Premium Car" className="w-full h-full object-contain drop-shadow-2xl scale-[1.15]" />;
-    default: return <img src="https://www.uber-assets.com/image/upload/f_auto,q_auto:eco,c_fill,h_368,w_552/v1548646918/assets/e9/2eeb8f-3764-4e26-8b17-5905a75e7e85/original/2.png" alt="Car" className="w-full h-full object-contain drop-shadow-2xl" />;
+    case 'auto': return <img src="https://img.icons8.com/fluency/256/auto-rickshaw.png" alt="Auto" className="w-[54px] h-[54px] object-contain drop-shadow-md" />;
+    case 'economy': return <img src="https://img.icons8.com/fluency/256/car.png" alt="Car" className="w-[54px] h-[54px] object-contain drop-shadow-md" />;
+    case 'premium': return <img src="https://img.icons8.com/fluency/256/suv.png" alt="Premium SUV" className="w-[54px] h-[54px] object-contain drop-shadow-md" />;
+    default: return <img src="https://img.icons8.com/fluency/256/car.png" alt="Car" className="w-[54px] h-[54px] object-contain drop-shadow-md" />;
   }
 };
 
@@ -1230,32 +1230,38 @@ export default function RiderHome() {
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
                 transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-                className="relative overflow-hidden sm:-mx-6 -mx-4 -mb-4 sm:-mb-6 pt-2 pb-6 isolate"
+                className="relative overflow-hidden w-full sm:-mx-6 -mx-4 -mb-4 sm:-mb-6 mt-4 isolate"
                 style={{
-                  backgroundColor: '#0B0E0C',
                   borderRadius: '32px 32px 0 0',
-                  boxShadow: '0 -10px 40px rgba(0, 0, 0, 0.6)'
+                  paddingTop: '3px',
+                  paddingLeft: '3px',
+                  paddingRight: '3px',
+                  boxShadow: '0 -10px 40px rgba(0, 0, 0, 0.6)',
+                  transform: 'translateZ(0)'
                 }}
               >
                 {/* Cinematic animated edge light */}
                 <div 
-                  className="absolute pointer-events-none"
+                  className="absolute inset-[-100%] z-[0] pointer-events-none"
                   style={{
-                    top: '-2px', right: '-2px', bottom: '-2px', left: '-2px',
-                    borderRadius: '34px 34px 0 0',
-                    padding: '2px',
-                    background: 'conic-gradient(from 0deg, transparent 70%, rgba(34, 197, 94, 0.9) 100%)',
-                    WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-                    WebkitMaskComposite: 'xor',
-                    maskComposite: 'exclude',
-                    animation: 'cinematic-spin 4s linear infinite',
-                    willChange: 'transform'
+                    background: 'conic-gradient(from 0deg, transparent 0%, transparent 35%, rgba(34, 197, 94, 0.4) 40%, rgba(34, 197, 94, 0.9) 50%, rgba(34, 197, 94, 0.4) 60%, transparent 65%, transparent 100%)',
+                    willChange: 'transform',
+                    animation: 'cinematic-spin 5s linear infinite'
                   }}
                 />
 
-                {/* Inner highlight */}
-                <div className="absolute inset-0 rounded-t-[32px] pointer-events-none z-0" style={{ background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, transparent 30%)' }} />
-                <div className="p-5 sm:p-6 relative z-10 pb-4">
+                {/* Solid inner core */}
+                <div 
+                  className="relative z-10 w-full h-full pb-6"
+                  style={{
+                    backgroundColor: '#0B0E0C',
+                    borderRadius: '32px 32px 0 0',
+                  }}
+                >
+                  {/* Inner highlight */}
+                  <div className="absolute inset-0 rounded-t-[32px] pointer-events-none z-0" style={{ background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, transparent 30%)' }} />
+                  
+                  <div className="p-5 sm:p-6 relative z-10 pb-4">
                   <div className="flex items-center justify-between mb-4">
                     <button onClick={() => setStep('home')} className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-zinc-400 hover:text-white transition-colors">
                       <ChevronRight className="rotate-180" size={20} />
@@ -1315,7 +1321,7 @@ export default function RiderHome() {
                     </button>
                   </div>
 
-                  <div className="space-y-3 max-h-[35vh] overflow-y-auto pr-2 custom-scrollbar">
+                  <div className="space-y-3 max-h-[30vh] overflow-y-auto pr-2 custom-scrollbar">
                     {RIDE_TYPES.map((type) => (
                       <button 
                         key={type.id}
@@ -1360,6 +1366,8 @@ export default function RiderHome() {
                       </div>
                     )}
                   </div>
+                  
+                </div> {/* Close Solid Inner Core */}
                   
                   {isScheduling && scheduledDate && (
                     <div className="space-y-3">
