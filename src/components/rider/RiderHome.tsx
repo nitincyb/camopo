@@ -1229,9 +1229,16 @@ export default function RiderHome() {
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: 20, opacity: 0 }}
-                className="relative bg-[rgba(20,20,20,0.6)] backdrop-blur-[16px] rounded-[32px] overflow-hidden border border-white/5"
+                className="relative overflow-hidden"
+                style={{
+                  backgroundColor: '#0B0E0C',
+                  borderRadius: '28px',
+                  border: '1px solid rgba(255, 255, 255, 0.05)',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)'
+                }}
               >
-                <div className="absolute inset-0 bg-gradient-to-b from-[#22c55e]/5 to-transparent pointer-events-none" />
+                {/* Inner highlight */}
+                <div className="absolute inset-0 rounded-[28px] pointer-events-none z-0" style={{ background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, transparent 30%)' }} />
                 <div className="p-6 relative z-10 pb-4">
                   <div className="flex items-center justify-between mb-4">
                     <button onClick={() => setStep('home')} className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-zinc-400 hover:text-white transition-colors">
@@ -1241,21 +1248,54 @@ export default function RiderHome() {
                     <div className="w-10" />
                   </div>
 
-                  {/* 1. Source & 2. Destination */}
-                  <div className="space-y-2 mb-6">
+                  {/* 1. Source & 2. Destination (Connecting Wire Layout) */}
+                  <div 
+                    className="relative flex flex-col px-[16px] py-[14px] rounded-[18px] mb-6"
+                    style={{
+                      background: '#121A15',
+                      border: '1px solid rgba(255, 255, 255, 0.06)',
+                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)'
+                    }}
+                  >
+                    {/* Connecting Wire */}
+                    <svg className="absolute left-[24px] top-[40px] w-[2px] h-[28px] z-0" style={{ strokeDasharray: "4 4", animation: "line-flow 1.5s linear infinite" }}>
+                      <line x1="1" y1="0" x2="1" y2="28" stroke="rgba(34, 197, 94, 0.15)" strokeWidth="1" />
+                    </svg>
+
+                    {/* From */}
                     <button 
                       onClick={() => navigate('/map', { state: { pickingUp: true } })}
-                      className="w-full bg-[rgba(255,255,255,0.03)] rounded-2xl py-3 px-4 border border-white/[0.02] flex items-center gap-3 hover:bg-[rgba(255,255,255,0.05)] transition-all text-left"
+                      className="flex items-center gap-4 relative z-10 w-full text-left transition-opacity hover:opacity-80"
                     >
-                      <div className="w-2 h-2 bg-[#22c55e] rounded-full shrink-0" />
-                      <span className="font-medium text-zinc-300 text-sm truncate">{pickup}</span>
+                      <div 
+                        className="w-[18px] h-[18px] rounded-full flex items-center justify-center flex-shrink-0"
+                        style={{ backgroundColor: 'rgba(34, 197, 94, 0.20)' }}
+                      >
+                        <div className="w-[8px] h-[8px] rounded-full bg-[#22C55E]" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[9px] tracking-[0.2em] font-dm uppercase mb-0.5" style={{ color: '#4ADE80', opacity: 0.8 }}>From</p>
+                        <p className="text-[15px] font-sora font-semibold truncate" style={{ color: 'rgba(255, 255, 255, 0.92)' }}>{pickup}</p>
+                      </div>
                     </button>
+
+                    <div className="h-[20px]" />
+
+                    {/* To */}
                     <button 
                       onClick={() => navigate('/map', { state: { pickingUp: false } })}
-                      className="w-full bg-[rgba(255,255,255,0.03)] rounded-2xl py-3 px-4 border border-white/[0.02] flex items-center gap-3 hover:bg-[rgba(255,255,255,0.05)] transition-all text-left"
+                      className="flex items-center gap-4 relative z-10 w-full text-left transition-opacity hover:opacity-80"
                     >
-                      <div className="w-2 h-2 bg-zinc-400 rounded-full shrink-0" />
-                      <span className="font-medium text-white text-sm truncate">{destination}</span>
+                      <div className="w-[18px] flex justify-center items-center flex-shrink-0">
+                        <div 
+                          className="w-[9px] h-[9px] animate-[breathe_2.5s_ease_infinite]"
+                          style={{ border: '1px solid rgba(255, 255, 255, 0.35)', borderRadius: '1px' }}
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[9px] tracking-[0.2em] font-dm uppercase mb-0.5" style={{ color: '#4ADE80', opacity: 0.8 }}>To</p>
+                        <p className="text-[15px] font-sora font-semibold truncate" style={{ color: 'rgba(255, 255, 255, 0.92)' }}>{destination}</p>
+                      </div>
                     </button>
                   </div>
 
@@ -1264,40 +1304,50 @@ export default function RiderHome() {
                       <button 
                         key={type.id}
                         onClick={() => setSelectedRide(type)}
-                        className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all border ${
+                        className={`w-full flex items-center gap-4 p-4 rounded-[18px] transition-all border ${
                           selectedRide.id === type.id 
-                            ? 'bg-[#22c55e]/10 border-[#22c55e]/30 ' 
-                            : 'bg-white/5 border-white/5 hover:bg-white/10'
+                            ? 'border-[#22C55E]/40 shadow-[0_0_15px_rgba(34,197,94,0.1)]' 
+                            : 'border-white/5 hover:border-white/10'
                         }`}
+                        style={{
+                          background: selectedRide.id === type.id ? 'rgba(34, 197, 94, 0.08)' : '#121A15',
+                        }}
                       >
-                        <div className="w-14 h-14 bg-zinc-800 rounded-xl flex items-center justify-center text-zinc-300">
-                          {getRideIcon(type.iconId, 28)}
+                        <div 
+                          className="w-14 h-14 rounded-xl flex items-center justify-center transition-colors"
+                          style={{
+                            background: selectedRide.id === type.id ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255, 255, 255, 0.03)'
+                          }}
+                        >
+                          <div style={{ color: selectedRide.id === type.id ? '#4ADE80' : 'rgba(255, 255, 255, 0.6)'}}>
+                            {getRideIcon(type.iconId, 28)}
+                          </div>
                         </div>
                         <div className="flex-1 text-left">
-                          <p className={`font-bold text-sm ${selectedRide.id === type.id ? 'text-[#22c55e]' : 'text-white'}`}>{t[type.nameKey]}</p>
-                          <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">
+                          <p className={`font-sora font-semibold text-[15px] ${selectedRide.id === type.id ? 'text-[#4ADE80]' : 'text-[rgba(255,255,255,0.92)]'}`}>{t[type.nameKey]}</p>
+                          <p className="text-[10px] opacity-60 font-dm uppercase tracking-widest mt-0.5" style={{ color: selectedRide.id === type.id ? '#4ADE80' : 'rgba(255, 255, 255, 0.6)' }}>
                             {type.time} • {distanceInfo?.distance || '...'}
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold text-lg">₹{type.price}</p>
-                          <p className="text-[8px] text-zinc-500 font-bold uppercase tracking-widest">Estimated</p>
+                          <p className={`font-sora font-semibold text-lg ${selectedRide.id === type.id ? 'text-white' : 'text-[rgba(255,255,255,0.92)]'}`}>₹{type.price}</p>
+                          <p className="text-[9px] opacity-60 font-dm uppercase tracking-widest mt-0.5" style={{ color: selectedRide.id === type.id ? '#4ADE80' : 'rgba(255, 255, 255, 0.6)' }}>Estimated</p>
                         </div>
                       </button>
                     ))}
                   </div>
                 </div>
 
-                <div className="p-6 pt-2 bg-white/5 border-t border-white/5 flex flex-col gap-4">
-                  <div className="flex items-center justify-between px-2">
+                <div className="p-6 pt-5 bg-[#080B09] border-t border-white/[0.04] flex flex-col gap-5 relative z-10">
+                  <div className="flex items-center justify-between px-1">
                     <div className="flex items-center gap-2 text-zinc-400">
-                      <CreditCard size={16} />
-                      <span className="font-bold text-xs uppercase tracking-widest">Personal • UPI</span>
+                      <CreditCard size={18} style={{ color: 'rgba(255, 255, 255, 0.4)' }} />
+                      <span className="font-dm font-bold text-[11px] uppercase tracking-[0.15em] text-[rgba(255,255,255,0.5)]">Personal • UPI</span>
                     </div>
                     {distanceInfo && (
                       <div className="text-right">
-                        <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Total Duration</p>
-                        <p className="text-sm font-bold text-[#22c55e]">{distanceInfo.duration}</p>
+                        <p className="text-[9px] text-[#4ADE80] opacity-80 font-dm font-bold uppercase tracking-[0.15em] mb-0.5">Total Duration</p>
+                        <p className="text-[15px] font-sora font-semibold text-[#22c55e]">{distanceInfo.duration}</p>
                       </div>
                     )}
                   </div>
