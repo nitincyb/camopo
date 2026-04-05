@@ -162,28 +162,50 @@ export default function MapScreen() {
           scale: { duration: 0.45 },
           delay: 0.15,
         }}
-        style={{ height: panelHeight }}
+        style={{
+          // We let the inner motion.div control the height smoothly instead of jumping the parent
+          height: panelHeight,
+          willChange: 'height, transform'
+        }}
       >
-        {/* Animated height wrapper */}
+        {/* Animated height wrapper with cinematic moving border */}
         <motion.div
-          className="w-full h-full flex flex-col relative"
+          className="w-full relative overflow-hidden"
           animate={{ height: panelHeight }}
           transition={{ type: 'spring', stiffness: 320, damping: 36 }}
           style={{
             borderRadius: '28px 28px 0 0',
-            background: 'rgba(10, 14, 12, 0.95)',
-            backdropFilter: 'blur(32px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(32px) saturate(180%)',
-            borderTop: '1px solid rgba(255, 255, 255, 0.10)',
-            borderLeft: '1px solid rgba(255, 255, 255, 0.06)',
-            borderRight: '1px solid rgba(255, 255, 255, 0.06)',
-            boxShadow: '0 -24px 60px rgba(0, 0, 0, 0.8), inset 0 2px 20px rgba(0, 0, 0, 0.3)',
-            padding: '16px 20px',
+            paddingTop: '2px',
+            paddingLeft: '2px',
+            paddingRight: '2px',
+            boxShadow: '0 -8px 24px rgba(0, 0, 0, 0.3)',
+            transform: 'translateZ(0)',
+            willChange: 'height, transform'
           }}
         >
-          {/* Inner Highlight Layer */}
-          <div className="absolute inset-0 rounded-[28px_28px_0_0] pointer-events-none z-[-1]" style={{ background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, transparent 60%)' }} />
-          {/* ── Drag Handle ─────────────────────────────────────────────── */}
+          {/* Spinning Cinematic Edge Light (CSS Animated for Mobile Performance) */}
+          <div
+            className="absolute inset-[-100%] z-0"
+            style={{
+              background: 'conic-gradient(from 0deg, transparent 0%, transparent 35%, rgba(34, 197, 94, 0.4) 40%, rgba(34, 197, 94, 0.9) 50%, rgba(34, 197, 94, 0.4) 60%, transparent 65%, transparent 100%)',
+              willChange: 'transform',
+              animation: 'cinematic-spin 5s linear infinite'
+            }}
+          />
+
+          {/* Solid inner core (removing backdrop filter entirely for smooth mobile perf) */}
+          <div 
+             className="relative z-10 w-full h-full flex flex-col px-[20px] pb-[16px]"
+             style={{
+               backgroundColor: '#0B0E0C',
+               borderRadius: '28px 28px 0 0',
+             }}
+          >
+            {/* Inner highlight (retained for 3D feel without blur penalty) */}
+            <div className="absolute inset-0 rounded-[26px_26px_0_0] pointer-events-none z-0" style={{ background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, transparent 30%)' }} />
+            
+            {/* Wrapper for content to maintain z-index over highlight */}
+            <div className="relative z-10 flex-1 flex flex-col h-full w-full">
           <div
             className="flex-shrink-0 flex justify-center pt-2 pb-4 cursor-grab active:cursor-grabbing touch-none"
             onPointerDown={onDragStart as any}
@@ -207,10 +229,8 @@ export default function MapScreen() {
             <div 
               className="relative flex flex-col px-[16px] py-[14px] rounded-[18px]"
               style={{
-                background: 'rgba(18, 25, 20, 0.80)',
-                backdropFilter: 'blur(16px)',
-                WebkitBackdropFilter: 'blur(16px)',
-                border: '1px solid rgba(255, 255, 255, 0.07)',
+                background: '#121A15',
+                border: '1px solid rgba(255, 255, 255, 0.06)',
                 boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)'
               }}
             >
@@ -237,10 +257,8 @@ export default function MapScreen() {
                   onClick={() => navigate(-1)} 
                   className="w-[32px] h-[32px] rounded-full flex items-center justify-center flex-shrink-0 transition-opacity hover:opacity-80 group"
                   style={{
-                    background: 'rgba(0, 0, 0, 0.50)',
-                    backdropFilter: 'blur(12px)',
-                    WebkitBackdropFilter: 'blur(12px)',
-                    border: '1px solid rgba(255, 255, 255, 0.10)'
+                    background: '#1B241D',
+                    border: '1px solid rgba(255, 255, 255, 0.08)'
                   }}
                 >
                   <X size={16} strokeWidth={2} style={{ color: 'rgba(255, 255, 255, 0.50)' }} />
@@ -313,10 +331,8 @@ export default function MapScreen() {
                               }}
                               className="w-full text-left transition-all hover:scale-[0.98] active:scale-[0.96]"
                               style={{
-                                background: 'rgba(18, 25, 20, 0.60)',
-                                backdropFilter: 'blur(20px)',
-                                WebkitBackdropFilter: 'blur(20px)',
-                                border: '1px solid rgba(255, 255, 255, 0.07)',
+                                background: '#121A15',
+                                border: '1px solid rgba(255, 255, 255, 0.05)',
                                 borderRadius: '14px',
                                 padding: '14px 16px',
                                 display: 'flex',
@@ -364,10 +380,8 @@ export default function MapScreen() {
                               }}
                               className="w-full text-left transition-all hover:scale-[0.98] active:scale-[0.96]"
                               style={{
-                                background: 'rgba(18, 25, 20, 0.60)',
-                                backdropFilter: 'blur(20px)',
-                                WebkitBackdropFilter: 'blur(20px)',
-                                border: '1px solid rgba(255, 255, 255, 0.07)',
+                                background: '#121A15',
+                                border: '1px solid rgba(255, 255, 255, 0.05)',
                                 borderRadius: '14px',
                                 padding: '14px 16px',
                                 display: 'flex',
@@ -422,6 +436,8 @@ export default function MapScreen() {
                 Confirm Destination
               </button>
             )}
+            </div>
+            </div>
           </div>
         </motion.div>
       </motion.div>

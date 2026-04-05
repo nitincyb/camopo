@@ -32,6 +32,11 @@
   50% { opacity: 1.0; }
 }
 
+@keyframes cinematic-spin {
+  from { transform: rotate(0deg) translateZ(0); }
+  to { transform: rotate(360deg) translateZ(0); }
+}
+
 @keyframes blink-caret {
   0%, 100% { opacity: 0; }
   50% { opacity: 1; }
