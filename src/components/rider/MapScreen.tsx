@@ -166,16 +166,23 @@ export default function MapScreen() {
       >
         {/* Animated height wrapper */}
         <motion.div
-          className="w-full h-full flex flex-col"
+          className="w-full h-full flex flex-col relative"
           animate={{ height: panelHeight }}
           transition={{ type: 'spring', stiffness: 320, damping: 36 }}
           style={{
             borderRadius: '28px 28px 0 0',
-            background: '#0C1210',
-            boxShadow: '0 -1px 0 #22C55E40, 0 -32px 80px rgba(0,0,0,0.9)',
+            background: 'rgba(255, 255, 255, 0.04)',
+            backdropFilter: 'blur(32px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(32px) saturate(180%)',
+            borderTop: '1px solid rgba(255, 255, 255, 0.10)',
+            borderLeft: '1px solid rgba(255, 255, 255, 0.06)',
+            borderRight: '1px solid rgba(255, 255, 255, 0.06)',
+            boxShadow: '0 -8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
             padding: '16px 20px',
           }}
         >
+          {/* Inner Highlight Layer */}
+          <div className="absolute inset-0 rounded-[28px_28px_0_0] pointer-events-none z-[-1]" style={{ background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, transparent 60%)' }} />
           {/* ── Drag Handle ─────────────────────────────────────────────── */}
           <div
             className="flex-shrink-0 flex justify-center pt-2 pb-4 cursor-grab active:cursor-grabbing touch-none"
@@ -188,7 +195,8 @@ export default function MapScreen() {
             onTouchEnd={onDragEnd}
           >
             <div
-              className="w-[36px] h-[4px] rounded-full transition-colors duration-200 bg-[#22C55E]/20"
+              className="w-[36px] h-[4px] rounded-full transition-colors duration-200"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
             />
           </div>
 
@@ -196,31 +204,46 @@ export default function MapScreen() {
           <div className="flex-1 overflow-hidden flex flex-col gap-4">
 
             {/* Location Inputs Container */}
-            <div className="relative flex flex-col px-[16px] py-[14px] rounded-[16px] bg-[#101915] border border-[#1A3322] shadow-[inset_0_1px_0_#22C55E15,_0_2px_12px_#00000060]">
+            <div 
+              className="relative flex flex-col px-[16px] py-[14px] rounded-[18px]"
+              style={{
+                background: 'rgba(255, 255, 255, 0.03)',
+                backdropFilter: 'blur(16px)',
+                WebkitBackdropFilter: 'blur(16px)',
+                border: '1px solid rgba(255, 255, 255, 0.07)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)'
+              }}
+            >
               {/* Connecting Wire */}
-              <svg className="absolute left-[25px] top-[34px] w-[2px] h-[32px] z-0" style={{ strokeDasharray: "4 8", animation: "line-flow 1.5s linear infinite" }}>
-                <line x1="1" y1="0" x2="1" y2="32" stroke="#22C55E" strokeWidth="1.5" strokeOpacity="0.25" />
+              <svg className="absolute left-[24px] top-[40px] w-[2px] h-[24px] z-0" style={{ strokeDasharray: "4 4", animation: "line-flow 1.5s linear infinite" }}>
+                <line x1="1" y1="0" x2="1" y2="24" stroke="rgba(34, 197, 94, 0.15)" strokeWidth="1" />
               </svg>
               
               {/* From Row */}
               <div className="flex items-center gap-4 relative z-10">
                 <div 
-                  className="w-[20px] h-[20px] rounded-full border-[1.5px] border-[#22C55E]/30 flex items-center justify-center flex-shrink-0 animate-[map-dot-pulse_2s_ease-in-out_infinite]"
-                  style={{ filter: 'drop-shadow(0 0 8px #22C55E)' }}
+                  className="w-[18px] h-[18px] rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{ backgroundColor: 'rgba(34, 197, 94, 0.20)' }}
                 >
                   <div className="w-[8px] h-[8px] rounded-full bg-[#22C55E]" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[9px] tracking-[0.2em] font-dm font-light uppercase text-[#4ADE80]/45 mb-0.5">From</p>
-                  <p className="text-[17px] font-sora font-semibold text-[#F0FFF4] truncate">
+                  <p className="text-[9px] tracking-[0.2em] font-dm uppercase mb-0.5" style={{ color: 'rgba(255, 255, 255, 0.35)' }}>From</p>
+                  <p className="text-[17px] font-sora font-semibold truncate" style={{ color: 'rgba(255, 255, 255, 0.92)' }}>
                     {location ? 'Current Location' : 'Locating…'}
                   </p>
                 </div>
                 <button 
                   onClick={() => navigate(-1)} 
-                  className="w-[32px] h-[32px] rounded-full bg-[#0F1F14] border border-[#22C55E]/25 hover:bg-[#162B1C] hover:border-[#22C55E]/60 flex items-center justify-center flex-shrink-0 transition-all duration-200 group"
+                  className="w-[32px] h-[32px] rounded-full flex items-center justify-center flex-shrink-0 transition-opacity hover:opacity-80 group"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.06)',
+                    backdropFilter: 'blur(12px)',
+                    WebkitBackdropFilter: 'blur(12px)',
+                    border: '1px solid rgba(255, 255, 255, 0.10)'
+                  }}
                 >
-                  <X size={16} className="text-[#4ADE80] opacity-70 group-hover:opacity-100 group-hover:text-[#22C55E] transition-colors duration-200" strokeWidth={2} />
+                  <X size={16} strokeWidth={2} style={{ color: 'rgba(255, 255, 255, 0.50)' }} />
                 </button>
               </div>
 
@@ -229,16 +252,14 @@ export default function MapScreen() {
 
               {/* To Row */}
               <div className="flex items-center gap-4 relative z-10">
-                <div className="w-[20px] flex justify-center items-center flex-shrink-0">
+                <div className="w-[18px] flex justify-center items-center flex-shrink-0">
                   <div 
-                    className="w-[9px] h-[9px] border-[1.5px] border-white animate-[breathe_2.5s_ease_infinite]"
+                    className="w-[9px] h-[9px] animate-[breathe_2.5s_ease_infinite]"
+                    style={{ border: '1px solid rgba(255, 255, 255, 0.35)', borderRadius: '1px' }}
                   />
                 </div>
                 <div className="flex-1 min-w-0 flex flex-col justify-center relative">
-                  {toValue.length === 0 && (
-                    <div className="absolute -left-[14px] top-1/2 -translate-y-1/2 w-[2px] h-[16px] bg-[#22C55E]/50 animate-[blink-caret_1s_ease_infinite] rounded-full" />
-                  )}
-                  <p className="text-[9px] tracking-[0.2em] font-dm font-light uppercase text-[#4ADE80]/45 mb-0.5">To</p>
+                  <p className="text-[9px] tracking-[0.2em] font-dm uppercase mb-0.5" style={{ color: 'rgba(255, 255, 255, 0.35)' }}>To</p>
                   <input
                     ref={inputRef}
                     type="text"
@@ -247,13 +268,15 @@ export default function MapScreen() {
                     onFocus={handleFocusInput}
                     onBlur={() => setIsFocused(false)}
                     placeholder="Where to?"
-                    className="w-full bg-transparent text-[17px] font-sora font-semibold text-[#F0FFF4] placeholder:text-[#2D4A33] outline-none"
+                    className="w-full bg-transparent text-[17px] font-sora font-semibold outline-none placeholder-[rgba(255,255,255,0.18)]"
+                    style={{ color: 'rgba(255, 255, 255, 0.92)' }}
                   />
                 </div>
                 {toValue.length > 0 && (
                   <button
                     onClick={() => { setToValue(''); setSuggestions([]); }}
-                    className="w-[38px] h-[38px] rounded-full flex items-center justify-center text-[#F0FFF4]"
+                    className="w-[38px] h-[38px] rounded-full flex items-center justify-center transition-opacity hover:opacity-80"
+                    style={{ color: 'rgba(255, 255, 255, 0.50)' }}
                   >
                     <X size={20} />
                   </button>
@@ -276,10 +299,10 @@ export default function MapScreen() {
                   {/* Suggestions from API */}
                   {suggestions.length > 0 ? (
                     <>
-                      <p className="text-[10px] tracking-[0.35em] uppercase text-[#5A6B5E] font-dm px-4 pb-2">
+                      <p className="text-[10px] tracking-[0.3em] font-dm uppercase px-4 pb-2" style={{ color: 'rgba(255, 255, 255, 0.25)' }}>
                         Results
                       </p>
-                      <div className="flex flex-col gap-[12px]">
+                      <div className="flex flex-col gap-[8px]">
                         {suggestions.map((s, idx) => (
                           <div key={s.id}>
                             <button
@@ -288,19 +311,39 @@ export default function MapScreen() {
                                 setSuggestions([]);
                                 snapTo(false);
                               }}
-                              className="w-full h-[64px] flex items-center gap-4 px-[16px] rounded-xl text-left hover:bg-[#141A15] hover:border hover:border-[#1E2B1F] border border-transparent transition-colors"
+                              className="w-full text-left transition-all hover:scale-[0.98] active:scale-[0.96]"
+                              style={{
+                                background: 'rgba(255, 255, 255, 0.04)',
+                                backdropFilter: 'blur(20px)',
+                                WebkitBackdropFilter: 'blur(20px)',
+                                border: '1px solid rgba(255, 255, 255, 0.07)',
+                                borderRadius: '14px',
+                                padding: '14px 16px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '16px'
+                              }}
                             >
-                              <div className="w-[40px] h-[40px] rounded-full bg-[#101915] flex items-center justify-center flex-shrink-0">
-                                <MapPin size={20} className="text-[#22C55E]" />
+                              <div
+                                style={{
+                                  background: 'rgba(255, 255, 255, 0.06)',
+                                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                                  borderRadius: '10px',
+                                  width: '40px',
+                                  height: '40px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  flexShrink: 0
+                                }}
+                              >
+                                <MapPin size={20} style={{ color: 'rgba(255, 255, 255, 0.40)' }} />
                               </div>
                               <div className="flex-1 min-w-0 flex flex-col justify-center">
-                                <p className="text-[17px] font-sora font-semibold text-[#F0FFF4] truncate">{s.placeName}</p>
-                                <p className="text-[13px] font-dm font-normal text-[#16A34A] truncate">{s.placeAddress}</p>
+                                <p className="font-sora font-semibold truncate" style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '15px' }}>{s.placeName}</p>
+                                <p className="font-dm font-normal truncate mt-0.5" style={{ color: 'rgba(255, 255, 255, 0.35)', fontSize: '12px' }}>{s.placeAddress}</p>
                               </div>
                             </button>
-                            {idx !== suggestions.length - 1 && (
-                              <div className="h-[0.5px] bg-[#1A3322] mx-[16px] mt-[12px]" />
-                            )}
                           </div>
                         ))}
                       </div>
@@ -308,10 +351,10 @@ export default function MapScreen() {
                   ) : toValue.length === 0 ? (
                     /* Quick locations when input is empty */
                     <>
-                      <p className="text-[10px] tracking-[0.35em] uppercase text-[#5A6B5E] font-dm px-4 pb-2 pt-2">
+                      <p className="text-[10px] tracking-[0.3em] font-dm uppercase px-4 pb-2 pt-2" style={{ color: 'rgba(255, 255, 255, 0.25)' }}>
                         Recent & Nearby
                       </p>
-                      <div className="flex flex-col gap-[12px]">
+                      <div className="flex flex-col gap-[8px]">
                         {QUICK_LOCATIONS.map((loc, idx) => (
                           <div key={loc.id}>
                             <button
@@ -319,19 +362,39 @@ export default function MapScreen() {
                                 setToValue(loc.name);
                                 snapTo(false);
                               }}
-                              className="w-full h-[64px] flex items-center gap-4 px-[16px] rounded-xl text-left hover:bg-[#141A15] hover:border hover:border-[#1E2B1F] border border-transparent transition-colors"
+                              className="w-full text-left transition-all hover:scale-[0.98] active:scale-[0.96]"
+                              style={{
+                                background: 'rgba(255, 255, 255, 0.04)',
+                                backdropFilter: 'blur(20px)',
+                                WebkitBackdropFilter: 'blur(20px)',
+                                border: '1px solid rgba(255, 255, 255, 0.07)',
+                                borderRadius: '14px',
+                                padding: '14px 16px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '16px'
+                              }}
                             >
-                              <div className="w-[40px] h-[40px] rounded-full bg-[#101915] flex items-center justify-center flex-shrink-0">
-                                <Clock size={20} className="text-[#22C55E]" />
+                              <div
+                                style={{
+                                  background: 'rgba(255, 255, 255, 0.06)',
+                                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                                  borderRadius: '10px',
+                                  width: '40px',
+                                  height: '40px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  flexShrink: 0
+                                }}
+                              >
+                                <Clock size={20} style={{ color: 'rgba(255, 255, 255, 0.40)' }} />
                               </div>
                               <div className="flex-1 min-w-0 flex flex-col justify-center">
-                                <p className="text-[17px] font-sora font-semibold text-[#F0FFF4] truncate">{loc.name}</p>
-                                <p className="text-[13px] font-dm font-normal text-[#16A34A] truncate">{loc.address}</p>
+                                <p className="font-sora font-semibold truncate" style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '15px' }}>{loc.name}</p>
+                                <p className="font-dm font-normal truncate mt-0.5" style={{ color: 'rgba(255, 255, 255, 0.35)', fontSize: '12px' }}>{loc.address}</p>
                               </div>
                             </button>
-                            {idx !== QUICK_LOCATIONS.length - 1 && (
-                              <div className="h-[0.5px] bg-[#1A3322] mx-[16px] mt-[12px]" />
-                            )}
                           </div>
                         ))}
                       </div>
@@ -339,8 +402,8 @@ export default function MapScreen() {
                   ) : (
                     /* Searching state */
                     <div className="flex flex-col items-center justify-center py-10 gap-2">
-                      <Search size={28} className="text-[#5A6B5E]" />
-                      <p className="text-[10px] tracking-[0.35em] font-dm font-bold text-[#5A6B5E] uppercase mt-2">
+                      <Search size={28} style={{ color: 'rgba(255, 255, 255, 0.40)' }} />
+                      <p className="text-[10px] tracking-[0.35em] font-dm font-bold uppercase mt-2" style={{ color: 'rgba(255, 255, 255, 0.25)' }}>
                         Type to search
                       </p>
                     </div>
@@ -353,7 +416,8 @@ export default function MapScreen() {
             {!expanded && toValue.length > 0 && (
               <button
                 onClick={() => navigate('/', { state: { destination: toValue, intent: 'select_ride' } })}
-                className="w-full h-[54px] rounded-[16px] bg-gradient-to-r from-[#22C55E] to-[#16A34A] text-[#F0FFF4] font-sora font-semibold text-[15px] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center shadow-[0_8px_24px_rgba(34,197,94,0.35)] mt-4 mb-[24px]"
+                className="w-full h-[54px] rounded-[16px] text-white font-sora font-semibold text-[15px] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center mt-4 mb-[24px]"
+                style={{ background: '#22C55E' }}
               >
                 Confirm Destination
               </button>
