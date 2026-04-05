@@ -589,7 +589,6 @@ export default function RiderHome() {
     } else {
       setDestination(suggestion.placeName);
       setDestinationCoords(coords);
-      setStep('selecting');
     }
     setSearchingFor(null);
     setSearchQuery('');
@@ -1199,7 +1198,6 @@ export default function RiderHome() {
                       onClick={() => {
                         setDestination(t[loc.nameKey]);
                         setDestinationCoords({ lat: loc.lat, lng: loc.lng });
-                        setStep('selecting');
                       }}
                       className="flex-shrink-0 flex items-center gap-2 px-4 py-3 bg-white/5 rounded-full border border-white/5 hover:bg-white/10 transition-colors snap-start"
                     >
@@ -1209,10 +1207,14 @@ export default function RiderHome() {
                   ))}
                 </div>
 
-                <SlideToBook
-                  onComplete={() => setStep('selecting')}
-                  label={t.request_ride}
-                />
+                <button 
+                  onClick={() => setStep('selecting')}
+                  className="w-full bg-emerald-500 text-black py-4 rounded-2xl font-black text-sm hover:scale-[1.02] hover:bg-emerald-400 active:scale-[0.98] transition-all shadow-[0_0_30px_rgba(16,185,129,0.3)] relative overflow-hidden group mt-2 flex items-center justify-center gap-2"
+                >
+                  <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                  <span className="relative z-10">Confirm Destination</span>
+                  <ChevronRight size={18} className="relative z-10" />
+                </button>
               </motion.div>
             )}
 
