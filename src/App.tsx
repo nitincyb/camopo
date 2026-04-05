@@ -24,6 +24,7 @@ const SecureManagementConsole = React.lazy(() => import('./components/admin/Secu
 const DriverOnboarding = React.lazy(() => import('./components/driver/DriverOnboarding'));
 const RideSharing = React.lazy(() => import('./components/rider/RideSharing'));
 const PhoneNumberPrompt = React.lazy(() => import('./components/auth/PhoneNumberPrompt'));
+const MapScreen = React.lazy(() => import('./components/rider/MapScreen'));
 
 import { MaintenanceScreen } from './components/shared/MaintenanceScreen';
 import { useSystemConfig } from './hooks/useSystemConfig';
@@ -126,6 +127,11 @@ function AppContent() {
               <Route
                 path="/ride-sharing"
                 element={user ? <RideSharing /> : <Navigate to="/login" replace />}
+              />
+
+              <Route
+                path="/map"
+                element={user ? <MapScreen /> : <Navigate to="/login" replace />}
               />
 
               <Route

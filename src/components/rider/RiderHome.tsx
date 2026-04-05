@@ -913,7 +913,7 @@ export default function RiderHome() {
   }, [activeRide?.driverId, activeRide?.status]);
 
   const isRideActive = activeRide && ['accepted', 'arrived', 'in_progress'].includes(activeRide.status);
-  const showMap = isRideActive || step === 'searching' || step === 'selecting';
+  const showMap = isRideActive || step === 'searching' || step === 'selecting' || (step === 'home' && showBooking);
 
   return (
     <div className="h-screen w-screen bg-black overflow-hidden relative font-sans">
@@ -995,7 +995,7 @@ export default function RiderHome() {
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] }}
-              onClick={() => setShowBooking(true)}
+              onClick={() => navigate('/map')}
               className="w-full bg-zinc-900 rounded-2xl flex items-center gap-4 px-5 py-4 border border-zinc-800 hover:border-zinc-700 transition-colors active:scale-[0.98]"
             >
               <Search size={18} className="text-zinc-500 shrink-0" />
@@ -1057,7 +1057,7 @@ export default function RiderHome() {
                   whileTap={{ scale: 0.95, transition: { duration: 0.1 } }}
                   onClick={() => {
                     setSelectedRide(type);
-                    setShowBooking(true);
+                    navigate('/map');
                   }}
                   className="relative z-10 flex-1 flex flex-col items-center justify-center gap-3.5 py-7 bg-[#181a20] rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.4)] border border-white/[0.06] hover:border-white/[0.12] hover:scale-[1.05] hover:-translate-y-[4px] hover:shadow-[0_16px_40px_rgba(0,0,0,0.6)] transition-all duration-300 ease-in-out cursor-pointer group overflow-hidden pointer-events-auto"
                 >
@@ -1068,7 +1068,7 @@ export default function RiderHome() {
                   <div className="absolute top-0 left-[-100%] h-full w-[150%] bg-gradient-to-r from-transparent via-white/[0.04] to-transparent skew-x-[-20deg] group-hover:translate-x-[150%] transition-transform duration-[800ms] ease-in-out pointer-events-none" />
                   
                   {/* Clean Icon */}
-                  <div className="relative z-10 text-zinc-400 group-hover:text-emerald-400 transition-colors duration-300 drop-shadow-sm">
+                  <div className="relative z-10 text-emerald-500 drop-shadow-[0_0_8px_rgba(16,185,129,0.4)] group-hover:brightness-110 transition-all duration-300">
                     {getRideIcon(type.iconId, 34)}
                   </div>
                   
@@ -1087,14 +1087,14 @@ export default function RiderHome() {
                 onClick={() => navigate('/ride-sharing')}
                 className="relative z-10 flex-1 flex flex-col items-center justify-center gap-3.5 py-7 bg-[#181a20] rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.4)] border border-white/[0.06] hover:border-white/[0.12] hover:scale-[1.05] hover:-translate-y-[4px] hover:shadow-[0_16px_40px_rgba(0,0,0,0.6)] transition-all duration-300 ease-in-out cursor-pointer group overflow-hidden pointer-events-auto"
               >
-                {/* Faint ambient glow on hover (yellow variant) */}
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(251,191,36,0.06)_0%,transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-in-out pointer-events-none" />
+                {/* Faint ambient glow on hover */}
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.06)_0%,transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-in-out pointer-events-none" />
                 
                 {/* Subtle soft cinematic light sweep */}
                 <div className="absolute top-0 left-[-100%] h-full w-[150%] bg-gradient-to-r from-transparent via-white/[0.04] to-transparent skew-x-[-20deg] group-hover:translate-x-[150%] transition-transform duration-[800ms] ease-in-out pointer-events-none" />
                 
                 {/* Clean Icon */}
-                <div className="relative z-10 text-zinc-400 group-hover:text-yellow-400 transition-colors duration-300 drop-shadow-sm">
+                <div className="relative z-10 text-emerald-500 drop-shadow-[0_0_8px_rgba(16,185,129,0.4)] group-hover:brightness-110 transition-all duration-300">
                   <Users size={34} />
                 </div>
                 
@@ -1118,11 +1118,14 @@ export default function RiderHome() {
             {step === 'home' && showBooking && (
               <motion.div 
                 key="home"
-                initial={{ y: 20, opacity: 0 }}
+                initial={{ y: "100%", opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                exit={{ y: 20, opacity: 0 }}
-                className="glass-panel rounded-[32px] p-6 space-y-6"
+                exit={{ y: "100%", opacity: 0 }}
+                transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+                className="bg-[#181a20]/95 backdrop-blur-xl rounded-t-[28px] p-6 pt-8 pb-12 space-y-6 shadow-[0_-8px_30px_rgba(0,0,0,0.5)] border-t border-white/10 -mx-4 sm:-mx-6 -mb-4 sm:-mb-6 relative"
               >
+                {/* Drag handle */}
+                <div className="absolute top-3 left-1/2 -translate-x-1/2 w-10 h-1.5 bg-white/20 rounded-full" />
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
                     <p className="text-[10px] text-emerald-500 font-black uppercase tracking-[0.2em]">{t.welcome_back}</p>
@@ -1179,7 +1182,7 @@ export default function RiderHome() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="flex overflow-x-auto gap-3 -mx-6 px-6 pb-2 hide-scrollbar snap-x">
                   {[LOCATIONS.GATE1, LOCATIONS.GATE2, LOCATIONS.DAHEGAM].map((loc) => (
                     <button
                       key={loc.nameKey}
@@ -1187,10 +1190,10 @@ export default function RiderHome() {
                         setDestination(t[loc.nameKey]);
                         setDestinationCoords({ lat: loc.lat, lng: loc.lng });
                       }}
-                      className="flex items-center gap-2 p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-colors text-left"
+                      className="flex-shrink-0 flex items-center gap-2 px-4 py-3 bg-white/5 rounded-full border border-white/5 hover:bg-white/10 transition-colors snap-start"
                     >
-                      <MapPin size={12} className="text-emerald-500 shrink-0" />
-                      <span className="text-[10px] font-bold text-zinc-400 truncate uppercase tracking-wider">{t[loc.nameKey]}</span>
+                      <MapPin size={14} className="text-emerald-500 shrink-0 shadow-[0_0_8px_rgba(16,185,129,0.2)]" />
+                      <span className="text-xs font-bold text-zinc-300 whitespace-nowrap">{t[loc.nameKey]}</span>
                     </button>
                   ))}
                 </div>

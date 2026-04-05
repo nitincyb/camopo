@@ -196,13 +196,13 @@ export default function Login() {
           {/* Animated Moving Light Border Wrapper (1px padding acts as the border) */}
           <div className="relative rounded-[2.5rem] p-[1px] overflow-hidden">
             
-            {/* Spinning Light Source (Colorless so it blends exactly with video background) */}
+            {/* Spinning Light Source — Emerald Green Moving Border */}
             <motion.div
               animate={{ rotate: 360 }}
-              transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-[-100%] rounded-full opacity-60"
+              transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+              className="absolute inset-[-100%] rounded-full"
               style={{
-                background: 'conic-gradient(from 0deg, transparent 0%, transparent 35%, rgba(255, 255, 255, 0.4) 45%, rgba(255, 255, 255, 0.8) 50%, rgba(255, 255, 255, 0.4) 55%, transparent 65%, transparent 100%)',
+                background: 'conic-gradient(from 0deg, transparent 0%, transparent 30%, rgba(52, 211, 153, 0.3) 40%, rgba(16, 185, 129, 0.9) 48%, rgba(52, 211, 153, 1) 50%, rgba(16, 185, 129, 0.9) 52%, rgba(52, 211, 153, 0.3) 60%, transparent 70%, transparent 100%)',
               }}
             />
 
