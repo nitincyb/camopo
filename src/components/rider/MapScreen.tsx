@@ -171,13 +171,13 @@ export default function MapScreen() {
           transition={{ type: 'spring', stiffness: 320, damping: 36 }}
           style={{
             borderRadius: '28px 28px 0 0',
-            background: 'rgba(0, 0, 0, 0.70)',
-            backdropFilter: 'blur(32px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(32px) saturate(180%)',
+            background: 'rgba(0, 0, 0, 0.35)',
+            backdropFilter: 'blur(40px) saturate(140%) brightness(1.1)',
+            WebkitBackdropFilter: 'blur(40px) saturate(140%) brightness(1.1)',
             borderTop: '1px solid rgba(255, 255, 255, 0.10)',
             borderLeft: '1px solid rgba(255, 255, 255, 0.06)',
             borderRight: '1px solid rgba(255, 255, 255, 0.06)',
-            boxShadow: '0 -8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+            boxShadow: '0 -24px 60px rgba(0, 0, 0, 0.8), inset 0 2px 20px rgba(0, 0, 0, 0.3)',
             padding: '16px 20px',
           }}
         >
