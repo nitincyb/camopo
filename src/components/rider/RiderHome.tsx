@@ -240,7 +240,19 @@ const translations = {
   }
 };
 
-const SmartSlider = ({ onConfirm }: { onConfirm: () => void }) => {
+const SmartSlider = ({ 
+  onConfirm, 
+  theme = 'green', 
+  label = 'Slide to Request Ride', 
+  successText = 'Requested ✓',
+  icon
+}: { 
+  onConfirm: () => void, 
+  theme?: 'green' | 'amber', 
+  label?: string, 
+  successText?: string,
+  icon?: React.ReactNode
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
   const [isConfirmed, setIsConfirmed] = useState(false);
@@ -255,8 +267,14 @@ const SmartSlider = ({ onConfirm }: { onConfirm: () => void }) => {
     return () => window.removeEventListener('resize', updateWidth);
   }, []);
 
-  const thumbWidth = 52;
-  const padding = 6;
+  const isGreen = theme === 'green';
+  const trackBorder = isGreen ? '1px solid rgba(255, 255, 255, 0.09)' : '1px solid rgba(245, 158, 11, 0.15)';
+  const thumbGradient = isGreen ? 'linear-gradient(135deg, #22C55E, #16A34A)' : 'linear-gradient(135deg, #F59E0B, #D97706)';
+  const thumbShadow = isGreen ? '0 4px 16px rgba(34, 197, 94, 0.40)' : '0 4px 16px rgba(245, 158, 11, 0.40)';
+  const successColor = isGreen ? '#22C55E' : '#F59E0B';
+
+  const thumbWidth = 44;
+  const padding = 4;
   const maxDrag = Math.max(0, containerWidth - thumbWidth - (padding * 2));
 
   const opacity = useTransform(x, [0, maxDrag * 0.8], [1, 0]);
@@ -278,10 +296,10 @@ const SmartSlider = ({ onConfirm }: { onConfirm: () => void }) => {
   return (
     <div 
       ref={containerRef}
-      className={`relative w-[calc(100%-32px)] mx-auto h-[56px] rounded-[99px] overflow-hidden transition-all duration-300 ${isConfirmed ? 'scale-[1.02]' : ''}`}
+      className={`relative w-[calc(100%-32px)] mx-auto h-[52px] rounded-[99px] overflow-hidden transition-all duration-300 ${isConfirmed ? 'scale-[1.02]' : ''}`}
       style={{
         backgroundColor: 'rgba(255, 255, 255, 0.05)',
-        border: '1px solid rgba(255, 255, 255, 0.09)'
+        border: trackBorder
       }}
     >
       {/* Shimmer Overlay */}
@@ -301,8 +319,8 @@ const SmartSlider = ({ onConfirm }: { onConfirm: () => void }) => {
         className="absolute inset-0 flex items-center justify-center z-0 pointer-events-none"
         style={{ opacity: isConfirmed ? 0 : opacity }}
       >
-        <span className="font-dm font-medium text-[14px]" style={{ color: 'rgba(255, 255, 255, 0.40)' }}>
-          Slide to Confirm Ride
+        <span className="font-dm font-medium text-[13px]" style={{ color: 'rgba(255, 255, 255, 0.38)' }}>
+          {label}
         </span>
       </motion.div>
 
@@ -311,8 +329,8 @@ const SmartSlider = ({ onConfirm }: { onConfirm: () => void }) => {
         className="absolute inset-0 flex items-center justify-center transition-opacity duration-300 z-10 pointer-events-none"
         style={{ opacity: isConfirmed ? 1 : 0 }}
       >
-        <span className="font-dm font-medium text-[14px] text-white">
-          Confirmed ✓
+        <span className="font-dm font-medium text-[13px] text-white">
+          {successText}
         </span>
       </div>
       
@@ -325,7 +343,7 @@ const SmartSlider = ({ onConfirm }: { onConfirm: () => void }) => {
         onDragEnd={handleDragEnd}
         animate={{ 
           width: isConfirmed ? containerWidth - (padding * 2) : thumbWidth,
-          backgroundColor: isConfirmed ? '#22C55E' : undefined
+          backgroundColor: isConfirmed ? successColor : undefined
         }}
         transition={{ type: "spring", bounce: 0, duration: 0.3 }}
         className="absolute flex items-center justify-center z-20 overflow-hidden"
@@ -336,17 +354,21 @@ const SmartSlider = ({ onConfirm }: { onConfirm: () => void }) => {
           marginTop: '-22px', 
           height: '44px',
           borderRadius: '99px',
-          background: isConfirmed ? undefined : 'linear-gradient(135deg, #22C55E, #16A34A)',
-          boxShadow: '0 4px 16px rgba(34, 197, 94, 0.35)',
+          background: isConfirmed ? undefined : thumbGradient,
+          boxShadow: thumbShadow,
           cursor: isConfirmed ? 'default' : 'grab'
         }}
       >
         <motion.div 
           animate={{ opacity: isConfirmed ? 0 : 1 }}
-          className="flex items-center shrink-0 w-[52px] justify-center"
+          className="flex items-center shrink-0 w-[44px] justify-center"
         >
-          <ChevronRight size={18} className="text-white ml-2" />
-          <ChevronRight size={18} className="text-white -ml-3 opacity-50" />
+          {icon || (
+            <>
+              <ChevronRight size={16} className="text-white ml-2" />
+              <ChevronRight size={16} className="text-white -ml-3 opacity-50" />
+            </>
+          )}
         </motion.div>
       </motion.div>
     </div>
@@ -1343,7 +1365,7 @@ export default function RiderHome() {
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
                 transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-                className="relative overflow-hidden w-full sm:-mx-6 -mx-4 sm:-mb-6 pt-2 isolate flex flex-col min-h-[85vh] sm:min-h-[90vh]"
+                className="relative overflow-hidden w-full sm:-mx-6 -mx-4 sm:-mb-6 pt-2 isolate flex flex-col h-auto max-h-[92vh]"
                 style={{
                   borderRadius: '32px 32px 0 0',
                   paddingTop: '2px',
@@ -1365,7 +1387,7 @@ export default function RiderHome() {
 
                 {/* Solid inner core */}
                 <div 
-                  className="relative z-10 w-full flex-1 flex flex-col pt-[16px] pb-[24px]"
+                  className="relative z-10 w-full flex-1 flex flex-col pt-[12px] pb-[28px] overflow-y-auto custom-scrollbar"
                   style={{
                     backgroundColor: '#0B0E0C',
                     borderRadius: '32px 32px 0 0',
@@ -1375,48 +1397,53 @@ export default function RiderHome() {
                   <div className="absolute inset-0 rounded-t-[32px] pointer-events-none z-0" style={{ background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, transparent 30%)' }} />
                   
                   {/* Vehicle Cards */}
-                  <div className="flex flex-col gap-[8px] px-0 w-full z-10">
+                  <div className="flex flex-col gap-[6px] px-0 w-full z-10 shrink-0">
                     {RIDE_TYPES.map((type) => {
                       const isSelected = selectedRide.id === type.id;
                       return (
                       <button 
                         key={type.id}
                         onClick={() => setSelectedRide(type)}
-                        className="relative mx-[16px] h-[72px] flex items-center justify-between px-[16px] rounded-[16px] transition-all overflow-hidden"
+                        className={`relative mx-[16px] h-[68px] flex items-center justify-between px-[16px] rounded-[16px] transition-all overflow-hidden ${isSelected ? 'animate-[borderPulse_0.4s_ease-out_forwards]' : ''}`}
                         style={{
-                          background: isSelected ? 'rgba(34, 197, 94, 0.06)' : 'rgba(255, 255, 255, 0.03)',
-                          border: isSelected ? '1px solid #22C55E' : '1px solid rgba(255, 255, 255, 0.07)'
+                          background: isSelected ? 'rgba(34, 197, 94, 0.08)' : 'rgba(255, 255, 255, 0.03)',
+                          border: isSelected ? '1.5px solid #22C55E' : '1px solid rgba(255, 255, 255, 0.07)'
                         }}
                       >
                         {isSelected && (
-                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-[40px] bg-[#22C55E] rounded-r-full" />
+                          <motion.div 
+                            initial={{ x: '-100%', y: '-50%' }}
+                            animate={{ x: 0, y: '-50%' }}
+                            transition={{ duration: 0.25, ease: 'easeOut' }}
+                            className="absolute left-0 top-1/2 w-[3px] h-[36px] bg-[#22C55E] rounded-r-[3px]" 
+                          />
                         )}
                         
-                        <div className="flex items-center gap-[16px] h-full">
-                          <div className="w-[48px] h-[48px] flex items-center justify-center shrink-0">
-                            {getRideIcon(type.iconId)}
+                        <div className="flex items-center gap-[16px] h-full flex-1 min-w-0">
+                          <div className="w-[44px] h-[44px] flex items-center justify-center shrink-0">
+                            {getRideIcon(type.iconId, 44)}
                           </div>
-                          <div className="flex flex-col items-start justify-center">
-                            <p className="font-sora font-semibold text-[15px] leading-tight text-[rgba(255,255,255,0.92)]">{t[type.nameKey]}</p>
-                            <p className="text-[10px] opacity-60 font-dm uppercase tracking-widest mt-1">
+                          <div className="flex flex-col items-start justify-center flex-1 min-w-0 mr-2">
+                            <p className="font-sora font-semibold text-[15px] leading-tight text-[rgba(255,255,255,0.92)] whitespace-nowrap overflow-hidden text-ellipsis w-full text-left">{t[type.nameKey]}</p>
+                            <p className="text-[11px] font-dm uppercase tracking-widest mt-1" style={{ color: 'rgba(255,255,255,0.40)' }}>
                               {type.time} • {distanceInfo?.distance || '...'}
                             </p>
                           </div>
                         </div>
                         
-                        <div className="flex flex-col items-end justify-center h-full">
-                          <p className="font-sora font-semibold text-lg leading-tight text-white">₹{type.price}</p>
-                          <p className="text-[9px] opacity-60 font-dm uppercase tracking-widest mt-1">Estimated</p>
+                        <div className="flex flex-col items-end justify-center h-full shrink-0 pl-2">
+                          <p className="font-sora font-bold text-[20px] leading-tight text-white">₹{type.price}</p>
+                          <p className="text-[9px] font-dm uppercase tracking-[0.1em] mt-1" style={{ color: 'rgba(255,255,255,0.35)' }}>ESTIMATED</p>
                         </div>
                       </button>
                     )})}
                   </div>
 
-                  <div className="h-[16px]" />
+                  <div className="h-[12px] shrink-0" />
 
                   {/* Payment Row */}
                   <div 
-                    className="w-full flex items-center justify-between px-[16px] py-[14px] border-y z-10 relative" 
+                    className="w-full flex items-center justify-between px-[16px] py-[12px] border-y my-0 shrink-0 z-10 relative" 
                     style={{ borderColor: 'rgba(255, 255, 255, 0.06)' }}
                   >
                     <div className="flex items-center gap-2 text-zinc-400">
@@ -1433,28 +1460,27 @@ export default function RiderHome() {
                     )}
                   </div>
 
-                  <div className="h-[20px]" />
+                  <div className="h-[12px] shrink-0" />
 
-                  {/* Slider */}
-                  <SmartSlider onConfirm={handleRequest} />
-
-                  <div className="h-[12px]" />
-
-                  {/* Schedule Ride Link */}
-                  {!isScheduling && (
-                    <button 
-                      onClick={() => setShowTimePicker(true)}
-                      className="w-full text-center font-dm text-[13px] hover:underline z-10 relative mt-2"
-                      style={{ color: 'rgba(255, 255, 255, 0.35)', transition: 'color 0.2s', textDecorationColor: 'rgba(255,255,255,0.35)' }}
-                      onMouseEnter={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.65)'}
-                      onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.35)'}
-                    >
-                      ⏱ Schedule Ride
-                    </button>
-                  )}
+                  {/* Sliders */}
+                  <div className="flex flex-col gap-[10px] shrink-0 w-full z-10 relative">
+                    <SmartSlider 
+                      onConfirm={handleRequest} 
+                      theme="green" 
+                      label="Slide to Request Ride" 
+                      successText="Requested ✓" 
+                    />
+                    <SmartSlider 
+                      onConfirm={() => setShowTimePicker(true)} 
+                      theme="amber" 
+                      label="Slide to Schedule Ride" 
+                      successText="Scheduled ✓" 
+                      icon={<Clock size={16} className="text-white" />}
+                    />
+                  </div>
 
                   {isScheduling && scheduledDate && (
-                    <div className="mt-4 space-y-3 px-[16px] z-10 relative">
+                    <div className="mt-4 shrink-0 space-y-3 px-[16px] z-10 relative">
                       <div className="bg-[#22c55e]/10 border border-[#22c55e]/30 rounded-2xl p-4 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <Clock className="text-[#22c55e]" size={18} />
