@@ -33,7 +33,7 @@ const createCustomIcon = (type: string, color: string) => {
     </svg>`;
   } else {
     svg = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="12" cy="12" r="10" fill="${color}" fill-opacity="0.2" stroke="${color}" stroke-width="2"/>
+      <circle cx="12" cy="12" r="10" fill="${color}" fill-opacity="0.3" stroke="${color}" stroke-width="2"/>
       <circle cx="12" cy="12" r="4" fill="${color}"/>
     </svg>`;
   }
@@ -46,11 +46,12 @@ const createCustomIcon = (type: string, color: string) => {
   });
 };
 
-function ChangeView({ center, zoom, isAutoCenter, setIsAutoCenter }: { 
+function ChangeView({ center, zoom, isAutoCenter, setIsAutoCenter, path }: { 
   center: [number, number], 
   zoom: number, 
   isAutoCenter: boolean, 
-  setIsAutoCenter: (v: boolean) => void 
+  setIsAutoCenter: (v: boolean) => void,
+  path?: Array<{lat: number; lng: number}>
 }) {
   const map = useMap();
   const lastZoomRef = useRef(zoom);
@@ -63,12 +64,18 @@ function ChangeView({ center, zoom, isAutoCenter, setIsAutoCenter }: {
 
   useEffect(() => {
     if (isAutoCenter) {
+      if (path && path.length > 1) {
+        const bounds = L.latLngBounds(path.map(p => [p.lat, p.lng]));
+        map.flyToBounds(bounds, { padding: [80, 80], animate: true, duration: 1.5, easeLinearity: 0.25 });
+        return;
+      }
+      
       const currentZoom = map.getZoom();
       const targetZoom = lastZoomRef.current !== zoom ? zoom : currentZoom;
-      map.setView(center, targetZoom, { animate: true, duration: 1 });
+      map.flyTo(center, targetZoom, { animate: true, duration: 1.5, easeLinearity: 0.25 });
       lastZoomRef.current = zoom;
     }
-  }, [center, zoom, map, isAutoCenter]);
+  }, [center, zoom, map, isAutoCenter, path]);
 
   return null;
 }
@@ -82,18 +89,18 @@ function MapControls({ isAutoCenter, setIsAutoCenter }: { isAutoCenter: boolean,
         onClick={() => {
           setIsAutoCenter(true);
         }}
-        className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all active:scale-90 shadow-2xl border border-white/20 backdrop-blur-xl ${
+        className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all active:scale-90 shadow-2xl border border-white/10 backdrop-blur-xl ${
           isAutoCenter 
-            ? 'bg-emerald-500 text-white' 
-            : 'bg-white/80 text-zinc-900 hover:bg-white'
+            ? 'bg-emerald-500 text-black' 
+            : 'bg-[#151515]/60 text-zinc-300 hover:bg-[#151515]/80'
         }`}
         title="Recenter Map"
       >
         <Target size={20} />
       </button>
-      <div className="flex flex-col bg-white/80 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl overflow-hidden">
+      <div className="flex flex-col bg-[#151515]/60 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] overflow-hidden">
         <button 
-          className="w-12 h-12 flex items-center justify-center text-zinc-900 hover:bg-white transition-all active:scale-90 border-b border-white/10"
+          className="w-12 h-12 flex items-center justify-center text-zinc-300 hover:bg-white/10 transition-all active:scale-90 border-b border-white/5"
           onClick={() => {
             setIsAutoCenter(false);
             map.zoomIn();
@@ -102,7 +109,7 @@ function MapControls({ isAutoCenter, setIsAutoCenter }: { isAutoCenter: boolean,
           <Plus size={20} />
         </button>
         <button 
-          className="w-12 h-12 flex items-center justify-center text-zinc-900 hover:bg-white transition-all active:scale-90"
+          className="w-12 h-12 flex items-center justify-center text-zinc-300 hover:bg-white/10 transition-all active:scale-90"
           onClick={() => {
             setIsAutoCenter(false);
             map.zoomOut();
@@ -126,7 +133,7 @@ export default function Map({ center, zoom = 15, markers = [], path = [], onMark
 
   if (!center || typeof center.lat !== 'number' || typeof center.lng !== 'number') {
     return (
-      <div className="h-full w-full bg-zinc-900 flex items-center justify-center">
+      <div className="h-full w-full bg-[#0a0a0a] flex items-center justify-center">
         <div className="text-zinc-500 flex flex-col items-center gap-2">
           <div className="w-8 h-8 border-2 border-zinc-800 border-t-emerald-500 rounded-full animate-spin" />
           <p className="text-[10px] font-black uppercase tracking-widest">Initializing Map...</p>
@@ -136,11 +143,11 @@ export default function Map({ center, zoom = 15, markers = [], path = [], onMark
   }
 
   return (
-    <div className="h-full w-full bg-zinc-100 overflow-hidden relative group">
+    <div className="h-full w-full bg-[#0a0a0a] overflow-hidden relative group">
       <MapContainer 
         center={[center.lat, center.lng]} 
         zoom={zoom} 
-        style={{ height: '100%', width: '100%', background: '#f8fafc' }}
+        style={{ height: '100%', width: '100%', background: '#0a0a0a' }}
         zoomControl={false}
         attributionControl={false}
       >
@@ -149,11 +156,12 @@ export default function Map({ center, zoom = 15, markers = [], path = [], onMark
           zoom={zoom} 
           isAutoCenter={isAutoCenter}
           setIsAutoCenter={setIsAutoCenter}
+          path={path}
         />
         <MapControls isAutoCenter={isAutoCenter} setIsAutoCenter={setIsAutoCenter} />
         <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          className="map-tiles-natural"
+          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          className="map-tiles-transparent"
         />
         
         {markers.map((marker) => {
@@ -176,9 +184,9 @@ export default function Map({ center, zoom = 15, markers = [], path = [], onMark
             >
               {marker.title && (
                 <Popup className="premium-popup">
-                  <div className="px-2 py-1">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-0.5">{marker.type}</p>
-                    <p className="text-xs font-bold text-zinc-900">{marker.title}</p>
+                  <div className="px-3 py-2">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-emerald-500 mb-0.5">{marker.type}</p>
+                    <p className="text-sm font-bold text-white">{marker.title}</p>
                   </div>
                 </Popup>
               )}
@@ -188,47 +196,53 @@ export default function Map({ center, zoom = 15, markers = [], path = [], onMark
 
         {polylinePositions.length > 1 && (
           <>
-            {/* Outer glow for polyline */}
+            {/* Outer large cinematic glow */}
             <Polyline 
               positions={polylinePositions} 
               color="#10b981" 
-              weight={8} 
-              opacity={0.15}
+              weight={12} 
+              opacity={0.08}
+              className="drop-shadow-[0_0_12px_rgba(16,185,129,0.5)]"
+            />
+            {/* Inner glow for polyline */}
+            <Polyline 
+              positions={polylinePositions} 
+              color="#10b981" 
+              weight={6} 
+              opacity={0.3}
             />
             {/* Main polyline */}
             <Polyline 
               positions={polylinePositions} 
               color="#10b981" 
-              weight={4} 
-              opacity={0.9}
-              dashArray="1, 8"
-              className="animate-dash"
+              weight={3} 
+              opacity={1}
+              dashArray="1, 10"
+              className="animate-dash stroke-linecap-round"
             />
           </>
         )}
       </MapContainer>
 
       <style>{`
-        .map-tiles-natural {
-          filter: none;
-        }
         .leaflet-container {
-          background: #f8fafc !important;
+          background: #0a0a0a !important;
         }
         .premium-popup .leaflet-popup-content-wrapper {
-          background: rgba(255, 255, 255, 0.95);
-          backdrop-filter: blur(12px);
-          border: 1px solid rgba(0, 0, 0, 0.1);
+          background: rgba(15, 15, 15, 0.85);
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(255, 255, 255, 0.06);
           border-radius: 12px;
-          color: #18181b;
+          color: white;
           padding: 0;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.4);
         }
         .premium-popup .leaflet-popup-tip {
-          background: rgba(255, 255, 255, 0.95);
+          background: rgba(15, 15, 15, 0.85);
         }
         .animate-dash {
           stroke-dasharray: 10, 20;
-          animation: dash 20s linear infinite;
+          animation: dash 30s linear infinite;
         }
         @keyframes dash {
           to {
@@ -236,10 +250,10 @@ export default function Map({ center, zoom = 15, markers = [], path = [], onMark
           }
         }
         .custom-map-marker {
-          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
         .custom-map-marker:hover {
-          transform: scale(1.2);
+          transform: scale(1.15);
           z-index: 1000 !important;
         }
       `}</style>

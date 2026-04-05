@@ -1122,8 +1122,17 @@ export default function RiderHome() {
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: "100%", opacity: 0 }}
                 transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-                className="bg-[#181a20]/95 backdrop-blur-xl rounded-t-[28px] p-6 pt-8 pb-12 space-y-6 shadow-[0_-8px_30px_rgba(0,0,0,0.5)] border-t border-white/10 -mx-4 sm:-mx-6 -mb-4 sm:-mb-6 relative"
+                className="relative p-6 pt-8 pb-12 space-y-6 shadow-[0_-12px_40px_rgba(0,0,0,0.8)] -mx-4 sm:-mx-6 -mb-4 sm:-mb-6 overflow-hidden rounded-t-[32px] isolate"
               >
+                {/* Animated Green Border Behind Content */}
+                <div className="absolute inset-0 z-[-2] overflow-hidden pointer-events-none rounded-t-[32px]">
+                  <div className="absolute -inset-[150%] bg-[conic-gradient(from_0deg_at_50%_50%,transparent_0deg,transparent_270deg,rgba(16,185,129,0.4)_360deg)] animate-[spin_4s_linear_infinite] opacity-50" />
+                </div>
+                {/* Inner glass layer */}
+                <div className="absolute inset-[1px] bg-[rgba(15,15,15,0.8)] backdrop-blur-[24px] z-[-1] pointer-events-none rounded-t-[31px]" />
+                
+                {/* Subtly glowing top edge */}
+                <div className="absolute top-0 inset-x-0 h-[100px] bg-emerald-500/5 blur-[40px] pointer-events-none rounded-full" />
                 {/* Drag handle */}
                 <div className="absolute top-3 left-1/2 -translate-x-1/2 w-10 h-1.5 bg-white/20 rounded-full" />
                 <div className="flex items-center justify-between">
@@ -1163,7 +1172,7 @@ export default function RiderHome() {
                         setSearchingFor('pickup');
                         setSearchQuery(pickup);
                       }}
-                      className="w-full bg-white/5 rounded-2xl py-4 pl-10 pr-4 font-bold text-zinc-300 text-sm border border-white/5 group-hover:bg-white/10 transition-colors text-left"
+                      className="w-full bg-[rgba(255,255,255,0.03)] backdrop-blur-md rounded-2xl py-4 pl-10 pr-4 font-bold text-zinc-300 text-sm border border-white/5 hover:bg-[rgba(255,255,255,0.08)] hover:border-emerald-500/30 hover:shadow-[0_0_20px_rgba(16,185,129,0.1)] transition-all duration-300 text-left"
                     >
                       {pickup}
                     </button>
@@ -1175,7 +1184,7 @@ export default function RiderHome() {
                         setSearchingFor('destination');
                         setSearchQuery(destination);
                       }}
-                      className="w-full bg-white/5 rounded-2xl py-4 pl-10 pr-4 font-bold text-zinc-100 text-sm border border-white/5 group-hover:bg-white/10 transition-colors text-left"
+                      className="w-full bg-[rgba(255,255,255,0.03)] backdrop-blur-md rounded-2xl py-4 pl-10 pr-4 font-bold text-white text-sm border border-white/5 hover:bg-[rgba(255,255,255,0.08)] hover:border-emerald-500/30 hover:shadow-[0_0_20px_rgba(16,185,129,0.1)] transition-all duration-300 text-left"
                     >
                       {destination}
                     </button>
@@ -1211,9 +1220,10 @@ export default function RiderHome() {
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: 20, opacity: 0 }}
-                className="glass-panel rounded-[32px] overflow-hidden"
+                className="relative bg-[rgba(15,15,15,0.8)] backdrop-blur-[24px] rounded-[32px] overflow-hidden border border-white/5 shadow-[0_8px_40px_rgba(0,0,0,0.6)]"
               >
-                <div className="p-6">
+                <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/5 to-transparent pointer-events-none" />
+                <div className="p-6 relative z-10">
                   <div className="flex items-center justify-between mb-6">
                     <button onClick={() => setStep('home')} className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-zinc-400 hover:text-white transition-colors">
                       <ChevronRight className="rotate-180" size={20} />
@@ -1343,9 +1353,10 @@ export default function RiderHome() {
                     </button>
                     <button 
                       onClick={handleRequest}
-                      className="bg-emerald-500 text-black py-4 rounded-2xl font-black text-sm premium-button shadow-[0_20px_40px_rgba(16,185,129,0.2)]"
+                      className="bg-emerald-500 text-black py-4 rounded-2xl font-black text-sm hover:scale-[1.02] hover:bg-emerald-400 active:scale-[0.98] transition-all shadow-[0_0_30px_rgba(16,185,129,0.3)] relative overflow-hidden group"
                     >
-                      {isScheduling ? 'Confirm' : t.confirm_ride}
+                      <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                      <span className="relative z-10">{isScheduling ? 'Confirm' : t.confirm_ride}</span>
                     </button>
                   </div>
                 </div>
@@ -1358,8 +1369,9 @@ export default function RiderHome() {
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: 20, opacity: 0 }}
-                className="glass-panel rounded-[32px] p-8 text-center space-y-6"
+                className="relative bg-[rgba(15,15,15,0.8)] backdrop-blur-[24px] rounded-[32px] p-8 text-center space-y-6 border border-white/5 shadow-[0_8px_40px_rgba(0,0,0,0.6)] overflow-hidden"
               >
+                <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/5 to-transparent pointer-events-none" />
                 <div className="relative w-24 h-24 mx-auto">
                   <motion.div 
                     animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0.2, 0.5] }}
@@ -1433,8 +1445,9 @@ export default function RiderHome() {
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: 20, opacity: 0 }}
-                className="glass-panel rounded-[32px] p-8 text-center space-y-6"
+                className="relative bg-[rgba(15,15,15,0.8)] backdrop-blur-[24px] rounded-[32px] p-8 text-center space-y-6 border border-white/5 shadow-[0_8px_40px_rgba(0,0,0,0.6)] overflow-hidden"
               >
+                <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/5 to-transparent pointer-events-none" />
                 <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto border border-emerald-500/30">
                   <Clock className="text-emerald-500" size={40} />
                 </div>
@@ -1496,9 +1509,10 @@ export default function RiderHome() {
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: 20, opacity: 0 }}
-                className="glass-panel rounded-[32px] overflow-hidden"
+                className="relative bg-[rgba(15,15,15,0.8)] backdrop-blur-[24px] rounded-[32px] overflow-hidden border border-[rgba(16,185,129,0.2)] shadow-[0_0_50px_rgba(16,185,129,0.1)]"
               >
-                <div className="p-6 space-y-6">
+                <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/10 to-transparent pointer-events-none" />
+                <div className="p-6 space-y-6 relative z-10">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="w-14 h-14 bg-zinc-800 rounded-2xl flex items-center justify-center shadow-inner border border-white/5 text-zinc-300">
@@ -1576,24 +1590,28 @@ export default function RiderHome() {
       <AnimatePresence>
         {searchingFor && (
           <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[70] bg-black/60 backdrop-blur-md flex flex-col"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+            className="fixed inset-0 z-[70] bg-[rgba(10,10,10,0.85)] backdrop-blur-3xl flex flex-col"
           >
-            <div className="p-6 bg-zinc-900/50 border-b border-white/10 flex items-center gap-4">
-              <button onClick={() => setSearchingFor(null)} className="text-zinc-400 hover:text-white">
+            <div className="p-6 bg-[#151515]/60 border-b border-white/5 shadow-[0_20px_40px_rgba(0,0,0,0.5)] flex items-center gap-4">
+              <button 
+                onClick={() => setSearchingFor(null)} 
+                className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
+              >
                 <ChevronRight className="rotate-180" size={24} />
               </button>
-              <div className="flex-1 relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
+              <div className="flex-1 relative group">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-emerald-500 transition-colors" size={18} />
                 <input 
                   autoFocus
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={searchingFor === 'pickup' ? t.search_pickup : t.search_destination}
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white font-bold focus:outline-none focus:border-emerald-500/50 transition-colors"
+                  className="w-full bg-[rgba(255,255,255,0.03)] border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white font-bold focus:outline-none focus:border-emerald-500/50 focus:shadow-[0_0_20px_rgba(16,185,129,0.15)] focus:bg-[rgba(255,255,255,0.05)] transition-all"
                 />
               </div>
             </div>
