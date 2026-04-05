@@ -169,7 +169,7 @@ export default function MapScreen() {
       {/* ── Glass Bottom Panel ──────────────────────────────────────────── */}
       <motion.div
         ref={containerRef}
-        className="absolute left-0 right-0 bottom-0 z-20"
+        className="absolute left-4 right-4 bottom-6 z-20"
         initial={{ y: 120, opacity: 0, scale: 0.96 }}
         animate={{ y: 0, opacity: 1, scale: 1 }}
         transition={{
@@ -188,12 +188,11 @@ export default function MapScreen() {
           animate={{ height: panelHeight }}
           transition={{ type: 'spring', stiffness: 320, damping: 36 }}
           style={{
-            borderRadius: '24px 24px 0 0',
-            background: 'rgba(25, 25, 25, 0.35)',
+            borderRadius: '24px',
+            background: 'rgba(0, 0, 0, 0.85)',
             backdropFilter: `blur(${blurAmount})`,
             WebkitBackdropFilter: `blur(${blurAmount})`,
             border: '1px solid rgba(255,255,255,0.08)',
-            borderBottom: 'none',
             boxShadow: 'inset 0 0 20px rgba(255,255,255,0.05)',
           }}
         >

@@ -1366,13 +1366,10 @@ export default function RiderHome() {
                       <Clock size={18} />
                       {isScheduling ? 'Change' : t.schedule_ride}
                     </button>
-                    <button 
-                      onClick={handleRequest}
-                      className="bg-emerald-500 text-black py-4 rounded-2xl font-black text-sm hover:scale-[1.02] hover:bg-emerald-400 active:scale-[0.98] transition-all shadow-[0_0_30px_rgba(16,185,129,0.3)] relative overflow-hidden group"
-                    >
-                      <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-                      <span className="relative z-10">{isScheduling ? 'Confirm' : t.confirm_ride}</span>
-                    </button>
+                    <SlideToBook 
+                      onComplete={handleRequest}
+                      label={isScheduling ? 'Confirm Schedule' : t.request_ride}
+                    />
                   </div>
                 </div>
               </motion.div>
