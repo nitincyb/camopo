@@ -260,12 +260,36 @@ const SmartSlider = ({
   const x = useMotionValue(0);
 
   useEffect(() => {
-    if (containerRef.current) setContainerWidth(containerRef.current.offsetWidth);
-    const updateWidth = () => {
-      if (containerRef.current) setContainerWidth(containerRef.current.offsetWidth);
+    const measure = () => {
+      if (containerRef.current) {
+        const w = containerRef.current.offsetWidth;
+        if (w > 0) setContainerWidth(w);
+      }
     };
-    window.addEventListener('resize', updateWidth);
-    return () => window.removeEventListener('resize', updateWidth);
+
+    // Measure immediately
+    measure();
+
+    // ResizeObserver catches the frame when the animated sheet settles
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && containerRef.current) {
+      ro = new ResizeObserver(measure);
+      ro.observe(containerRef.current);
+    }
+
+    // Fallback for resize events
+    window.addEventListener('resize', measure);
+
+    // Also measure after a short delay in case of animation delay
+    const t1 = setTimeout(measure, 100);
+    const t2 = setTimeout(measure, 400);
+
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener('resize', measure);
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
   }, []);
 
   const isGreen = theme === 'green';
@@ -282,16 +306,22 @@ const SmartSlider = ({
 
   const handleDragEnd = (e: any, info: any) => {
     setIsDragging(false);
-    if (info.offset.x >= maxDrag * 0.85) {
+    // Guard: only fire if we actually have a measured width AND user dragged far enough
+    const minAbsoluteDrag = 80; // at least 80px regardless of track width
+    const reachedThreshold =
+      maxDrag > 20 &&
+      (info.offset.x >= maxDrag * 0.85 || info.offset.x >= minAbsoluteDrag);
+
+    if (reachedThreshold) {
       setIsConfirmed(true);
       if (navigator.vibrate) navigator.vibrate(50);
       onConfirm();
       setTimeout(() => {
         setIsConfirmed(false);
-        x.set(0); 
+        x.set(0);
       }, 2000);
     } else {
-      x.set(0); // Snap back if not completed
+      x.set(0); // Snap back
     }
   };
 
