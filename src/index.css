@@ -17,6 +17,25 @@
   100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
 }
 
+@keyframes map-dot-pulse {
+  0% { transform: scale(0.9); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(0.9); }
+}
+
+@keyframes line-flow {
+  to { stroke-dashoffset: -16; }
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1.0; }
+}
+
+@keyframes blink-caret {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
 @layer base {
   html, body {
     @apply font-sans;
