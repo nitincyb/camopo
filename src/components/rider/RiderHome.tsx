@@ -406,6 +406,180 @@ const LOCATIONS = {
   DAHEGAM: { nameKey: 'dahegam_name', lat: 23.1691, lng: 72.8124, addressKey: 'dahegam_address' }
 };
 
+const SearchingOverlay = ({ onCancel, t, children }: { onCancel: () => void; t: any; children?: React.ReactNode }) => {
+  const [isCancelled, setIsCancelled] = useState(false);
+
+  const handleCancelClick = () => {
+    setIsCancelled(true);
+    setTimeout(() => {
+      onCancel();
+    }, 1000);
+  };
+
+  return (
+    <motion.div 
+      key="searching"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[100] flex items-center justify-center pointer-events-auto"
+      style={{
+        background: 'rgba(0,0,0,0.75)',
+        backdropFilter: 'blur(3px)',
+        WebkitBackdropFilter: 'blur(3px)'
+      }}
+    >
+      <div 
+        className="relative flex flex-col items-center overflow-hidden"
+        style={{
+          background: 'rgba(12,18,14,0.95)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          borderRadius: '28px',
+          padding: '32px 28px',
+          width: 'calc(100% - 48px)',
+          maxWidth: '340px',
+          animation: 'borderGlow 1.8s ease-in-out infinite'
+        }}
+      >
+        {/* Animated Car Character */}
+        <div className="relative w-[96px] h-[96px] rounded-full border-[2.5px] border-[#22C55E] bg-[#0D1A0F] flex items-center justify-center shrink-0">
+          
+          {/* Green ring around car */}
+          <div 
+             className="absolute"
+             style={{
+               inset: '-6px',
+               borderRadius: '50%',
+               border: '2px dashed',
+               borderColor: isCancelled ? 'rgba(239,68,68,0.3)' : 'rgba(34,197,94,0.5)',
+               animation: isCancelled ? 'none' : 'spinRing 3s linear infinite',
+               transition: 'border-color 0.4s'
+             }}
+          />
+
+          {/* Tear Drop */}
+          {isCancelled && (
+            <svg width="3" height="5" className="absolute top-[58px] left-[32px] opacity-0" style={{ animation: 'tearDrop 1s ease-in forwards' }}>
+              <ellipse cx="1.5" cy="2.5" rx="1.5" ry="2.5" fill="#60A5FA" />
+            </svg>
+          )}
+
+          {/* Car Body */}
+          <div 
+            className="relative w-[48px] h-[64px]"
+            style={{
+              animation: isCancelled ? 'sadSlump 0.5s ease-out forwards' : 'idleBob 1.2s ease-in-out infinite'
+            }}
+          >
+             {/* Simple Car SVG */}
+             <svg width="100%" height="100%" viewBox="0 0 48 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                {/* Wheels */}
+                <circle cx="8" cy="12" r="4" fill="#0A0F0B" />
+                <circle cx="40" cy="12" r="4" fill="#0A0F0B" />
+                <circle cx="8" cy="52" r="4" fill="#0A0F0B" />
+                <circle cx="40" cy="52" r="4" fill="#0A0F0B" />
+                
+                {/* Body */}
+                <rect x="8" y="8" width="32" height="48" rx="8" fill="#22C55E" />
+                
+                {/* Windows */}
+                <rect x="12" y="24" width="24" height="16" rx="4" fill="#0A0F0B" />
+             </svg>
+
+             {/* Eyes / Headlights Container */}
+             <div 
+               className="absolute top-[10px] left-[8px] right-[8px] h-[8px] flex items-center justify-between"
+               style={{
+                 animation: isCancelled ? 'none' : 'lookAround 2.4s ease-in-out infinite',
+                 transform: isCancelled ? 'translateY(2px)' : 'none',
+                 opacity: isCancelled ? 0.5 : 1,
+                 transition: 'transform 0.4s ease-out, opacity 0.4s ease-out'
+               }}
+             >
+                <div className="relative w-[8px] h-[4px] bg-white rounded-full">
+                   {/* Eyebrow */}
+                   <div 
+                     className="absolute w-[8px] h-[4px] rounded-full border-t-[1.5px] border-white opacity-60"
+                     style={{
+                       top: '-4px',
+                       left: '0px',
+                       animation: isCancelled ? 'none' : 'browRaise 2.4s ease-in-out infinite',
+                       transform: isCancelled ? 'rotate(20deg)' : 'none',
+                       transformOrigin: 'right center',
+                       transition: 'transform 0.4s ease-out'
+                     }}
+                   />
+                </div>
+                <div className="relative w-[8px] h-[4px] bg-white rounded-full">
+                   {/* Eyebrow */}
+                   <div 
+                     className="absolute w-[8px] h-[4px] rounded-full border-t-[1.5px] border-white opacity-60"
+                     style={{
+                       top: '-4px',
+                       left: '0px',
+                       animation: isCancelled ? 'none' : 'browRaise 2.4s ease-in-out infinite',
+                       transform: isCancelled ? 'rotate(-20deg)' : 'none',
+                       transformOrigin: 'left center',
+                       transition: 'transform 0.4s ease-out'
+                     }}
+                   />
+                </div>
+             </div>
+          </div>
+        </div>
+
+        {/* Text */}
+        <div className="mt-[20px] flex items-center justify-center">
+          <span className="font-sora font-semibold text-[20px] text-[#F0FFF4] tracking-[-0.02em]">
+            {t.finding_ride.replace('...', '')}
+          </span>
+          <span className="font-sora font-semibold text-[20px] text-[#F0FFF4] tracking-[-0.02em] ml-[1px]">
+            <span style={{ animation: 'dotFade 1.2s infinite 0s' }}>.</span>
+            <span style={{ animation: 'dotFade 1.2s infinite 0.4s' }}>.</span>
+            <span style={{ animation: 'dotFade 1.2s infinite 0.8s' }}>.</span>
+          </span>
+        </div>
+
+        {/* Dots */}
+        <div className="flex gap-[6px] mt-4 mb-2">
+           <div className="w-[7px] h-[7px] rounded-full bg-[#22C55E]" style={{ animation: 'dotBounce 1s ease-in-out infinite 0s' }} />
+           <div className="w-[7px] h-[7px] rounded-full bg-[#22C55E] opacity-60" style={{ animation: 'dotBounce 1s ease-in-out infinite 0.16s' }} />
+           <div className="w-[7px] h-[7px] rounded-full bg-[#22C55E] opacity-30" style={{ animation: 'dotBounce 1s ease-in-out infinite 0.32s' }} />
+        </div>
+
+        {/* Optional Sub-content (e.g. shared riders) */}
+        {children && (
+          <div className="w-full mt-4 mb-2">
+            {children}
+          </div>
+        )}
+
+        {/* Cancel Button */}
+        <button 
+           onClick={handleCancelClick}
+           className="w-full mt-[24px] px-[24px] py-[13px] rounded-[14px] font-dm font-medium text-[13px] tracking-[0.05em] transition-colors duration-200"
+           style={{
+             background: 'rgba(255,255,255,0.05)',
+             border: '1px solid rgba(255,255,255,0.10)',
+             color: 'rgba(255,255,255,0.45)'
+           }}
+           onMouseOver={(e) => {
+             e.currentTarget.style.borderColor = 'rgba(239,68,68,0.40)';
+             e.currentTarget.style.color = 'rgba(239,68,68,0.70)';
+           }}
+           onMouseOut={(e) => {
+             e.currentTarget.style.borderColor = 'rgba(255,255,255,0.10)';
+             e.currentTarget.style.color = 'rgba(255,255,255,0.45)';
+           }}
+        >
+          {t.cancel_request}
+        </button>
+
+      </div>
+    </motion.div>
+  );
+};
+
 // --- CinematicScramble: Smooth scramble + depth animation ---
 const SCRAMBLE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 
@@ -1556,35 +1730,12 @@ export default function RiderHome() {
             )}
 
             {step === 'searching' && (
-              <motion.div 
-                key="searching"
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: 20, opacity: 0 }}
-                className="relative bg-[rgba(20,20,20,0.6)] backdrop-blur-[16px] rounded-[32px] p-8 text-center space-y-6 border border-white/5 overflow-hidden"
-              >
-                <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/5 to-transparent pointer-events-none" />
-                <div className="relative w-24 h-24 mx-auto">
-                  <motion.div 
-                    animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0.2, 0.5] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                    className="absolute inset-0 bg-emerald-500 rounded-full"
-                  />
-                  <div className="absolute inset-2 bg-zinc-900 rounded-full flex items-center justify-center border border-emerald-500/30">
-                    <Car className="text-emerald-500 animate-pulse" size={32} />
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <h2 className="text-xl font-black font-display tracking-tight">{t.finding_ride}</h2>
-                  <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">{t.finding_driver}</p>
-                </div>
-
+              <SearchingOverlay onCancel={handleCancelRide} t={t}>
                 {activeRide?.isShared && (
                   <div className="p-4 bg-white/5 rounded-2xl border border-white/5 space-y-3">
                     <div className="flex items-center justify-between">
-                      <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">{t.joined_riders || 'Joined Riders'}</p>
-                      <span className="bg-emerald-500/20 text-emerald-500 text-[10px] font-black px-2 py-0.5 rounded-full border border-emerald-500/30">
+                      <p className="text-[10px] text-[rgba(255,255,255,0.45)] font-sora uppercase tracking-widest">{t.joined_riders || 'Joined Riders'}</p>
+                      <span className="bg-emerald-500/10 text-emerald-500 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-500/20">
                         {joinedRiderProfiles.length} / {activeRide.availableSeats + joinedRiderProfiles.length}
                       </span>
                     </div>
@@ -1592,43 +1743,22 @@ export default function RiderHome() {
                     <div className="flex flex-wrap gap-2 justify-center">
                       {joinedRiderProfiles.length > 0 ? (
                         joinedRiderProfiles.map((rider) => (
-                          <div key={rider.id} className="flex flex-col items-center gap-1 bg-zinc-800/50 p-2 rounded-xl border border-white/5">
+                          <div key={rider.id} className="flex flex-col items-center gap-1 bg-black/20 p-2 rounded-xl border border-white/5">
                             <div className="flex items-center gap-2">
                               <div className="w-6 h-6 bg-emerald-500/20 rounded-lg overflow-hidden border border-emerald-500/30">
                                 <img src={rider.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${rider.id}`} alt={rider.displayName} className="w-full h-full object-cover" />
                               </div>
-                              <span className="text-[10px] font-bold text-zinc-300">{rider.displayName || 'Rider'}</span>
+                              <span className="text-[10px] font-medium text-white/90 font-dm">{rider.displayName || 'Rider'}</span>
                             </div>
-                            {rider.phoneNumber && (
-                              <span className="text-[9px] text-emerald-400 font-mono">{rider.phoneNumber}</span>
-                            )}
                           </div>
                         ))
                       ) : (
-                        <p className="text-[10px] text-zinc-600 font-bold italic">{t.waiting_for_others || 'Waiting for others to join...'}</p>
+                        <p className="text-[10px] text-white/40 font-dm italic">{t.waiting_for_others || 'Waiting for others to join...'}</p>
                       )}
                     </div>
                   </div>
                 )}
-
-                <div className="flex justify-center gap-1">
-                  {[0, 1, 2].map(i => (
-                    <motion.div
-                      key={i}
-                      animate={{ y: [0, -4, 0] }}
-                      transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.1 }}
-                      className="w-1.5 h-1.5 bg-emerald-500 rounded-full"
-                    />
-                  ))}
-                </div>
-
-                <button 
-                  onClick={handleCancelRide}
-                  className="w-full bg-white/5 text-zinc-400 py-4 rounded-2xl font-black text-sm hover:bg-white/10 transition-all border border-white/5"
-                >
-                  {t.cancel_request}
-                </button>
-              </motion.div>
+              </SearchingOverlay>
             )}
 
             {step === 'scheduled_success' && (
