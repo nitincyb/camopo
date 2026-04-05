@@ -171,9 +171,9 @@ export default function MapScreen() {
           transition={{ type: 'spring', stiffness: 320, damping: 36 }}
           style={{
             borderRadius: '28px 28px 0 0',
-            background: 'rgba(0, 0, 0, 0.35)',
-            backdropFilter: 'blur(40px) saturate(140%) brightness(1.1)',
-            WebkitBackdropFilter: 'blur(40px) saturate(140%) brightness(1.1)',
+            background: 'rgba(10, 14, 12, 0.95)',
+            backdropFilter: 'blur(32px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(32px) saturate(180%)',
             borderTop: '1px solid rgba(255, 255, 255, 0.10)',
             borderLeft: '1px solid rgba(255, 255, 255, 0.06)',
             borderRight: '1px solid rgba(255, 255, 255, 0.06)',
@@ -207,7 +207,7 @@ export default function MapScreen() {
             <div 
               className="relative flex flex-col px-[16px] py-[14px] rounded-[18px]"
               style={{
-                background: 'rgba(0, 0, 0, 0.40)',
+                background: 'rgba(18, 25, 20, 0.80)',
                 backdropFilter: 'blur(16px)',
                 WebkitBackdropFilter: 'blur(16px)',
                 border: '1px solid rgba(255, 255, 255, 0.07)',
@@ -228,7 +228,7 @@ export default function MapScreen() {
                   <div className="w-[8px] h-[8px] rounded-full bg-[#22C55E]" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[9px] tracking-[0.2em] font-dm uppercase mb-0.5" style={{ color: 'rgba(255, 255, 255, 0.35)' }}>From</p>
+                  <p className="text-[9px] tracking-[0.2em] font-dm uppercase mb-0.5" style={{ color: '#4ADE80', opacity: 0.8 }}>From</p>
                   <p className="text-[17px] font-sora font-semibold truncate" style={{ color: 'rgba(255, 255, 255, 0.92)' }}>
                     {location ? 'Current Location' : 'Locating…'}
                   </p>
@@ -259,7 +259,7 @@ export default function MapScreen() {
                   />
                 </div>
                 <div className="flex-1 min-w-0 flex flex-col justify-center relative">
-                  <p className="text-[9px] tracking-[0.2em] font-dm uppercase mb-0.5" style={{ color: 'rgba(255, 255, 255, 0.35)' }}>To</p>
+                  <p className="text-[9px] tracking-[0.2em] font-dm uppercase mb-0.5" style={{ color: '#4ADE80', opacity: 0.8 }}>To</p>
                   <input
                     ref={inputRef}
                     type="text"
@@ -268,7 +268,7 @@ export default function MapScreen() {
                     onFocus={handleFocusInput}
                     onBlur={() => setIsFocused(false)}
                     placeholder="Where to?"
-                    className="w-full bg-transparent text-[17px] font-sora font-semibold outline-none placeholder-[rgba(255,255,255,0.18)]"
+                    className="w-full bg-transparent text-[17px] font-sora font-semibold outline-none placeholder-[#2D4A33]"
                     style={{ color: 'rgba(255, 255, 255, 0.92)' }}
                   />
                 </div>
@@ -299,7 +299,7 @@ export default function MapScreen() {
                   {/* Suggestions from API */}
                   {suggestions.length > 0 ? (
                     <>
-                      <p className="text-[10px] tracking-[0.3em] font-dm uppercase px-4 pb-2" style={{ color: 'rgba(255, 255, 255, 0.25)' }}>
+                      <p className="text-[10px] tracking-[0.3em] font-dm uppercase px-4 pb-2" style={{ color: '#4ADE80', opacity: 0.6 }}>
                         Results
                       </p>
                       <div className="flex flex-col gap-[8px]">
@@ -313,7 +313,7 @@ export default function MapScreen() {
                               }}
                               className="w-full text-left transition-all hover:scale-[0.98] active:scale-[0.96]"
                               style={{
-                                background: 'rgba(0, 0, 0, 0.40)',
+                                background: 'rgba(18, 25, 20, 0.60)',
                                 backdropFilter: 'blur(20px)',
                                 WebkitBackdropFilter: 'blur(20px)',
                                 border: '1px solid rgba(255, 255, 255, 0.07)',
@@ -351,7 +351,7 @@ export default function MapScreen() {
                   ) : toValue.length === 0 ? (
                     /* Quick locations when input is empty */
                     <>
-                      <p className="text-[10px] tracking-[0.3em] font-dm uppercase px-4 pb-2 pt-2" style={{ color: 'rgba(255, 255, 255, 0.25)' }}>
+                      <p className="text-[10px] tracking-[0.3em] font-dm uppercase px-4 pb-2 pt-2" style={{ color: '#4ADE80', opacity: 0.6 }}>
                         Recent & Nearby
                       </p>
                       <div className="flex flex-col gap-[8px]">
@@ -364,7 +364,7 @@ export default function MapScreen() {
                               }}
                               className="w-full text-left transition-all hover:scale-[0.98] active:scale-[0.96]"
                               style={{
-                                background: 'rgba(0, 0, 0, 0.40)',
+                                background: 'rgba(18, 25, 20, 0.60)',
                                 backdropFilter: 'blur(20px)',
                                 WebkitBackdropFilter: 'blur(20px)',
                                 border: '1px solid rgba(255, 255, 255, 0.07)',
