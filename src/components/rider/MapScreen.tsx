@@ -36,9 +36,9 @@ export default function MapScreen() {
   // ── Drag gesture ────────────────────────────────────────────────────────
   const panelY = useMotionValue(0);
   const dragStartY = useRef(0);
-  const panelHeightCollapsedBase = Math.round(screenH * COLLAPSED_VH);
-  const panelHeightCollapsed = panelHeightCollapsedBase + (!expanded && toValue.length > 0 ? 64 : 0);
-  const panelHeightExpanded  = Math.round(screenH * EXPANDED_VH);
+  const panelHeightCollapsedBase = Math.max(Math.round(screenH * COLLAPSED_VH), 220); // ensure min height
+  const panelHeightCollapsed = panelHeightCollapsedBase + (!expanded && toValue.length > 0 ? 76 : 0);
+  const panelHeightExpanded  = Math.max(Math.round(screenH * EXPANDED_VH), 500);
   const [panelHeight, setPanelHeight] = useState(panelHeightCollapsed);
 
   useEffect(() => {
@@ -218,38 +218,27 @@ export default function MapScreen() {
 
             {/* From Row */}
             <div
-              className="flex items-center gap-3 px-4 py-3 rounded-2xl"
-              style={{
-                background: 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(255,255,255,0.07)',
-              }}
+              className="flex items-center gap-4 px-5 py-4 rounded-2xl border border-white/5 bg-[rgba(255,255,255,0.03)]"
             >
-              <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)] flex-shrink-0" />
+              <div className="w-2.5 h-2.5 rounded-full bg-[#22c55e] flex-shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-0.5">From</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">From</p>
                 <p className="text-sm font-semibold text-zinc-200 truncate">
                   {location ? 'Current Location' : 'Locating…'}
                 </p>
               </div>
-              <Navigation2 size={15} className="text-emerald-500 flex-shrink-0" />
+              <Navigation2 size={16} className="text-[#22c55e] flex-shrink-0" />
             </div>
 
             {/* To Row */}
             <div
-              className="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200"
+              className="flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-200"
               style={{
-                background: isFocused
-                  ? 'rgba(16,185,129,0.08)'
-                  : 'rgba(255,255,255,0.06)',
-                border: isFocused
-                  ? '1px solid rgba(16,185,129,0.3)'
-                  : '1px solid rgba(255,255,255,0.07)',
-                boxShadow: isFocused
-                  ? '0 0 0 3px rgba(16,185,129,0.06)'
-                  : 'none',
+                background: isFocused ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.03)',
+                border: isFocused ? '1px solid rgba(34,197,94,0.3)' : '1px solid rgba(255,255,255,0.05)',
               }}
             >
-              <div className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)] flex-shrink-0" />
+              <div className="w-2.5 h-2.5 rounded-full bg-red-500 flex-shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-0.5">To</p>
                 <input
@@ -266,7 +255,7 @@ export default function MapScreen() {
               {toValue.length > 0 && (
                 <button
                   onClick={() => { setToValue(''); setSuggestions([]); }}
-                  className="flex-shrink-0 w-6 h-6 rounded-full bg-zinc-700 flex items-center justify-center"
+                  className="flex-shrink-0 w-6 h-6 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20"
                 >
                   <X size={12} className="text-zinc-300" />
                 </button>
@@ -367,7 +356,7 @@ export default function MapScreen() {
             {!expanded && toValue.length > 0 && (
               <button
                 onClick={() => navigate('/', { state: { destination: toValue, intent: 'select_ride' } })}
-                className="w-full bg-emerald-500 text-black py-3.5 rounded-2xl font-black text-sm hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.2)] mt-2"
+                className="w-full bg-[#22c55e] text-black py-4 rounded-xl font-bold text-sm hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center mt-3"
               >
                 Confirm Destination
               </button>
