@@ -36,9 +36,16 @@ export default function MapScreen() {
   // ── Drag gesture ────────────────────────────────────────────────────────
   const panelY = useMotionValue(0);
   const dragStartY = useRef(0);
-  const panelHeightCollapsed = Math.round(screenH * COLLAPSED_VH);
+  const panelHeightCollapsedBase = Math.round(screenH * COLLAPSED_VH);
+  const panelHeightCollapsed = panelHeightCollapsedBase + (!expanded && toValue.length > 0 ? 64 : 0);
   const panelHeightExpanded  = Math.round(screenH * EXPANDED_VH);
   const [panelHeight, setPanelHeight] = useState(panelHeightCollapsed);
+
+  useEffect(() => {
+    if (!expanded) {
+      setPanelHeight(panelHeightCollapsed);
+    }
+  }, [expanded, panelHeightCollapsed]);
 
   // ── Map camera ──────────────────────────────────────────────────────────
   const mapCenter = location || { lat: 23.154578, lng: 72.884973 };
@@ -358,23 +365,14 @@ export default function MapScreen() {
             </AnimatePresence>
 
             {/* ── Confirm Button ────────────────────────────────────────────── */}
-            <AnimatePresence>
-              {!expanded && toValue.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                  animate={{ opacity: 1, height: 'auto', marginTop: 8 }}
-                  exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                  className="overflow-hidden"
-                >
-                  <button
-                    onClick={() => navigate('/', { state: { destination: toValue, intent: 'select_ride' } })}
-                    className="w-full bg-emerald-500 text-black py-3.5 rounded-2xl font-black text-sm hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.2)]"
-                  >
-                    Confirm Destination
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {!expanded && toValue.length > 0 && (
+              <button
+                onClick={() => navigate('/', { state: { destination: toValue, intent: 'select_ride' } })}
+                className="w-full bg-emerald-500 text-black py-3.5 rounded-2xl font-black text-sm hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.2)] mt-2"
+              >
+                Confirm Destination
+              </button>
+            )}
           </div>
         </motion.div>
       </motion.div>

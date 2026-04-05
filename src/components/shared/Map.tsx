@@ -133,7 +133,7 @@ export default function Map({ center, zoom = 15, markers = [], path = [], onMark
 
   if (!center || typeof center.lat !== 'number' || typeof center.lng !== 'number') {
     return (
-      <div className="h-full w-full bg-[#0a0a0a] flex items-center justify-center">
+      <div className="h-full w-full bg-[#fcfcfc] flex items-center justify-center">
         <div className="text-zinc-500 flex flex-col items-center gap-2">
           <div className="w-8 h-8 border-2 border-zinc-800 border-t-emerald-500 rounded-full animate-spin" />
           <p className="text-[10px] font-black uppercase tracking-widest">Initializing Map...</p>
@@ -143,11 +143,11 @@ export default function Map({ center, zoom = 15, markers = [], path = [], onMark
   }
 
   return (
-    <div className="h-full w-full bg-[#0a0a0a] overflow-hidden relative group">
+    <div className="h-full w-full bg-[#fcfcfc] overflow-hidden relative group">
       <MapContainer 
         center={[center.lat, center.lng]} 
         zoom={zoom} 
-        style={{ height: '100%', width: '100%', background: '#0a0a0a' }}
+        style={{ height: '100%', width: '100%', background: '#fcfcfc' }}
         zoomControl={false}
         attributionControl={false}
       >
@@ -160,7 +160,7 @@ export default function Map({ center, zoom = 15, markers = [], path = [], onMark
         />
         <MapControls isAutoCenter={isAutoCenter} setIsAutoCenter={setIsAutoCenter} />
         <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
           className="map-tiles-transparent"
         />
         
@@ -226,7 +226,7 @@ export default function Map({ center, zoom = 15, markers = [], path = [], onMark
 
       <style>{`
         .leaflet-container {
-          background: #0a0a0a !important;
+          background: #fcfcfc !important;
         }
         .premium-popup .leaflet-popup-content-wrapper {
           background: rgba(15, 15, 15, 0.85);
