@@ -84,12 +84,12 @@ function MapControls({ isAutoCenter, setIsAutoCenter }: { isAutoCenter: boolean,
   const map = useMap();
 
   return (
-    <div className="absolute right-6 top-1/2 -translate-y-1/2 z-[1000] flex flex-col gap-3 pointer-events-auto">
+    <div className="absolute right-4 top-[120px] z-[1000] flex flex-col gap-3 pointer-events-auto">
       <button 
         onClick={() => {
           setIsAutoCenter(true);
         }}
-        className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all active:scale-90 shadow-2xl border border-white/10 backdrop-blur-xl ${
+        className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all active:scale-90 shadow-[0_8px_30px_rgba(0,0,0,0.5)] border border-white/10 backdrop-blur-xl ${
           isAutoCenter 
             ? 'bg-emerald-500 text-black' 
             : 'bg-[#151515]/60 text-zinc-300 hover:bg-[#151515]/80'

@@ -36,9 +36,9 @@ export default function MapScreen() {
   // ── Drag gesture ────────────────────────────────────────────────────────
   const panelY = useMotionValue(0);
   const dragStartY = useRef(0);
-  const panelHeightCollapsedBase = Math.max(Math.round(screenH * COLLAPSED_VH), 220); // ensure min height
-  const panelHeightCollapsed = panelHeightCollapsedBase + (!expanded && toValue.length > 0 ? 76 : 0);
-  const panelHeightExpanded  = Math.max(Math.round(screenH * EXPANDED_VH), 500);
+  const panelHeightCollapsedBase = Math.max(Math.round(screenH * COLLAPSED_VH), 240); // ensure min height
+  const panelHeightCollapsed = panelHeightCollapsedBase + (!expanded && toValue.length > 0 ? 80 : 0);
+  const panelHeightExpanded  = Math.min(Math.round(screenH * 0.65), screenH - 280);
   const [panelHeight, setPanelHeight] = useState(panelHeightCollapsed);
 
   useEffect(() => {
@@ -147,29 +147,11 @@ export default function MapScreen() {
         />
       )}
 
-      {/* ── Back Button ─────────────────────────────────────────────────── */}
-      <motion.button
-        initial={{ opacity: 0, x: -16 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.35, duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
-        onClick={() => navigate(-1)}
-        className="absolute top-12 left-4 z-30 w-11 h-11 rounded-full flex items-center justify-center"
-        style={{
-          background: 'rgba(25,25,25,0.55)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          boxShadow: 'inset 0 0 14px rgba(255,255,255,0.04)',
-        }}
-        aria-label="Go back"
-      >
-        <ChevronLeft size={20} className="text-white" />
-      </motion.button>
 
       {/* ── Glass Bottom Panel ──────────────────────────────────────────── */}
       <motion.div
         ref={containerRef}
-        className="absolute left-4 right-4 bottom-6 z-20"
+        className="absolute left-0 right-0 bottom-0 z-20"
         initial={{ y: 120, opacity: 0, scale: 0.96 }}
         animate={{ y: 0, opacity: 1, scale: 1 }}
         transition={{
@@ -189,15 +171,15 @@ export default function MapScreen() {
           transition={{ type: 'spring', stiffness: 320, damping: 36 }}
           style={{
             borderRadius: '28px 28px 0 0',
-            background: 'rgba(13, 15, 14, 0.8)',
-            backdropFilter: `blur(${blurAmount})`,
-            WebkitBackdropFilter: `blur(${blurAmount})`,
-            boxShadow: '0 -12px 48px rgba(34,197,94,0.08)',
+            background: '#0D1210',
+            borderTop: '1px solid #1F2E22',
+            boxShadow: '0 -20px 60px rgba(0,0,0,0.6), 0 -4px 24px rgba(34,197,94,0.10)',
+            padding: '16px 20px',
           }}
         >
           {/* ── Drag Handle ─────────────────────────────────────────────── */}
           <div
-            className="flex-shrink-0 flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing touch-none"
+            className="flex-shrink-0 flex justify-center pt-2 pb-4 cursor-grab active:cursor-grabbing touch-none"
             onPointerDown={onDragStart as any}
             onPointerMove={onDragMove as any}
             onPointerUp={onDragEnd}
@@ -207,41 +189,47 @@ export default function MapScreen() {
             onTouchEnd={onDragEnd}
           >
             <div
-              className="w-10 h-1 rounded-full transition-colors duration-200"
-              style={{ background: 'rgba(255,255,255,0.2)' }}
+              className="w-[36px] h-[4px] rounded-full transition-colors duration-200 bg-[#2A3D2C]"
             />
           </div>
 
           {/* ── Panel Content ────────────────────────────────────────────── */}
-          <div className="flex-1 overflow-hidden flex flex-col px-5 pb-6 gap-4">
+          <div className="flex-1 overflow-hidden flex flex-col gap-4">
 
             {/* Location Inputs Container */}
-            <div className="relative flex flex-col px-4 py-4 rounded-2xl bg-[#0B0E0C] shadow-[inset_0_1px_4px_rgba(255,255,255,0.02)]">
+            <div className="relative flex flex-col px-[16px] py-[14px] rounded-[16px] bg-[#111A13] border border-[#1C2B1E] shadow-[inset_0_1px_0_rgba(255,255,255,0.04),_0_4px_16px_rgba(0,0,0,0.4)]">
               {/* Connecting Wire */}
-              <div className="absolute left-[26px] top-[40px] bottom-[40px] w-0 border-l-[1.5px] border-dashed border-[#22c55e]/40 z-0" />
+              <div className="absolute left-[20px] top-[32px] h-[32px] w-0 border-l-[1.5px] border-dashed border-[#22c55e]/30 z-0" />
               
               {/* From Row */}
               <div className="flex items-center gap-4 py-1 relative z-10">
-                <div className="w-[10px] h-[10px] rounded-full bg-[#22c55e] flex items-center justify-center flex-shrink-0">
-                  <div className="w-[4px] h-[4px] bg-white rounded-full" />
-                </div>
+                <div 
+                  className="w-[10px] h-[10px] rounded-full bg-[#22c55e] flex items-center justify-center flex-shrink-0"
+                  style={{ filter: 'drop-shadow(0 0 6px #22C55E)' }}
+                />
                 <div className="flex-1 min-w-0">
                   <p className="text-[9px] tracking-[0.2em] font-dm font-light uppercase text-[#7AAF8A] mb-0.5">From</p>
                   <p className="text-[17px] font-sora font-semibold text-[#F4F4F0] truncate">
                     {location ? 'Current Location' : 'Locating…'}
                   </p>
                 </div>
-                <div className="w-[38px] h-[38px] rounded-full bg-[#1A2E1E] flex items-center justify-center flex-shrink-0">
-                  <Navigation2 size={20} className="text-[#22C55E]" strokeWidth={2} />
-                </div>
+                <button 
+                  onClick={() => navigate(-1)} 
+                  className="w-[32px] h-[32px] rounded-full bg-[#1A2A1C] flex items-center justify-center flex-shrink-0"
+                >
+                  <X size={16} className="text-[#6B8F6E]" strokeWidth={2} />
+                </button>
               </div>
 
-              {/* 24px gap area */}
-              <div className="h-[24px]" />
+              {/* 16px gap area for wire */}
+              <div className="h-[16px]" />
 
               {/* To Row */}
               <div className="flex items-center gap-4 py-1 relative z-10">
-                <div className="w-[10px] h-[10px] border-[2px] border-white rounded-[1px] flex-shrink-0" />
+                <div 
+                  className="w-[10px] h-[10px] border-[2px] border-white rounded-[1px] flex-shrink-0"
+                  style={{ filter: 'drop-shadow(0 0 4px rgba(255,255,255,0.3))' }}
+                />
                 <div className="flex-1 min-w-0 flex flex-col justify-center">
                   <p className="text-[9px] tracking-[0.2em] font-dm font-light uppercase text-[#7AAF8A] mb-0.5">To</p>
                   <input
@@ -358,7 +346,7 @@ export default function MapScreen() {
             {!expanded && toValue.length > 0 && (
               <button
                 onClick={() => navigate('/', { state: { destination: toValue, intent: 'select_ride' } })}
-                className="w-full h-[52px] rounded-[20px] bg-gradient-to-r from-[#22C55E] to-[#16A34A] text-black font-sora font-semibold text-[15px] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center mt-2"
+                className="w-full h-[54px] rounded-[16px] bg-gradient-to-r from-[#22C55E] to-[#16A34A] text-white font-sora font-semibold text-[15px] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center shadow-[0_8px_24px_rgba(34,197,94,0.35)] mt-4 mb-[24px]"
               >
                 Confirm Destination
               </button>
