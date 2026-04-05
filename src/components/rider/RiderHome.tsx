@@ -240,6 +240,54 @@ const translations = {
   }
 };
 
+const SwipeButton = ({ label, colorHex, onSwipe }: { label: string, colorHex: string, onSwipe: () => void }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(0);
+
+  useEffect(() => {
+    if (containerRef.current) setContainerWidth(containerRef.current.offsetWidth);
+    const updateWidth = () => {
+      if (containerRef.current) setContainerWidth(containerRef.current.offsetWidth);
+    };
+    window.addEventListener('resize', updateWidth);
+    return () => window.removeEventListener('resize', updateWidth);
+  }, []);
+
+  const buttonWidth = 56;
+  const maxDrag = Math.max(0, containerWidth - buttonWidth - 8);
+
+  return (
+    <div 
+      ref={containerRef}
+      className="relative w-full h-[60px] rounded-2xl bg-[#0B0E0C] border flex items-center justify-center overflow-hidden"
+      style={{ borderColor: `${colorHex}30`, boxShadow: 'inset 0 4px 10px rgba(0,0,0,0.5)' }}
+    >
+      <span className="text-[13px] font-sora font-semibold tracking-widest uppercase pointer-events-none z-0" style={{ color: colorHex, opacity: 0.8 }}>
+        {label}
+      </span>
+      
+      {maxDrag > 0 && (
+        <motion.div
+          drag="x"
+          dragConstraints={{ left: 0, right: maxDrag }}
+          dragElastic={0}
+          dragMomentum={false}
+          onDragEnd={(e, info) => {
+            if (info.offset.x >= maxDrag * 0.80) {
+              onSwipe();
+            }
+          }}
+          className="absolute left-[4px] top-[4px] bottom-[4px] w-[52px] rounded-xl flex items-center justify-center cursor-grab active:cursor-grabbing z-20 shadow-[0_0_15px_rgba(0,0,0,0.2)]"
+          style={{ backgroundColor: colorHex }}
+        >
+          <ChevronRight size={24} className="text-black ml-1" />
+          <ChevronRight size={24} className="text-black -ml-4 opacity-50" />
+        </motion.div>
+      )}
+    </div>
+  );
+};
+
 const RIDE_TYPES = [
   { id: 'Auto', nameKey: 'auto_ricksaw', price: 40, time: '2 min', iconId: 'auto' },
   { id: 'Economy', nameKey: 'economy_cab', price: 80, time: '3 min', iconId: 'economy' },
@@ -1230,13 +1278,13 @@ export default function RiderHome() {
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
                 transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-                className="relative overflow-hidden w-full sm:-mx-6 -mx-4 -mb-4 sm:-mb-6 mt-4 isolate"
+                className="relative overflow-hidden w-full sm:-mx-6 -mx-4 sm:-mb-6 pt-2 isolate flex flex-col min-h-[85vh] sm:min-h-[90vh]"
                 style={{
                   borderRadius: '32px 32px 0 0',
-                  paddingTop: '3px',
-                  paddingLeft: '3px',
-                  paddingRight: '3px',
-                  boxShadow: '0 -10px 40px rgba(0, 0, 0, 0.6)',
+                  paddingTop: '2px',
+                  paddingLeft: '2px',
+                  paddingRight: '2px',
+                  boxShadow: '0 -4px 30px rgba(0, 0, 0, 0.4)',
                   transform: 'translateZ(0)'
                 }}
               >
@@ -1244,15 +1292,15 @@ export default function RiderHome() {
                 <div 
                   className="absolute inset-[-100%] z-[0] pointer-events-none"
                   style={{
-                    background: 'conic-gradient(from 0deg, transparent 0%, transparent 35%, rgba(34, 197, 94, 0.4) 40%, rgba(34, 197, 94, 0.9) 50%, rgba(34, 197, 94, 0.4) 60%, transparent 65%, transparent 100%)',
+                    background: 'conic-gradient(from 0deg, transparent 0%, transparent 40%, rgba(34, 197, 94, 0.15) 45%, rgba(34, 197, 94, 0.6) 50%, rgba(34, 197, 94, 0.15) 55%, transparent 60%, transparent 100%)',
                     willChange: 'transform',
-                    animation: 'cinematic-spin 5s linear infinite'
+                    animation: 'cinematic-spin 8s linear infinite'
                   }}
                 />
 
                 {/* Solid inner core */}
                 <div 
-                  className="relative z-10 w-full h-full pb-6"
+                  className="relative z-10 w-full flex-1 flex flex-col pb-6"
                   style={{
                     backgroundColor: '#0B0E0C',
                     borderRadius: '32px 32px 0 0',
@@ -1321,7 +1369,7 @@ export default function RiderHome() {
                     </button>
                   </div>
 
-                  <div className="space-y-3 max-h-[30vh] overflow-y-auto pr-2 custom-scrollbar">
+                  <div className="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar">
                     {RIDE_TYPES.map((type) => (
                       <button 
                         key={type.id}
@@ -1352,7 +1400,6 @@ export default function RiderHome() {
                     ))}
                   </div>
                 </div>
-
                 <div className="p-6 pt-5 bg-[#080B09] border-t border-white/[0.04] flex flex-col gap-5 relative z-10">
                   <div className="flex items-center justify-between px-1">
                     <div className="flex items-center gap-2 text-zinc-400">
@@ -1367,6 +1414,29 @@ export default function RiderHome() {
                     )}
                   </div>
                   
+                  <div className="space-y-3 mt-4 w-full">
+                    <SwipeButton 
+                      label={isScheduling ? "Slide to Confirm Schedule" : "Slide to Request Ride"} 
+                      colorHex={isScheduling ? "#EAB308" : "#22c55e"} 
+                      onSwipe={handleRequest} 
+                    />
+                    
+                    {!isScheduling ? (
+                      <SwipeButton 
+                        label="Slide to Schedule Ride" 
+                        colorHex="#EAB308" 
+                        onSwipe={() => setShowTimePicker(true)} 
+                      />
+                    ) : (
+                      <button 
+                        onClick={() => setShowTimePicker(true)}
+                        className="w-full py-3.5 rounded-2xl font-medium text-sm transition-all flex items-center justify-center gap-2 text-zinc-400 hover:text-white border border-white/5 bg-white/5"
+                      >
+                        <Clock size={16} />
+                        Change Time
+                      </button>
+                    )}
+                  </div>
                 </div> {/* Close Solid Inner Core */}
                   
                   {isScheduling && scheduledDate && (
