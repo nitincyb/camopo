@@ -1070,7 +1070,7 @@ export default function RiderHome() {
                     setSelectedRide(type);
                     navigate('/map');
                   }}
-                  className="relative z-10 flex-1 flex flex-col items-center justify-center gap-3.5 py-7 bg-[#181a20] rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.4)] border border-white/[0.06] hover:border-white/[0.12] hover:scale-[1.05] hover:-translate-y-[4px] hover:shadow-[0_16px_40px_rgba(0,0,0,0.6)] transition-all duration-300 ease-in-out cursor-pointer group overflow-hidden pointer-events-auto"
+                  className="relative z-10 flex-1 flex flex-col items-center justify-center gap-3.5 py-7 bg-[#181a20] rounded-2xl border border-white/[0.06] hover:border-white/[0.12] hover:scale-[1.05] hover:-translate-y-[4px] hover:transition-all duration-300 ease-in-out cursor-pointer group overflow-hidden pointer-events-auto"
                 >
                   {/* Faint ambient glow on hover */}
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.06)_0%,transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-in-out pointer-events-none" />
@@ -1079,7 +1079,7 @@ export default function RiderHome() {
                   <div className="absolute top-0 left-[-100%] h-full w-[150%] bg-gradient-to-r from-transparent via-white/[0.04] to-transparent skew-x-[-20deg] group-hover:translate-x-[150%] transition-transform duration-[800ms] ease-in-out pointer-events-none" />
                   
                   {/* Clean Icon */}
-                  <div className="relative z-10 text-emerald-500 drop-shadow-[0_0_8px_rgba(16,185,129,0.4)] group-hover:brightness-110 transition-all duration-300">
+                  <div className="relative z-10 text-emerald-500 group-hover:brightness-110 transition-all duration-300">
                     {getRideIcon(type.iconId, 34)}
                   </div>
                   
@@ -1096,7 +1096,7 @@ export default function RiderHome() {
                 transition={{ duration: 0.4, delay: 0.4 + RIDE_TYPES.length * 0.07, ease: [0.25, 0.46, 0.45, 0.94] }}
                 whileTap={{ scale: 0.95, transition: { duration: 0.1 } }}
                 onClick={() => navigate('/ride-sharing')}
-                className="relative z-10 flex-1 flex flex-col items-center justify-center gap-3.5 py-7 bg-[#181a20] rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.4)] border border-white/[0.06] hover:border-white/[0.12] hover:scale-[1.05] hover:-translate-y-[4px] hover:shadow-[0_16px_40px_rgba(0,0,0,0.6)] transition-all duration-300 ease-in-out cursor-pointer group overflow-hidden pointer-events-auto"
+                className="relative z-10 flex-1 flex flex-col items-center justify-center gap-3.5 py-7 bg-[#181a20] rounded-2xl border border-white/[0.06] hover:border-white/[0.12] hover:scale-[1.05] hover:-translate-y-[4px] hover:transition-all duration-300 ease-in-out cursor-pointer group overflow-hidden pointer-events-auto"
               >
                 {/* Faint ambient glow on hover */}
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.06)_0%,transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-in-out pointer-events-none" />
@@ -1105,7 +1105,7 @@ export default function RiderHome() {
                 <div className="absolute top-0 left-[-100%] h-full w-[150%] bg-gradient-to-r from-transparent via-white/[0.04] to-transparent skew-x-[-20deg] group-hover:translate-x-[150%] transition-transform duration-[800ms] ease-in-out pointer-events-none" />
                 
                 {/* Clean Icon */}
-                <div className="relative z-10 text-emerald-500 drop-shadow-[0_0_8px_rgba(16,185,129,0.4)] group-hover:brightness-110 transition-all duration-300">
+                <div className="relative z-10 text-emerald-500 group-hover:brightness-110 transition-all duration-300">
                   <Users size={34} />
                 </div>
                 
@@ -1133,25 +1133,19 @@ export default function RiderHome() {
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: "100%", opacity: 0 }}
                 transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-                className="relative p-6 pt-8 pb-12 space-y-6 shadow-[0_-12px_40px_rgba(0,0,0,0.8)] -mx-4 sm:-mx-6 -mb-4 sm:-mb-6 overflow-hidden rounded-t-[32px] isolate"
+                className="relative p-6 pt-8 pb-12 space-y-6 sm:-mx-6 -mb-4 sm:-mb-6 overflow-hidden rounded-t-[32px] isolate"
               >
-                {/* Animated Green Border Behind Content */}
-                <div className="absolute inset-0 z-[-2] overflow-hidden pointer-events-none rounded-t-[32px]">
-                  <div className="absolute -inset-[150%] bg-[conic-gradient(from_0deg_at_50%_50%,transparent_0deg,transparent_270deg,rgba(16,185,129,0.4)_360deg)] animate-[spin_4s_linear_infinite] opacity-50" />
-                </div>
                 {/* Inner glass layer */}
-                <div className="absolute inset-[1px] bg-[rgba(15,15,15,0.8)] backdrop-blur-[24px] z-[-1] pointer-events-none rounded-t-[31px]" />
+                <div className="absolute inset-[1px] bg-[rgba(20,20,20,0.6)] backdrop-blur-[16px] z-[-1] pointer-events-none rounded-t-[31px] border border-white/5" />
                 
-                {/* Subtly glowing top edge */}
-                <div className="absolute top-0 inset-x-0 h-[100px] bg-emerald-500/5 blur-[40px] pointer-events-none rounded-full" />
                 {/* Drag handle */}
                 <div className="absolute top-3 left-1/2 -translate-x-1/2 w-10 h-1.5 bg-white/20 rounded-full" />
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <p className="text-[10px] text-emerald-500 font-black uppercase tracking-[0.2em]">{t.welcome_back}</p>
+                    <p className="text-[10px] text-[#22c55e] font-black uppercase tracking-[0.2em]">{t.welcome_back}</p>
                     <h2 className="text-2xl font-black tracking-tight font-display text-white">
                       <span className="block">Hi,</span>
-                      <span className="inline-block origin-left text-[115%] hover:bg-gradient-to-r hover:from-emerald-400 hover:to-yellow-400 hover:bg-clip-text hover:text-transparent hover:scale-105 hover:drop-shadow-[0_0_12px_rgba(16,185,129,0.5)] transition-all duration-300 ease-in-out">
+                      <span className="inline-block origin-left text-[115%] transition-all duration-300 ease-in-out">
                         {profile?.displayName || 'Rider'}
                       </span>
                     </h2>
@@ -1170,32 +1164,32 @@ export default function RiderHome() {
                     onClick={swapLocations}
                     className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
                   >
-                    <ArrowUpDown size={18} className="text-emerald-500" />
+                    <ArrowUpDown size={18} className="text-[#22c55e]" />
                   </button>
                 </div>
                 
                 <div className="space-y-3 relative">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 w-0.5 h-8 bg-zinc-800" />
                   <div className="relative group">
-                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 w-2 h-2 bg-emerald-500 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 w-2 h-2 bg-[#22c55e] rounded-full " />
                     <button 
                       onClick={() => {
                         setSearchingFor('pickup');
                         setSearchQuery(pickup);
                       }}
-                      className="w-full bg-[rgba(255,255,255,0.03)] backdrop-blur-md rounded-2xl py-4 pl-10 pr-4 font-bold text-zinc-300 text-sm border border-white/5 hover:bg-[rgba(255,255,255,0.08)] hover:border-emerald-500/30 hover:shadow-[0_0_20px_rgba(16,185,129,0.1)] transition-all duration-300 text-left"
+                      className="w-full bg-[rgba(255,255,255,0.03)] backdrop-blur-md rounded-2xl py-4 pl-10 pr-4 font-bold text-zinc-300 text-sm border border-white/5 hover:bg-[rgba(255,255,255,0.08)] transition-all duration-300 text-left"
                     >
                       {pickup}
                     </button>
                   </div>
                   <div className="relative group">
-                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 w-2 h-2 bg-red-500 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.5)]" />
+                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 w-2 h-2 bg-red-500 rounded-full " />
                     <button 
                       onClick={() => {
                         setSearchingFor('destination');
                         setSearchQuery(destination);
                       }}
-                      className="w-full bg-[rgba(255,255,255,0.03)] backdrop-blur-md rounded-2xl py-4 pl-10 pr-4 font-bold text-white text-sm border border-white/5 hover:bg-[rgba(255,255,255,0.08)] hover:border-emerald-500/30 hover:shadow-[0_0_20px_rgba(16,185,129,0.1)] transition-all duration-300 text-left"
+                      className="w-full bg-[rgba(255,255,255,0.03)] backdrop-blur-md rounded-2xl py-4 pl-10 pr-4 font-bold text-white text-sm border border-white/5 hover:bg-[rgba(255,255,255,0.08)] transition-all duration-300 text-left"
                     >
                       {destination}
                     </button>
@@ -1212,7 +1206,7 @@ export default function RiderHome() {
                       }}
                       className="flex-shrink-0 flex items-center gap-2 px-4 py-3 bg-white/5 rounded-full border border-white/5 hover:bg-white/10 transition-colors snap-start"
                     >
-                      <MapPin size={14} className="text-emerald-500 shrink-0 shadow-[0_0_8px_rgba(16,185,129,0.2)]" />
+                      <MapPin size={14} className="text-[#22c55e] shrink-0 " />
                       <span className="text-xs font-bold text-zinc-300 whitespace-nowrap">{t[loc.nameKey]}</span>
                     </button>
                   ))}
@@ -1220,7 +1214,7 @@ export default function RiderHome() {
 
                 <button 
                   onClick={() => setStep('selecting')}
-                  className="w-full bg-emerald-500 text-black py-4 rounded-2xl font-black text-sm hover:scale-[1.02] hover:bg-emerald-400 active:scale-[0.98] transition-all shadow-[0_0_30px_rgba(16,185,129,0.3)] relative overflow-hidden group mt-2 flex items-center justify-center gap-2"
+                  className="w-full bg-[#22c55e] text-black py-4 rounded-xl font-bold text-sm hover:scale-[1.02] hover:bg-[#16a34a] active:scale-[0.98] transition-all relative overflow-hidden group mt-2 flex items-center justify-center gap-2"
                 >
                   <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
                   <span className="relative z-10">Confirm Destination</span>
@@ -1235,40 +1229,58 @@ export default function RiderHome() {
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: 20, opacity: 0 }}
-                className="relative bg-[rgba(15,15,15,0.8)] backdrop-blur-[24px] rounded-[32px] overflow-hidden border border-white/5 shadow-[0_8px_40px_rgba(0,0,0,0.6)]"
+                className="relative bg-[rgba(20,20,20,0.6)] backdrop-blur-[16px] rounded-[32px] overflow-hidden border border-white/5"
               >
-                <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/5 to-transparent pointer-events-none" />
-                <div className="p-6 relative z-10">
-                  <div className="flex items-center justify-between mb-6">
+                <div className="absolute inset-0 bg-gradient-to-b from-[#22c55e]/5 to-transparent pointer-events-none" />
+                <div className="p-6 relative z-10 pb-4">
+                  <div className="flex items-center justify-between mb-4">
                     <button onClick={() => setStep('home')} className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-zinc-400 hover:text-white transition-colors">
                       <ChevronRight className="rotate-180" size={20} />
                     </button>
-                    <h2 className="font-black font-display text-lg uppercase tracking-widest">{t.choose_ride}</h2>
+                    <h2 className="font-bold text-sm text-zinc-300 uppercase tracking-widest">{t.choose_ride}</h2>
                     <div className="w-10" />
                   </div>
 
-                  <div className="space-y-3 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
+                  {/* 1. Source & 2. Destination */}
+                  <div className="space-y-2 mb-6">
+                    <button 
+                      onClick={() => navigate('/map', { state: { pickingUp: true } })}
+                      className="w-full bg-[rgba(255,255,255,0.03)] rounded-2xl py-3 px-4 border border-white/[0.02] flex items-center gap-3 hover:bg-[rgba(255,255,255,0.05)] transition-all text-left"
+                    >
+                      <div className="w-2 h-2 bg-[#22c55e] rounded-full shrink-0" />
+                      <span className="font-medium text-zinc-300 text-sm truncate">{pickup}</span>
+                    </button>
+                    <button 
+                      onClick={() => navigate('/map', { state: { pickingUp: false } })}
+                      className="w-full bg-[rgba(255,255,255,0.03)] rounded-2xl py-3 px-4 border border-white/[0.02] flex items-center gap-3 hover:bg-[rgba(255,255,255,0.05)] transition-all text-left"
+                    >
+                      <div className="w-2 h-2 bg-zinc-400 rounded-full shrink-0" />
+                      <span className="font-medium text-white text-sm truncate">{destination}</span>
+                    </button>
+                  </div>
+
+                  <div className="space-y-3 max-h-[35vh] overflow-y-auto pr-2 custom-scrollbar">
                     {RIDE_TYPES.map((type) => (
                       <button 
                         key={type.id}
                         onClick={() => setSelectedRide(type)}
                         className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all border ${
                           selectedRide.id === type.id 
-                            ? 'bg-emerald-500/10 border-emerald-500/50 shadow-[0_0_20px_rgba(16,185,129,0.1)]' 
+                            ? 'bg-[#22c55e]/10 border-[#22c55e]/30 ' 
                             : 'bg-white/5 border-white/5 hover:bg-white/10'
                         }`}
                       >
-                        <div className="w-14 h-14 bg-zinc-800 rounded-xl flex items-center justify-center shadow-inner text-zinc-300">
+                        <div className="w-14 h-14 bg-zinc-800 rounded-xl flex items-center justify-center text-zinc-300">
                           {getRideIcon(type.iconId, 28)}
                         </div>
                         <div className="flex-1 text-left">
-                          <p className={`font-black text-sm ${selectedRide.id === type.id ? 'text-emerald-400' : 'text-white'}`}>{t[type.nameKey]}</p>
+                          <p className={`font-bold text-sm ${selectedRide.id === type.id ? 'text-[#22c55e]' : 'text-white'}`}>{t[type.nameKey]}</p>
                           <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">
                             {type.time} • {distanceInfo?.distance || '...'}
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="font-black text-lg">₹{type.price}</p>
+                          <p className="font-bold text-lg">₹{type.price}</p>
                           <p className="text-[8px] text-zinc-500 font-bold uppercase tracking-widest">Estimated</p>
                         </div>
                       </button>
@@ -1276,7 +1288,7 @@ export default function RiderHome() {
                   </div>
                 </div>
 
-                <div className="p-6 bg-white/5 border-t border-white/5 flex flex-col gap-4">
+                <div className="p-6 pt-2 bg-white/5 border-t border-white/5 flex flex-col gap-4">
                   <div className="flex items-center justify-between px-2">
                     <div className="flex items-center gap-2 text-zinc-400">
                       <CreditCard size={16} />
@@ -1285,19 +1297,19 @@ export default function RiderHome() {
                     {distanceInfo && (
                       <div className="text-right">
                         <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Total Duration</p>
-                        <p className="text-sm font-black text-emerald-500">{distanceInfo.duration}</p>
+                        <p className="text-sm font-bold text-[#22c55e]">{distanceInfo.duration}</p>
                       </div>
                     )}
                   </div>
                   
                   {isScheduling && scheduledDate && (
                     <div className="space-y-3">
-                      <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-4 flex items-center justify-between">
+                      <div className="bg-[#22c55e]/10 border border-[#22c55e]/30 rounded-2xl p-4 flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <Clock className="text-emerald-500" size={18} />
+                          <Clock className="text-[#22c55e]" size={18} />
                           <div>
-                            <p className="text-[10px] text-emerald-500 font-black uppercase tracking-widest">{t.schedule_confirm}</p>
-                            <p className="text-sm font-black text-white">{format(scheduledDate, 'PPp')}</p>
+                            <p className="text-[10px] text-[#22c55e] font-bold uppercase tracking-widest">{t.schedule_confirm}</p>
+                            <p className="text-sm font-bold text-white">{format(scheduledDate, 'PPp')}</p>
                           </div>
                         </div>
                         <button 
@@ -1314,25 +1326,25 @@ export default function RiderHome() {
                       <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center">
-                              <User className="text-emerald-500" size={16} />
+                            <div className="w-8 h-8 bg-[#22c55e]/20 rounded-lg flex items-center justify-center">
+                              <User className="text-[#22c55e]" size={16} />
                             </div>
                             <span className="text-sm font-bold text-zinc-300 uppercase tracking-wider">{t.share_ride}</span>
                           </div>
                           <button 
                             onClick={() => setIsShared(!isShared)}
-                            className={`w-12 h-6 rounded-full transition-colors relative ${isShared ? 'bg-emerald-500' : 'bg-zinc-800'}`}
+                            className={`w-12 h-6 rounded-full transition-colors relative ${isShared ? 'bg-[#22c55e]' : 'bg-zinc-800'}`}
                           >
                             <motion.div 
                               animate={{ x: isShared ? 24 : 4 }}
-                              className="absolute top-1 left-0 w-4 h-4 bg-white rounded-full shadow-lg"
+                              className="absolute top-1 left-0 w-4 h-4 bg-white rounded-full shadow-sm"
                             />
                           </button>
                         </div>
 
                         {isShared && (
                           <div className="flex items-center justify-between pt-2 border-t border-white/5">
-                            <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">{t.available_seats}</span>
+                            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{t.available_seats}</span>
                             <div className="flex items-center gap-4">
                               <button 
                                 onClick={() => setAvailableSeats(Math.max(1, availableSeats - 1))}
@@ -1340,7 +1352,7 @@ export default function RiderHome() {
                               >
                                 -
                               </button>
-                              <span className="font-black text-white w-4 text-center">{availableSeats}</span>
+                              <span className="font-bold text-white w-4 text-center">{availableSeats}</span>
                               <button 
                                 onClick={() => setAvailableSeats(Math.min(selectedRide.id === 'Premium' ? 5 : 3, availableSeats + 1))}
                                 className="w-8 h-8 bg-white/5 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
@@ -1354,22 +1366,25 @@ export default function RiderHome() {
                     </div>
                   )}
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2 mt-2">
+                    <button 
+                      onClick={handleRequest}
+                      className="w-full py-4 rounded-xl font-bold text-[15px] transition-all bg-[#22c55e] text-black hover:bg-[#16a34a] active:scale-[0.98]"
+                    >
+                      {isScheduling ? 'Confirm Schedule' : 'Confirm Ride'}
+                    </button>
+                    
                     <button 
                       onClick={() => setShowTimePicker(true)}
-                      className={`py-4 rounded-2xl font-black text-sm transition-all border flex items-center justify-center gap-2 ${
+                      className={`w-full py-3 rounded-xl font-medium text-sm transition-all flex items-center justify-center gap-2 ${
                         isScheduling 
-                          ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30' 
-                          : 'bg-white/5 text-zinc-400 border-white/5 hover:bg-white/10'
+                          ? 'text-[#22c55e] bg-[#22c55e]/10' 
+                          : 'text-zinc-400 hover:text-white hover:bg-white/5'
                       }`}
                     >
-                      <Clock size={18} />
-                      {isScheduling ? 'Change' : t.schedule_ride}
+                      <Clock size={16} />
+                      {isScheduling ? 'Change Schedule' : t.schedule_ride}
                     </button>
-                    <SlideToBook 
-                      onComplete={handleRequest}
-                      label={isScheduling ? 'Confirm Schedule' : t.request_ride}
-                    />
                   </div>
                 </div>
               </motion.div>
@@ -1381,7 +1396,7 @@ export default function RiderHome() {
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: 20, opacity: 0 }}
-                className="relative bg-[rgba(15,15,15,0.8)] backdrop-blur-[24px] rounded-[32px] p-8 text-center space-y-6 border border-white/5 shadow-[0_8px_40px_rgba(0,0,0,0.6)] overflow-hidden"
+                className="relative bg-[rgba(20,20,20,0.6)] backdrop-blur-[16px] rounded-[32px] p-8 text-center space-y-6 border border-white/5 overflow-hidden"
               >
                 <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/5 to-transparent pointer-events-none" />
                 <div className="relative w-24 h-24 mx-auto">
@@ -1457,7 +1472,7 @@ export default function RiderHome() {
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: 20, opacity: 0 }}
-                className="relative bg-[rgba(15,15,15,0.8)] backdrop-blur-[24px] rounded-[32px] p-8 text-center space-y-6 border border-white/5 shadow-[0_8px_40px_rgba(0,0,0,0.6)] overflow-hidden"
+                className="relative bg-[rgba(20,20,20,0.6)] backdrop-blur-[16px] rounded-[32px] p-8 text-center space-y-6 border border-white/5 overflow-hidden"
               >
                 <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/5 to-transparent pointer-events-none" />
                 <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto border border-emerald-500/30">
@@ -1471,7 +1486,7 @@ export default function RiderHome() {
 
                 <div className="bg-white/5 rounded-2xl p-6 space-y-4 border border-white/5 text-left">
                   <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                    <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 " />
                     <div>
                       <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">{t.pickup_label}</p>
                       <p className="text-sm font-bold text-zinc-200 line-clamp-1">{pickup === 'Current Location' ? currentAddress : pickup}</p>
@@ -1479,7 +1494,7 @@ export default function RiderHome() {
                   </div>
                   
                   <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 rounded-full bg-orange-500 mt-1.5 shadow-[0_0_10px_rgba(249,115,22,0.5)]" />
+                    <div className="w-2 h-2 rounded-full bg-orange-500 mt-1.5 " />
                     <div>
                       <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">{t.destination_label}</p>
                       <p className="text-sm font-bold text-zinc-200 line-clamp-1">{destination}</p>
@@ -1508,7 +1523,7 @@ export default function RiderHome() {
                     setIsScheduling(false);
                     setScheduledDate(null);
                   }}
-                  className="w-full bg-emerald-500 text-black py-4 rounded-2xl font-black text-sm premium-button shadow-[0_20px_40px_rgba(16,185,129,0.2)]"
+                  className="w-full bg-emerald-500 text-black py-4 rounded-2xl font-black text-sm premium-button "
                 >
                   {t.got_it}
                 </button>
@@ -1521,7 +1536,7 @@ export default function RiderHome() {
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: 20, opacity: 0 }}
-                className="relative bg-[rgba(15,15,15,0.8)] backdrop-blur-[24px] rounded-[32px] overflow-hidden border border-[rgba(16,185,129,0.2)] shadow-[0_0_50px_rgba(16,185,129,0.1)]"
+                className="relative bg-[rgba(20,20,20,0.6)] backdrop-blur-[16px] rounded-[32px] overflow-hidden border border-emerald-500/20 "
               >
                 <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/10 to-transparent pointer-events-none" />
                 <div className="p-6 space-y-6 relative z-10">
@@ -1608,7 +1623,7 @@ export default function RiderHome() {
             transition={{ type: "spring", bounce: 0, duration: 0.4 }}
             className="fixed inset-0 z-[70] bg-[rgba(10,10,10,0.85)] backdrop-blur-3xl flex flex-col"
           >
-            <div className="p-6 bg-[#151515]/60 border-b border-white/5 shadow-[0_20px_40px_rgba(0,0,0,0.5)] flex items-center gap-4">
+            <div className="p-6 bg-[#151515]/60 border-b border-white/5 flex items-center gap-4">
               <button 
                 onClick={() => setSearchingFor(null)} 
                 className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
@@ -1623,7 +1638,7 @@ export default function RiderHome() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={searchingFor === 'pickup' ? t.search_pickup : t.search_destination}
-                  className="w-full bg-[rgba(255,255,255,0.03)] border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white font-bold focus:outline-none focus:border-emerald-500/50 focus:shadow-[0_0_20px_rgba(16,185,129,0.15)] focus:bg-[rgba(255,255,255,0.05)] transition-all"
+                  className="w-full bg-[rgba(255,255,255,0.03)] border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white font-bold focus:outline-none focus:border-emerald-500/50 focus:focus:bg-[rgba(255,255,255,0.05)] transition-all"
                 />
               </div>
             </div>
@@ -1712,7 +1727,7 @@ export default function RiderHome() {
                       {i < routeSteps.length - 1 && (
                         <div className="absolute left-[11px] top-8 bottom-[-24px] w-[2px] bg-white/5 group-hover:bg-emerald-500/20 transition-colors" />
                       )}
-                      <div className="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-[10px] text-emerald-500 font-black shrink-0 z-10 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+                      <div className="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-[10px] text-emerald-500 font-black shrink-0 z-10 ">
                         {i + 1}
                       </div>
                       <div className="flex-1 pb-2">
@@ -1762,7 +1777,7 @@ export default function RiderHome() {
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
-              className="bg-zinc-900 border border-emerald-500/30 rounded-3xl p-8 max-w-sm w-full text-center shadow-[0_0_50px_rgba(16,185,129,0.2)]"
+              className="bg-zinc-900 border border-emerald-500/30 rounded-3xl p-8 max-w-sm w-full text-center "
             >
               <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-emerald-500/30">
                 <Clock className="w-10 h-10 text-emerald-500" />
@@ -1821,7 +1836,7 @@ export default function RiderHome() {
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
-              className="bg-zinc-900 border border-red-500/30 rounded-3xl p-8 max-w-sm w-full text-center shadow-[0_0_50px_rgba(239,68,68,0.2)]"
+              className="bg-zinc-900 border border-red-500/30 rounded-3xl p-8 max-w-sm w-full text-center "
             >
               <div className="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-red-500/30">
                 <ShieldAlert className="w-10 h-10 text-red-500" />
