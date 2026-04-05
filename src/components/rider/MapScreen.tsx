@@ -175,9 +175,9 @@ export default function MapScreen() {
           transition={{ type: 'spring', stiffness: 320, damping: 36 }}
           style={{
             borderRadius: '28px 28px 0 0',
-            paddingTop: '2px',
-            paddingLeft: '2px',
-            paddingRight: '2px',
+            paddingTop: '4px',
+            paddingLeft: '4px',
+            paddingRight: '4px',
             boxShadow: '0 -8px 24px rgba(0, 0, 0, 0.3)',
             transform: 'translateZ(0)',
             willChange: 'height, transform'
@@ -197,7 +197,7 @@ export default function MapScreen() {
           <div 
              className="relative z-10 w-full h-full flex flex-col px-[20px] pb-[16px]"
              style={{
-               backgroundColor: '#0B0E0C',
+               backgroundColor: '#0A0A0A',
                borderRadius: '28px 28px 0 0',
              }}
           >
@@ -229,7 +229,7 @@ export default function MapScreen() {
             <div 
               className="relative flex flex-col px-[16px] py-[14px] rounded-[18px]"
               style={{
-                background: '#121A15',
+                background: '#111111',
                 border: '1px solid rgba(255, 255, 255, 0.06)',
                 boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)'
               }}
@@ -257,7 +257,7 @@ export default function MapScreen() {
                   onClick={() => navigate(-1)} 
                   className="w-[32px] h-[32px] rounded-full flex items-center justify-center flex-shrink-0 transition-opacity hover:opacity-80 group"
                   style={{
-                    background: '#1B241D',
+                    background: '#1A1A1A',
                     border: '1px solid rgba(255, 255, 255, 0.08)'
                   }}
                 >
@@ -331,7 +331,7 @@ export default function MapScreen() {
                               }}
                               className="w-full text-left transition-all hover:scale-[0.98] active:scale-[0.96]"
                               style={{
-                                background: '#121A15',
+                                background: '#111111',
                                 border: '1px solid rgba(255, 255, 255, 0.05)',
                                 borderRadius: '14px',
                                 padding: '14px 16px',
@@ -380,7 +380,7 @@ export default function MapScreen() {
                               }}
                               className="w-full text-left transition-all hover:scale-[0.98] active:scale-[0.96]"
                               style={{
-                                background: '#121A15',
+                                background: '#111111',
                                 border: '1px solid rgba(255, 255, 255, 0.05)',
                                 borderRadius: '14px',
                                 padding: '14px 16px',

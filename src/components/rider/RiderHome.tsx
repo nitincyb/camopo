@@ -248,7 +248,7 @@ const SmartSlider = ({
   icon
 }: { 
   onConfirm: () => void, 
-  theme?: 'green' | 'amber', 
+  theme?: 'green' | 'amber' | 'red', 
   label?: string, 
   successText?: string,
   icon?: React.ReactNode
@@ -293,10 +293,11 @@ const SmartSlider = ({
   }, []);
 
   const isGreen = theme === 'green';
-  const trackBorder = isGreen ? '1px solid rgba(255, 255, 255, 0.09)' : '1px solid rgba(245, 158, 11, 0.15)';
-  const thumbGradient = isGreen ? 'linear-gradient(135deg, #22C55E, #16A34A)' : 'linear-gradient(135deg, #F59E0B, #D97706)';
-  const thumbShadow = isGreen ? '0 4px 16px rgba(34, 197, 94, 0.40)' : '0 4px 16px rgba(245, 158, 11, 0.40)';
-  const successColor = isGreen ? '#22C55E' : '#F59E0B';
+  const isRed = theme === 'red';
+  const trackBorder = theme === 'green' ? '1px solid rgba(255, 255, 255, 0.09)' : theme === 'red' ? '1px solid rgba(239, 68, 68, 0.20)' : '1px solid rgba(245, 158, 11, 0.15)';
+  const thumbGradient = theme === 'green' ? 'linear-gradient(135deg, #22C55E, #16A34A)' : theme === 'red' ? 'linear-gradient(135deg, #EF4444, #DC2626)' : 'linear-gradient(135deg, #F59E0B, #D97706)';
+  const thumbShadow = theme === 'green' ? '0 4px 16px rgba(34, 197, 94, 0.40)' : theme === 'red' ? '0 4px 16px rgba(239, 68, 68, 0.40)' : '0 4px 16px rgba(245, 158, 11, 0.40)';
+  const successColor = theme === 'green' ? '#22C55E' : theme === 'red' ? '#EF4444' : '#F59E0B';
 
   const thumbWidth = 44;
   const padding = 4;
@@ -306,11 +307,8 @@ const SmartSlider = ({
 
   const handleDragEnd = (e: any, info: any) => {
     setIsDragging(false);
-    // Guard: only fire if we actually have a measured width AND user dragged far enough
-    const minAbsoluteDrag = 80; // at least 80px regardless of track width
-    const reachedThreshold =
-      maxDrag > 20 &&
-      (info.offset.x >= maxDrag * 0.85 || info.offset.x >= minAbsoluteDrag);
+    // Requires a full 95% slide to confirm, preventing any accidental half-slides
+    const reachedThreshold = maxDrag > 20 && (info.offset.x >= maxDrag * 0.95);
 
     if (reachedThreshold) {
       setIsConfirmed(true);
@@ -321,7 +319,7 @@ const SmartSlider = ({
         x.set(0);
       }, 2000);
     } else {
-      x.set(0); // Snap back
+      x.set(0); // Snap back to start if not fully dragged
     }
   };
 
@@ -343,7 +341,7 @@ const SmartSlider = ({
         <div 
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: isDragging && !isGreen ? 'linear-gradient(90deg, transparent 0%, rgba(245, 158, 11, 0.15) 50%, transparent 100%)' : 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.04) 50%, transparent 100%)',
+            background: isDragging && !isGreen ? (theme === 'red' ? 'linear-gradient(90deg, transparent 0%, rgba(239, 68, 68, 0.15) 50%, transparent 100%)' : 'linear-gradient(90deg, transparent 0%, rgba(245, 158, 11, 0.15) 50%, transparent 100%)') : 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.04) 50%, transparent 100%)',
             backgroundSize: '200% 100%',
             animation: `shimmer ${isDragging ? '0.6s' : '2.5s'} ease-in-out infinite`
           }}
@@ -449,213 +447,88 @@ const SearchingOverlay = ({ onCancel, t, children }: { onCancel: () => void; t: 
   return (
     <motion.div
       key="searching"
-      initial={{ y: 120, opacity: 0 }}
+      initial={{ y: '100%', opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      exit={{ y: 120, opacity: 0 }}
+      exit={{ y: '100%', opacity: 0 }}
       transition={{ type: 'spring', stiffness: 300, damping: 32, opacity: { duration: 0.3 } }}
       className="fixed left-0 right-0 bottom-0 z-[100] pointer-events-auto overflow-hidden"
       style={{
-        borderRadius: '24px 24px 0 0',
+        borderRadius: '28px 28px 0 0',
+        paddingTop: '4px',
+        paddingLeft: '4px',
+        paddingRight: '4px',
+        boxShadow: '0 -8px 24px rgba(0, 0, 0, 0.4)',
         transform: 'translateZ(0)',
         willChange: 'transform, opacity',
       }}
     >
-      {/* ── Cinematic spinning green border (same as ride-selection sheet) ── */}
+      {/* Spinning Cinematic Edge Light */}
       <div
-        className="absolute inset-0 z-0 pointer-events-none overflow-hidden"
-        style={{ borderRadius: '24px 24px 0 0' }}
-      >
-        <div
-          className="absolute inset-[-100%]"
-          style={{
-            background:
-              'conic-gradient(from 0deg, transparent 0%, transparent 40%, rgba(34,197,94,0.15) 45%, rgba(34,197,94,0.7) 50%, rgba(34,197,94,0.15) 55%, transparent 60%, transparent 100%)',
-            willChange: 'transform',
-            animation: 'cinematic-spin 5s linear infinite',
-          }}
-        />
-        {/* Black inner core — leaves only the 2px edge glow visible */}
-        <div
-          className="absolute inset-[2px]"
-          style={{ background: '#0B0B0B', borderRadius: '23px 23px 0 0' }}
-        />
-      </div>
+        className="absolute inset-[-100%] z-0"
+        style={{
+          background: 'conic-gradient(from 0deg, transparent 0%, transparent 35%, rgba(34, 197, 94, 0.4) 40%, rgba(34, 197, 94, 0.9) 50%, rgba(34, 197, 94, 0.4) 60%, transparent 65%, transparent 100%)',
+          willChange: 'transform',
+          animation: 'cinematic-spin 5s linear infinite'
+        }}
+      />
 
-      {/* ── All content sits above the border layer ── */}
-      <div
-        className="relative z-10"
-        style={{ padding: '20px 20px env(safe-area-inset-bottom, 24px)' }}
+      {/* Solid Inner Core */}
+      <div 
+        className="relative z-10 w-full h-full flex flex-col items-center"
+        style={{
+          backgroundColor: '#0A0A0A',
+          borderRadius: '28px 28px 0 0',
+          padding: '24px 24px env(safe-area-inset-bottom, 24px)',
+        }}
       >
-      {/* Drag Handle */}
-      <div className="flex justify-center mb-5">
-        <div
-          style={{
-            width: 36,
-            height: 4,
-            borderRadius: 99,
-            backgroundColor: 'rgba(255,255,255,0.15)',
-          }}
-        />
-      </div>
+        <div className="flex justify-center mb-6 w-full">
+          <div style={{ width: 36, height: 4, borderRadius: 99, backgroundColor: 'rgba(255,255,255,0.12)' }} />
+        </div>
 
-      {/* CSS Sonar Animation — Pure GPU (transform + opacity only) */}
-      <div
-        className="relative flex items-center justify-center mx-auto mb-4"
-        style={{ width: 88, height: 88 }}
-      >
-        {/* 3 sonar rings — yellow, using transform scale instead of width/height */}
-        {!isCancelled && (
-          <>
-            <div
-              style={{
-                position: 'absolute',
-                width: 60,
-                height: 60,
-                borderRadius: '50%',
-                border: '1.5px solid #F59E0B',
-                top: '50%',
-                left: '50%',
-                marginTop: -30,
-                marginLeft: -30,
-                willChange: 'transform, opacity',
-                transform: 'translateZ(0)',
-                animation: 'sonarPulse 2s ease-out infinite 0s',
-              }}
-            />
-            <div
-              style={{
-                position: 'absolute',
-                width: 60,
-                height: 60,
-                borderRadius: '50%',
-                border: '1.5px solid #F59E0B',
-                top: '50%',
-                left: '50%',
-                marginTop: -30,
-                marginLeft: -30,
-                willChange: 'transform, opacity',
-                transform: 'translateZ(0)',
-                animation: 'sonarPulse 2s ease-out infinite 0.65s',
-              }}
-            />
-            <div
-              style={{
-                position: 'absolute',
-                width: 60,
-                height: 60,
-                borderRadius: '50%',
-                border: '1.5px solid #F59E0B',
-                top: '50%',
-                left: '50%',
-                marginTop: -30,
-                marginLeft: -30,
-                willChange: 'transform, opacity',
-                transform: 'translateZ(0)',
-                animation: 'sonarPulse 2s ease-out infinite 1.3s',
-              }}
-            />
-          </>
+        {/* Searching Animation from Internet */}
+        <div style={{ width: 140, height: 140, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <img 
+            src="https://raw.githubusercontent.com/SamHerbert/SVG-Loaders/master/svg-loaders/rings.svg" 
+            alt="Searching Animation" 
+            style={{ width: '100%', height: '100%', filter: 'drop-shadow(0 0 12px rgba(34,197,94,0.4))' }} 
+          />
+        </div>
+
+        {/* "Finding your ride..." text */}
+        <div className="flex flex-col items-center justify-center mt-2 mb-2">
+          <div className="font-sora font-semibold text-[20px] tracking-[-0.02em] flex gap-1">
+            <span style={{ color: '#F0FFF4' }}>{t.finding_ride ? t.finding_ride.split(' ')[0] : 'Finding'}</span>
+            <span style={{ color: '#4ADE80' }}>{t.finding_ride ? t.finding_ride.split(' ').slice(1).join(' ') : 'your ride...'}</span>
+          </div>
+        </div>
+
+        {/* 3 bouncing dots */}
+        <div className="flex gap-[6px] justify-center mb-6">
+          <div className="w-[7px] h-[7px] rounded-full bg-[#22C55E]" style={{ animation: 'dotWave 0.8s ease-in-out infinite 0s' }} />
+          <div className="w-[7px] h-[7px] rounded-full bg-[#22C55E]" style={{ animation: 'dotWave 0.8s ease-in-out infinite 0.13s' }} />
+          <div className="w-[7px] h-[7px] rounded-full bg-[#22C55E]" style={{ animation: 'dotWave 0.8s ease-in-out infinite 0.26s' }} />
+        </div>
+
+        {children && (
+          <div className="w-full mb-5">
+            {children}
+          </div>
         )}
 
-        {/* SVG Map Pin — floats gently */}
-        <div
-          style={{
-            position: 'relative',
-            zIndex: 10,
-            willChange: 'transform',
-            transform: 'translateZ(0)',
-            animation: 'pinFloat 2s ease-in-out infinite',
-          }}
-        >
-          <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M20 2C13.373 2 8 7.373 8 14C8 22 20 38 20 38C20 38 32 22 32 14C32 7.373 26.627 2 20 2Z"
-              fill="#22C55E"
-            />
-            <circle cx="20" cy="14" r="5" fill="rgba(0,0,0,0.25)" />
-          </svg>
-        </div>
+        {/* Redesigned Slide-to-Cancel using SmartSlider pattern */}
+        <SmartSlider 
+          theme="red" 
+          label={t.cancel_request || 'SLIDE TO CANCEL RIDE'} 
+          successText="RIDE CANCELLED" 
+          onConfirm={handleCancelClick}
+          icon={
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          }
+        />
       </div>
-
-      {/* "Finding your ride..." shimmer text */}
-      <div className="flex items-center justify-center mb-[10px]">
-        <span
-          className="font-sora font-semibold text-[18px] tracking-[-0.02em]"
-          style={{
-            background: 'linear-gradient(90deg, #F0FFF4 30%, #4ADE80 50%, #F0FFF4 70%)',
-            backgroundSize: '200% auto',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            animation: 'textShimmer 2.5s linear infinite',
-            willChange: 'background-position',
-          }}
-        >
-          {t.finding_ride}
-        </span>
-      </div>
-
-      {/* 3 bouncing dots — GPU safe: translateY only */}
-      {!isCancelled && (
-        <div className="flex gap-[6px] justify-center mb-5">
-          <div
-            className="w-[7px] h-[7px] rounded-full bg-[#22C55E]"
-            style={{
-              willChange: 'transform',
-              transform: 'translateZ(0)',
-              animation: 'dotWave 1s ease-in-out infinite 0s',
-            }}
-          />
-          <div
-            className="w-[7px] h-[7px] rounded-full bg-[#22C55E]"
-            style={{
-              willChange: 'transform',
-              transform: 'translateZ(0)',
-              animation: 'dotWave 1s ease-in-out infinite 0.15s',
-            }}
-          />
-          <div
-            className="w-[7px] h-[7px] rounded-full bg-[#22C55E]"
-            style={{
-              willChange: 'transform',
-              transform: 'translateZ(0)',
-              animation: 'dotWave 1s ease-in-out infinite 0.30s',
-            }}
-          />
-        </div>
-      )}
-
-      {/* Optional Sub-content (e.g. shared riders) */}
-      {children && (
-        <div className="w-full mb-5">
-          {children}
-        </div>
-      )}
-
-      {/* Cancel Button — always red, no animation */}
-      <button
-        onClick={handleCancelClick}
-        className="w-full rounded-[14px] font-dm font-medium text-[13px] tracking-[0.05em] flex items-center justify-center"
-        style={{
-          background: 'rgba(239, 68, 68, 0.12)',
-          border: '1px solid rgba(239, 68, 68, 0.35)',
-          color: '#F87171',
-          height: '50px',
-          minHeight: 44,
-        }}
-        onMouseOver={(e) => {
-          e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.20)';
-          e.currentTarget.style.borderColor = 'rgba(239,68,68,0.60)';
-          e.currentTarget.style.color = '#FCA5A5';
-        }}
-        onMouseOut={(e) => {
-          e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.12)';
-          e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.35)';
-          e.currentTarget.style.color = '#F87171';
-        }}
-      >
-        {t.cancel_request}
-      </button>
-      </div>{/* close relative z-10 content wrapper */}
     </motion.div>
   );
 };
