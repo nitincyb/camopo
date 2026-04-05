@@ -409,12 +409,26 @@ const LOCATIONS = {
 const SearchingOverlay = ({ onCancel, t, children }: { onCancel: () => void; t: any; children?: React.ReactNode }) => {
   const [isCancelled, setIsCancelled] = useState(false);
 
+  // Load Lottie Player Script dynamically
+  useEffect(() => {
+    if (!document.querySelector('script[src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"]')) {
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js';
+      script.async = true;
+      document.body.appendChild(script);
+    }
+  }, []);
+
   const handleCancelClick = () => {
     setIsCancelled(true);
     setTimeout(() => {
       onCancel();
     }, 1000);
   };
+
+  const lottieUrl = isCancelled 
+    ? 'https://assets3.lottiefiles.com/packages/lf20_sad_face.json'
+    : 'https://assets9.lottiefiles.com/packages/lf20_ofa3xwo7.json'; // Car with eyes option
 
   return (
     <motion.div 
@@ -438,114 +452,57 @@ const SearchingOverlay = ({ onCancel, t, children }: { onCancel: () => void; t: 
           padding: '32px 28px',
           width: 'calc(100% - 48px)',
           maxWidth: '340px',
-          animation: 'borderGlow 1.8s ease-in-out infinite'
+          animation: 'yellowBorderGlow 1.8s ease-in-out infinite'
         }}
       >
-        {/* Animated Car Character */}
-        <div className="relative w-[96px] h-[96px] rounded-full border-[2.5px] border-[#22C55E] bg-[#0D1A0F] flex items-center justify-center shrink-0">
+        {/* Animated Car Character / Lottie */}
+        <div className="relative w-[120px] h-[120px] flex items-center justify-center shrink-0">
           
-          {/* Green ring around car */}
-          <div 
-             className="absolute"
-             style={{
-               inset: '-6px',
-               borderRadius: '50%',
-               border: '2px dashed',
-               borderColor: isCancelled ? 'rgba(239,68,68,0.3)' : 'rgba(34,197,94,0.5)',
-               animation: isCancelled ? 'none' : 'spinRing 3s linear infinite',
-               transition: 'border-color 0.4s'
-             }}
-          />
-
-          {/* Tear Drop */}
-          {isCancelled && (
-            <svg width="3" height="5" className="absolute top-[58px] left-[32px] opacity-0" style={{ animation: 'tearDrop 1s ease-in forwards' }}>
-              <ellipse cx="1.5" cy="2.5" rx="1.5" ry="2.5" fill="#60A5FA" />
-            </svg>
+          {/* Yellow Sonar Rings */}
+          {!isCancelled && (
+             <>
+               <div className="absolute inset-0 rounded-full border-[1.5px] border-[#F59E0B]" style={{ animation: 'sonar 2s ease-out infinite 0s' }} />
+               <div className="absolute inset-0 rounded-full border-[1.5px] border-[#F59E0B]" style={{ animation: 'sonar 2s ease-out infinite 0.5s' }} />
+               <div className="absolute inset-0 rounded-full border-[1.5px] border-[#F59E0B]" style={{ animation: 'sonar 2s ease-out infinite 1s' }} />
+             </>
           )}
 
-          {/* Car Body */}
-          <div 
-            className="relative w-[48px] h-[64px]"
-            style={{
-              animation: isCancelled ? 'sadSlump 0.5s ease-out forwards' : 'idleBob 1.2s ease-in-out infinite'
-            }}
-          >
-             {/* Simple Car SVG */}
-             <svg width="100%" height="100%" viewBox="0 0 48 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                {/* Wheels */}
-                <circle cx="8" cy="12" r="4" fill="#0A0F0B" />
-                <circle cx="40" cy="12" r="4" fill="#0A0F0B" />
-                <circle cx="8" cy="52" r="4" fill="#0A0F0B" />
-                <circle cx="40" cy="52" r="4" fill="#0A0F0B" />
-                
-                {/* Body */}
-                <rect x="8" y="8" width="32" height="48" rx="8" fill="#22C55E" />
-                
-                {/* Windows */}
-                <rect x="12" y="24" width="24" height="16" rx="4" fill="#0A0F0B" />
-             </svg>
-
-             {/* Eyes / Headlights Container */}
-             <div 
-               className="absolute top-[10px] left-[8px] right-[8px] h-[8px] flex items-center justify-between"
-               style={{
-                 animation: isCancelled ? 'none' : 'lookAround 2.4s ease-in-out infinite',
-                 transform: isCancelled ? 'translateY(2px)' : 'none',
-                 opacity: isCancelled ? 0.5 : 1,
-                 transition: 'transform 0.4s ease-out, opacity 0.4s ease-out'
-               }}
-             >
-                <div className="relative w-[8px] h-[4px] bg-white rounded-full">
-                   {/* Eyebrow */}
-                   <div 
-                     className="absolute w-[8px] h-[4px] rounded-full border-t-[1.5px] border-white opacity-60"
-                     style={{
-                       top: '-4px',
-                       left: '0px',
-                       animation: isCancelled ? 'none' : 'browRaise 2.4s ease-in-out infinite',
-                       transform: isCancelled ? 'rotate(20deg)' : 'none',
-                       transformOrigin: 'right center',
-                       transition: 'transform 0.4s ease-out'
-                     }}
-                   />
-                </div>
-                <div className="relative w-[8px] h-[4px] bg-white rounded-full">
-                   {/* Eyebrow */}
-                   <div 
-                     className="absolute w-[8px] h-[4px] rounded-full border-t-[1.5px] border-white opacity-60"
-                     style={{
-                       top: '-4px',
-                       left: '0px',
-                       animation: isCancelled ? 'none' : 'browRaise 2.4s ease-in-out infinite',
-                       transform: isCancelled ? 'rotate(-20deg)' : 'none',
-                       transformOrigin: 'left center',
-                       transition: 'transform 0.4s ease-out'
-                     }}
-                   />
-                </div>
-             </div>
-          </div>
+          {/* Lottie Player */}
+          {/* @ts-ignore */}
+          <lottie-player 
+            src={lottieUrl}
+            background="transparent" 
+            speed={isCancelled ? "0.8" : "1"}
+            style={{ width: '100px', height: '100px', position: 'relative', zIndex: 10 }}
+            autoplay 
+            loop
+          />
         </div>
 
         {/* Text */}
         <div className="mt-[20px] flex items-center justify-center">
-          <span className="font-sora font-semibold text-[20px] text-[#F0FFF4] tracking-[-0.02em]">
-            {t.finding_ride.replace('...', '')}
-          </span>
-          <span className="font-sora font-semibold text-[20px] text-[#F0FFF4] tracking-[-0.02em] ml-[1px]">
-            <span style={{ animation: 'dotFade 1.2s infinite 0s' }}>.</span>
-            <span style={{ animation: 'dotFade 1.2s infinite 0.4s' }}>.</span>
-            <span style={{ animation: 'dotFade 1.2s infinite 0.8s' }}>.</span>
+          <span 
+            className="font-sora font-semibold text-[20px] tracking-[-0.02em]"
+            style={{
+               background: 'linear-gradient(90deg, #F0FFF4 30%, #4ADE80 50%, #F0FFF4 70%)',
+               backgroundSize: '200% auto',
+               WebkitBackgroundClip: 'text',
+               WebkitTextFillColor: 'transparent',
+               animation: 'textShimmer 3s linear infinite'
+            }}
+          >
+            {t.finding_ride}
           </span>
         </div>
 
         {/* Dots */}
-        <div className="flex gap-[6px] mt-4 mb-2">
-           <div className="w-[7px] h-[7px] rounded-full bg-[#22C55E]" style={{ animation: 'dotBounce 1s ease-in-out infinite 0s' }} />
-           <div className="w-[7px] h-[7px] rounded-full bg-[#22C55E] opacity-60" style={{ animation: 'dotBounce 1s ease-in-out infinite 0.16s' }} />
-           <div className="w-[7px] h-[7px] rounded-full bg-[#22C55E] opacity-30" style={{ animation: 'dotBounce 1s ease-in-out infinite 0.32s' }} />
-        </div>
+        {!isCancelled && (
+           <div className="flex gap-[6px] mt-4 mb-2">
+              <div className="w-[7px] h-[7px] rounded-full bg-[#22C55E]" style={{ animation: 'waveDot 1s ease-in-out infinite 0s' }} />
+              <div className="w-[7px] h-[7px] rounded-full bg-[#22C55E]" style={{ animation: 'waveDot 1s ease-in-out infinite 0.15s' }} />
+              <div className="w-[7px] h-[7px] rounded-full bg-[#22C55E]" style={{ animation: 'waveDot 1s ease-in-out infinite 0.30s' }} />
+           </div>
+        )}
 
         {/* Optional Sub-content (e.g. shared riders) */}
         {children && (
@@ -557,19 +514,22 @@ const SearchingOverlay = ({ onCancel, t, children }: { onCancel: () => void; t: 
         {/* Cancel Button */}
         <button 
            onClick={handleCancelClick}
-           className="w-full mt-[24px] px-[24px] py-[13px] rounded-[14px] font-dm font-medium text-[13px] tracking-[0.05em] transition-colors duration-200"
+           className="w-full mt-[24px] rounded-[14px] font-dm font-medium text-[13px] tracking-[0.05em] transition-colors duration-200 flex items-center justify-center"
            style={{
-             background: 'rgba(255,255,255,0.05)',
-             border: '1px solid rgba(255,255,255,0.10)',
-             color: 'rgba(255,255,255,0.45)'
+             background: 'rgba(239, 68, 68, 0.12)',
+             border: '1px solid rgba(239, 68, 68, 0.35)',
+             color: '#F87171',
+             height: '50px'
            }}
            onMouseOver={(e) => {
-             e.currentTarget.style.borderColor = 'rgba(239,68,68,0.40)';
-             e.currentTarget.style.color = 'rgba(239,68,68,0.70)';
+             e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.20)';
+             e.currentTarget.style.borderColor = 'rgba(239,68,68,0.60)';
+             e.currentTarget.style.color = '#FCA5A5';
            }}
            onMouseOut={(e) => {
-             e.currentTarget.style.borderColor = 'rgba(255,255,255,0.10)';
-             e.currentTarget.style.color = 'rgba(255,255,255,0.45)';
+             e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.12)';
+             e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.35)';
+             e.currentTarget.style.color = '#F87171';
            }}
         >
           {t.cancel_request}
