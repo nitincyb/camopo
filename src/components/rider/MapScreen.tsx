@@ -216,50 +216,58 @@ export default function MapScreen() {
           {/* ── Panel Content ────────────────────────────────────────────── */}
           <div className="flex-1 overflow-hidden flex flex-col px-5 pb-6 gap-4">
 
-            {/* From Row */}
-            <div
-              className="flex items-center gap-4 px-5 py-4 rounded-2xl border border-white/5 bg-[rgba(255,255,255,0.03)]"
-            >
-              <div className="w-2.5 h-2.5 rounded-full bg-[#22c55e] flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">From</p>
-                <p className="text-sm font-semibold text-zinc-200 truncate">
-                  {location ? 'Current Location' : 'Locating…'}
-                </p>
-              </div>
-              <Navigation2 size={16} className="text-[#22c55e] flex-shrink-0" />
-            </div>
-
-            {/* To Row */}
-            <div
-              className="flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-200"
-              style={{
-                background: isFocused ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.03)',
-                border: isFocused ? '1px solid rgba(34,197,94,0.3)' : '1px solid rgba(255,255,255,0.05)',
-              }}
-            >
-              <div className="w-2.5 h-2.5 rounded-full bg-red-500 flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-0.5">To</p>
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={toValue}
-                  onChange={(e) => setToValue(e.target.value)}
-                  onFocus={handleFocusInput}
-                  onBlur={() => setIsFocused(false)}
-                  placeholder="Where to?"
-                  className="w-full bg-transparent text-sm font-semibold text-white placeholder:text-zinc-600 outline-none"
-                />
-              </div>
-              {toValue.length > 0 && (
-                <button
-                  onClick={() => { setToValue(''); setSuggestions([]); }}
-                  className="flex-shrink-0 w-6 h-6 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20"
-                >
-                  <X size={12} className="text-zinc-300" />
+            {/* Location Inputs Container */}
+            <div className="relative flex flex-col pl-4 pr-3 py-4 rounded-3xl border border-white/[0.08] bg-white/[0.02] shadow-[0_8px_32px_rgba(0,0,0,0.4)] backdrop-blur-md">
+              {/* Connecting Wire */}
+              <div className="absolute left-[33px] top-[46px] bottom-[46px] w-[2px] bg-gradient-to-b from-[#22c55e]/60 to-white/20 rounded-full z-0" />
+              
+              {/* From Row */}
+              <div className="flex items-center gap-4 px-2 py-2 relative z-10">
+                <div className="w-3.5 h-3.5 rounded-full border-[3px] border-[#22c55e] bg-[#0a0a0a] flex-shrink-0 box-border" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-zinc-500 mb-0.5">From</p>
+                  <p className="text-base font-semibold text-white truncate">
+                    {location ? 'Current Location' : 'Locating…'}
+                  </p>
+                </div>
+                <button className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors">
+                  <Navigation2 size={16} className="text-[#22c55e]" />
                 </button>
-              )}
+              </div>
+
+              {/* Subtle internal divider */}
+              <div className="ml-11 mr-3 h-[1px] bg-white-[0.04] my-2" />
+
+              {/* To Row */}
+              <div
+                className="flex items-center gap-4 px-2 py-2 rounded-2xl transition-colors duration-200 relative z-10"
+                style={{
+                  background: isFocused ? 'rgba(255,255,255,0.04)' : 'transparent',
+                }}
+              >
+                <div className="w-3 h-3 bg-white rounded-sm flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#22c55e]/90 mb-0.5">To</p>
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={toValue}
+                    onChange={(e) => setToValue(e.target.value)}
+                    onFocus={handleFocusInput}
+                    onBlur={() => setIsFocused(false)}
+                    placeholder="Where to?"
+                    className="w-full bg-transparent text-lg font-bold text-white placeholder:text-zinc-600 outline-none"
+                  />
+                </div>
+                {toValue.length > 0 && (
+                  <button
+                    onClick={() => { setToValue(''); setSuggestions([]); }}
+                    className="flex-shrink-0 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors text-white"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* ── Expanded Content ─────────────────────────────────────── */}
