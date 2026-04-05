@@ -447,23 +447,45 @@ const SearchingOverlay = ({ onCancel, t, children }: { onCancel: () => void; t: 
   };
 
   return (
-    <motion.div 
+    <motion.div
       key="searching"
       initial={{ y: 120, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: 120, opacity: 0 }}
       transition={{ type: 'spring', stiffness: 300, damping: 32, opacity: { duration: 0.3 } }}
-      className="fixed left-0 right-0 bottom-0 z-[100] pointer-events-auto"
+      className="fixed left-0 right-0 bottom-0 z-[100] pointer-events-auto overflow-hidden"
       style={{
-        background: 'rgba(10,15,11,0.97)',
         borderRadius: '24px 24px 0 0',
-        borderTop: '1px solid rgba(245,158,11,0.35)',
-        boxShadow: '0 -1px 0 rgba(245,158,11,0.25)',
-        padding: '20px 20px env(safe-area-inset-bottom, 24px)',
         transform: 'translateZ(0)',
         willChange: 'transform, opacity',
       }}
     >
+      {/* ── Cinematic spinning green border (same as ride-selection sheet) ── */}
+      <div
+        className="absolute inset-0 z-0 pointer-events-none overflow-hidden"
+        style={{ borderRadius: '24px 24px 0 0' }}
+      >
+        <div
+          className="absolute inset-[-100%]"
+          style={{
+            background:
+              'conic-gradient(from 0deg, transparent 0%, transparent 40%, rgba(34,197,94,0.15) 45%, rgba(34,197,94,0.7) 50%, rgba(34,197,94,0.15) 55%, transparent 60%, transparent 100%)',
+            willChange: 'transform',
+            animation: 'cinematic-spin 5s linear infinite',
+          }}
+        />
+        {/* Black inner core — leaves only the 2px edge glow visible */}
+        <div
+          className="absolute inset-[2px]"
+          style={{ background: '#0B0B0B', borderRadius: '23px 23px 0 0' }}
+        />
+      </div>
+
+      {/* ── All content sits above the border layer ── */}
+      <div
+        className="relative z-10"
+        style={{ padding: '20px 20px env(safe-area-inset-bottom, 24px)' }}
+      >
       {/* Drag Handle */}
       <div className="flex justify-center mb-5">
         <div
@@ -633,6 +655,7 @@ const SearchingOverlay = ({ onCancel, t, children }: { onCancel: () => void; t: 
       >
         {t.cancel_request}
       </button>
+      </div>{/* close relative z-10 content wrapper */}
     </motion.div>
   );
 };
