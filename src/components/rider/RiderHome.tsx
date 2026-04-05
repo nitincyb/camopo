@@ -589,6 +589,7 @@ export default function RiderHome() {
     } else {
       setDestination(suggestion.placeName);
       setDestinationCoords(coords);
+      setStep('selecting');
     }
     setSearchingFor(null);
     setSearchQuery('');
@@ -1198,6 +1199,7 @@ export default function RiderHome() {
                       onClick={() => {
                         setDestination(t[loc.nameKey]);
                         setDestinationCoords({ lat: loc.lat, lng: loc.lng });
+                        setStep('selecting');
                       }}
                       className="flex-shrink-0 flex items-center gap-2 px-4 py-3 bg-white/5 rounded-full border border-white/5 hover:bg-white/10 transition-colors snap-start"
                     >
