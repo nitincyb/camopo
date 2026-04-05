@@ -171,7 +171,7 @@ export default function MapScreen() {
           transition={{ type: 'spring', stiffness: 320, damping: 36 }}
           style={{
             borderRadius: '28px 28px 0 0',
-            background: 'rgba(255, 255, 255, 0.04)',
+            background: 'rgba(0, 0, 0, 0.70)',
             backdropFilter: 'blur(32px) saturate(180%)',
             WebkitBackdropFilter: 'blur(32px) saturate(180%)',
             borderTop: '1px solid rgba(255, 255, 255, 0.10)',
@@ -207,7 +207,7 @@ export default function MapScreen() {
             <div 
               className="relative flex flex-col px-[16px] py-[14px] rounded-[18px]"
               style={{
-                background: 'rgba(255, 255, 255, 0.03)',
+                background: 'rgba(0, 0, 0, 0.40)',
                 backdropFilter: 'blur(16px)',
                 WebkitBackdropFilter: 'blur(16px)',
                 border: '1px solid rgba(255, 255, 255, 0.07)',
@@ -237,7 +237,7 @@ export default function MapScreen() {
                   onClick={() => navigate(-1)} 
                   className="w-[32px] h-[32px] rounded-full flex items-center justify-center flex-shrink-0 transition-opacity hover:opacity-80 group"
                   style={{
-                    background: 'rgba(255, 255, 255, 0.06)',
+                    background: 'rgba(0, 0, 0, 0.50)',
                     backdropFilter: 'blur(12px)',
                     WebkitBackdropFilter: 'blur(12px)',
                     border: '1px solid rgba(255, 255, 255, 0.10)'
@@ -313,7 +313,7 @@ export default function MapScreen() {
                               }}
                               className="w-full text-left transition-all hover:scale-[0.98] active:scale-[0.96]"
                               style={{
-                                background: 'rgba(255, 255, 255, 0.04)',
+                                background: 'rgba(0, 0, 0, 0.40)',
                                 backdropFilter: 'blur(20px)',
                                 WebkitBackdropFilter: 'blur(20px)',
                                 border: '1px solid rgba(255, 255, 255, 0.07)',
@@ -326,7 +326,7 @@ export default function MapScreen() {
                             >
                               <div
                                 style={{
-                                  background: 'rgba(255, 255, 255, 0.06)',
+                                  background: 'rgba(0, 0, 0, 0.50)',
                                   border: '1px solid rgba(255, 255, 255, 0.08)',
                                   borderRadius: '10px',
                                   width: '40px',
@@ -364,7 +364,7 @@ export default function MapScreen() {
                               }}
                               className="w-full text-left transition-all hover:scale-[0.98] active:scale-[0.96]"
                               style={{
-                                background: 'rgba(255, 255, 255, 0.04)',
+                                background: 'rgba(0, 0, 0, 0.40)',
                                 backdropFilter: 'blur(20px)',
                                 WebkitBackdropFilter: 'blur(20px)',
                                 border: '1px solid rgba(255, 255, 255, 0.07)',
@@ -377,7 +377,7 @@ export default function MapScreen() {
                             >
                               <div
                                 style={{
-                                  background: 'rgba(255, 255, 255, 0.06)',
+                                  background: 'rgba(0, 0, 0, 0.50)',
                                   border: '1px solid rgba(255, 255, 255, 0.08)',
                                   borderRadius: '10px',
                                   width: '40px',
