@@ -409,16 +409,6 @@ const LOCATIONS = {
 const SearchingOverlay = ({ onCancel, t, children }: { onCancel: () => void; t: any; children?: React.ReactNode }) => {
   const [isCancelled, setIsCancelled] = useState(false);
 
-  // Load Lottie Player Script dynamically
-  useEffect(() => {
-    if (!document.querySelector('script[src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"]')) {
-      const script = document.createElement('script');
-      script.src = 'https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js';
-      script.async = true;
-      document.body.appendChild(script);
-    }
-  }, []);
-
   const handleCancelClick = () => {
     setIsCancelled(true);
     setTimeout(() => {
@@ -426,116 +416,193 @@ const SearchingOverlay = ({ onCancel, t, children }: { onCancel: () => void; t: 
     }, 1000);
   };
 
-  const lottieUrl = isCancelled 
-    ? 'https://assets3.lottiefiles.com/packages/lf20_sad_face.json'
-    : 'https://assets9.lottiefiles.com/packages/lf20_ofa3xwo7.json'; // Car with eyes option
-
   return (
     <motion.div 
       key="searching"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] flex items-center justify-center pointer-events-auto"
+      initial={{ y: 120, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: 120, opacity: 0 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 32, opacity: { duration: 0.3 } }}
+      className="fixed left-0 right-0 bottom-0 z-[100] pointer-events-auto"
       style={{
-        background: 'rgba(0,0,0,0.75)',
-        backdropFilter: 'blur(3px)',
-        WebkitBackdropFilter: 'blur(3px)'
+        background: 'rgba(10,15,11,0.97)',
+        borderRadius: '24px 24px 0 0',
+        borderTop: '1px solid rgba(245,158,11,0.35)',
+        boxShadow: '0 -1px 0 rgba(245,158,11,0.25)',
+        padding: '20px 20px env(safe-area-inset-bottom, 24px)',
+        transform: 'translateZ(0)',
+        willChange: 'transform, opacity',
       }}
     >
-      <div 
-        className="relative flex flex-col items-center overflow-hidden"
-        style={{
-          background: 'rgba(12,18,14,0.95)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: '28px',
-          padding: '32px 28px',
-          width: 'calc(100% - 48px)',
-          maxWidth: '340px',
-          animation: 'yellowBorderGlow 1.8s ease-in-out infinite'
-        }}
-      >
-        {/* Animated Car Character / Lottie */}
-        <div className="relative w-[120px] h-[120px] flex items-center justify-center shrink-0">
-          
-          {/* Yellow Sonar Rings */}
-          {!isCancelled && (
-             <>
-               <div className="absolute inset-0 rounded-full border-[1.5px] border-[#F59E0B]" style={{ animation: 'sonar 2s ease-out infinite 0s' }} />
-               <div className="absolute inset-0 rounded-full border-[1.5px] border-[#F59E0B]" style={{ animation: 'sonar 2s ease-out infinite 0.5s' }} />
-               <div className="absolute inset-0 rounded-full border-[1.5px] border-[#F59E0B]" style={{ animation: 'sonar 2s ease-out infinite 1s' }} />
-             </>
-          )}
+      {/* Drag Handle */}
+      <div className="flex justify-center mb-5">
+        <div
+          style={{
+            width: 36,
+            height: 4,
+            borderRadius: 99,
+            backgroundColor: 'rgba(255,255,255,0.15)',
+          }}
+        />
+      </div>
 
-          {/* Lottie Player */}
-          {/* @ts-ignore */}
-          <lottie-player 
-            src={lottieUrl}
-            background="transparent" 
-            speed={isCancelled ? "0.8" : "1"}
-            style={{ width: '100px', height: '100px', position: 'relative', zIndex: 10 }}
-            autoplay 
-            loop
+      {/* CSS Sonar Animation — Pure GPU (transform + opacity only) */}
+      <div
+        className="relative flex items-center justify-center mx-auto mb-4"
+        style={{ width: 88, height: 88 }}
+      >
+        {/* 3 sonar rings — yellow, using transform scale instead of width/height */}
+        {!isCancelled && (
+          <>
+            <div
+              style={{
+                position: 'absolute',
+                width: 60,
+                height: 60,
+                borderRadius: '50%',
+                border: '1.5px solid #F59E0B',
+                top: '50%',
+                left: '50%',
+                marginTop: -30,
+                marginLeft: -30,
+                willChange: 'transform, opacity',
+                transform: 'translateZ(0)',
+                animation: 'sonarPulse 2s ease-out infinite 0s',
+              }}
+            />
+            <div
+              style={{
+                position: 'absolute',
+                width: 60,
+                height: 60,
+                borderRadius: '50%',
+                border: '1.5px solid #F59E0B',
+                top: '50%',
+                left: '50%',
+                marginTop: -30,
+                marginLeft: -30,
+                willChange: 'transform, opacity',
+                transform: 'translateZ(0)',
+                animation: 'sonarPulse 2s ease-out infinite 0.65s',
+              }}
+            />
+            <div
+              style={{
+                position: 'absolute',
+                width: 60,
+                height: 60,
+                borderRadius: '50%',
+                border: '1.5px solid #F59E0B',
+                top: '50%',
+                left: '50%',
+                marginTop: -30,
+                marginLeft: -30,
+                willChange: 'transform, opacity',
+                transform: 'translateZ(0)',
+                animation: 'sonarPulse 2s ease-out infinite 1.3s',
+              }}
+            />
+          </>
+        )}
+
+        {/* SVG Map Pin — floats gently */}
+        <div
+          style={{
+            position: 'relative',
+            zIndex: 10,
+            willChange: 'transform',
+            transform: 'translateZ(0)',
+            animation: 'pinFloat 2s ease-in-out infinite',
+          }}
+        >
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M20 2C13.373 2 8 7.373 8 14C8 22 20 38 20 38C20 38 32 22 32 14C32 7.373 26.627 2 20 2Z"
+              fill="#22C55E"
+            />
+            <circle cx="20" cy="14" r="5" fill="rgba(0,0,0,0.25)" />
+          </svg>
+        </div>
+      </div>
+
+      {/* "Finding your ride..." shimmer text */}
+      <div className="flex items-center justify-center mb-[10px]">
+        <span
+          className="font-sora font-semibold text-[18px] tracking-[-0.02em]"
+          style={{
+            background: 'linear-gradient(90deg, #F0FFF4 30%, #4ADE80 50%, #F0FFF4 70%)',
+            backgroundSize: '200% auto',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            animation: 'textShimmer 2.5s linear infinite',
+            willChange: 'background-position',
+          }}
+        >
+          {t.finding_ride}
+        </span>
+      </div>
+
+      {/* 3 bouncing dots — GPU safe: translateY only */}
+      {!isCancelled && (
+        <div className="flex gap-[6px] justify-center mb-5">
+          <div
+            className="w-[7px] h-[7px] rounded-full bg-[#22C55E]"
+            style={{
+              willChange: 'transform',
+              transform: 'translateZ(0)',
+              animation: 'dotWave 1s ease-in-out infinite 0s',
+            }}
+          />
+          <div
+            className="w-[7px] h-[7px] rounded-full bg-[#22C55E]"
+            style={{
+              willChange: 'transform',
+              transform: 'translateZ(0)',
+              animation: 'dotWave 1s ease-in-out infinite 0.15s',
+            }}
+          />
+          <div
+            className="w-[7px] h-[7px] rounded-full bg-[#22C55E]"
+            style={{
+              willChange: 'transform',
+              transform: 'translateZ(0)',
+              animation: 'dotWave 1s ease-in-out infinite 0.30s',
+            }}
           />
         </div>
+      )}
 
-        {/* Text */}
-        <div className="mt-[20px] flex items-center justify-center">
-          <span 
-            className="font-sora font-semibold text-[20px] tracking-[-0.02em]"
-            style={{
-               background: 'linear-gradient(90deg, #F0FFF4 30%, #4ADE80 50%, #F0FFF4 70%)',
-               backgroundSize: '200% auto',
-               WebkitBackgroundClip: 'text',
-               WebkitTextFillColor: 'transparent',
-               animation: 'textShimmer 3s linear infinite'
-            }}
-          >
-            {t.finding_ride}
-          </span>
+      {/* Optional Sub-content (e.g. shared riders) */}
+      {children && (
+        <div className="w-full mb-5">
+          {children}
         </div>
+      )}
 
-        {/* Dots */}
-        {!isCancelled && (
-           <div className="flex gap-[6px] mt-4 mb-2">
-              <div className="w-[7px] h-[7px] rounded-full bg-[#22C55E]" style={{ animation: 'waveDot 1s ease-in-out infinite 0s' }} />
-              <div className="w-[7px] h-[7px] rounded-full bg-[#22C55E]" style={{ animation: 'waveDot 1s ease-in-out infinite 0.15s' }} />
-              <div className="w-[7px] h-[7px] rounded-full bg-[#22C55E]" style={{ animation: 'waveDot 1s ease-in-out infinite 0.30s' }} />
-           </div>
-        )}
-
-        {/* Optional Sub-content (e.g. shared riders) */}
-        {children && (
-          <div className="w-full mt-4 mb-2">
-            {children}
-          </div>
-        )}
-
-        {/* Cancel Button */}
-        <button 
-           onClick={handleCancelClick}
-           className="w-full mt-[24px] rounded-[14px] font-dm font-medium text-[13px] tracking-[0.05em] transition-colors duration-200 flex items-center justify-center"
-           style={{
-             background: 'rgba(239, 68, 68, 0.12)',
-             border: '1px solid rgba(239, 68, 68, 0.35)',
-             color: '#F87171',
-             height: '50px'
-           }}
-           onMouseOver={(e) => {
-             e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.20)';
-             e.currentTarget.style.borderColor = 'rgba(239,68,68,0.60)';
-             e.currentTarget.style.color = '#FCA5A5';
-           }}
-           onMouseOut={(e) => {
-             e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.12)';
-             e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.35)';
-             e.currentTarget.style.color = '#F87171';
-           }}
-        >
-          {t.cancel_request}
-        </button>
-
-      </div>
+      {/* Cancel Button — always red, no animation */}
+      <button
+        onClick={handleCancelClick}
+        className="w-full rounded-[14px] font-dm font-medium text-[13px] tracking-[0.05em] flex items-center justify-center"
+        style={{
+          background: 'rgba(239, 68, 68, 0.12)',
+          border: '1px solid rgba(239, 68, 68, 0.35)',
+          color: '#F87171',
+          height: '50px',
+          minHeight: 44,
+        }}
+        onMouseOver={(e) => {
+          e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.20)';
+          e.currentTarget.style.borderColor = 'rgba(239,68,68,0.60)';
+          e.currentTarget.style.color = '#FCA5A5';
+        }}
+        onMouseOut={(e) => {
+          e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.12)';
+          e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.35)';
+          e.currentTarget.style.color = '#F87171';
+        }}
+      >
+        {t.cancel_request}
+      </button>
     </motion.div>
   );
 };
