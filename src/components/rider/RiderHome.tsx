@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Search, MapPin, Navigation, Clock, CreditCard, ChevronRight, User, Settings, LogOut, Car, Bell, ArrowUpDown, HelpCircle, ShieldAlert, Users, Phone, Home, Star, History, Truck } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Map from '../shared/Map';
 import Logo from '../shared/Logo';
 import { NotificationsPanel } from '../shared/NotificationsPanel';
@@ -418,6 +418,17 @@ export default function RiderHome() {
   const t = translations[lang];
 
   const navigate = useNavigate();
+  const locationRouter = useLocation();
+
+  useEffect(() => {
+    if (locationRouter.state?.destination) {
+      setDestination(locationRouter.state.destination);
+      if (locationRouter.state?.intent === 'select_ride') {
+        setStep('selecting');
+      }
+      navigate('.', { replace: true, state: {} });
+    }
+  }, [locationRouter.state, navigate]);
 
   // Safety redirect if role changed to driver
   useEffect(() => {

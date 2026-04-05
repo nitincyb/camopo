@@ -356,6 +356,25 @@ export default function MapScreen() {
                 </motion.div>
               )}
             </AnimatePresence>
+
+            {/* ── Confirm Button ────────────────────────────────────────────── */}
+            <AnimatePresence>
+              {!expanded && toValue.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                  animate={{ opacity: 1, height: 'auto', marginTop: 8 }}
+                  exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                  className="overflow-hidden"
+                >
+                  <button
+                    onClick={() => navigate('/', { state: { destination: toValue, intent: 'select_ride' } })}
+                    className="w-full bg-emerald-500 text-black py-3.5 rounded-2xl font-black text-sm hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.2)]"
+                  >
+                    Confirm Destination
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </motion.div>
       </motion.div>
