@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Search, MapPin, Navigation, Clock, CreditCard, ChevronRight, User, Settings, LogOut, Car, Bell, ArrowUpDown, HelpCircle, ShieldAlert, Users, Phone, Home, Star, History, Truck } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useMotionValue, useTransform } from 'motion/react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Map from '../shared/Map';
 import Logo from '../shared/Logo';
@@ -240,9 +240,11 @@ const translations = {
   }
 };
 
-const SwipeButton = ({ label, colorHex, onSwipe }: { label: string, colorHex: string, onSwipe: () => void }) => {
+const SmartSlider = ({ onConfirm }: { onConfirm: () => void }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
+  const [isConfirmed, setIsConfirmed] = useState(false);
+  const x = useMotionValue(0);
 
   useEffect(() => {
     if (containerRef.current) setContainerWidth(containerRef.current.offsetWidth);
@@ -253,37 +255,100 @@ const SwipeButton = ({ label, colorHex, onSwipe }: { label: string, colorHex: st
     return () => window.removeEventListener('resize', updateWidth);
   }, []);
 
-  const buttonWidth = 56;
-  const maxDrag = Math.max(0, containerWidth - buttonWidth - 8);
+  const thumbWidth = 52;
+  const padding = 6;
+  const maxDrag = Math.max(0, containerWidth - thumbWidth - (padding * 2));
+
+  const opacity = useTransform(x, [0, maxDrag * 0.8], [1, 0]);
+
+  const handleDragEnd = (e: any, info: any) => {
+    if (info.offset.x >= maxDrag * 0.85) {
+      setIsConfirmed(true);
+      if (navigator.vibrate) navigator.vibrate(50);
+      onConfirm();
+      setTimeout(() => {
+        setIsConfirmed(false);
+        x.set(0); 
+      }, 2000);
+    } else {
+      x.set(0); // Snap back if not completed
+    }
+  };
 
   return (
     <div 
       ref={containerRef}
-      className="relative w-full h-[60px] rounded-2xl bg-[#0B0E0C] border flex items-center justify-center overflow-hidden"
-      style={{ borderColor: `${colorHex}30`, boxShadow: 'inset 0 4px 10px rgba(0,0,0,0.5)' }}
+      className={`relative w-[calc(100%-32px)] mx-auto h-[56px] rounded-[99px] overflow-hidden transition-all duration-300 ${isConfirmed ? 'scale-[1.02]' : ''}`}
+      style={{
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+        border: '1px solid rgba(255, 255, 255, 0.09)'
+      }}
     >
-      <span className="text-[13px] font-sora font-semibold tracking-widest uppercase pointer-events-none z-0" style={{ color: colorHex, opacity: 0.8 }}>
-        {label}
-      </span>
-      
-      {maxDrag > 0 && (
-        <motion.div
-          drag="x"
-          dragConstraints={{ left: 0, right: maxDrag }}
-          dragElastic={0}
-          dragMomentum={false}
-          onDragEnd={(e, info) => {
-            if (info.offset.x >= maxDrag * 0.80) {
-              onSwipe();
-            }
+      {/* Shimmer Overlay */}
+      {!isConfirmed && (
+        <div 
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.04) 50%, transparent 100%)',
+            backgroundSize: '200% 100%',
+            animation: 'shimmer 2.5s ease-in-out infinite'
           }}
-          className="absolute left-[4px] top-[4px] bottom-[4px] w-[52px] rounded-xl flex items-center justify-center cursor-grab active:cursor-grabbing z-20 shadow-[0_0_15px_rgba(0,0,0,0.2)]"
-          style={{ backgroundColor: colorHex }}
-        >
-          <ChevronRight size={24} className="text-black ml-1" />
-          <ChevronRight size={24} className="text-black -ml-4 opacity-50" />
-        </motion.div>
+        />
       )}
+
+      {/* Label Text */}
+      <motion.div 
+        className="absolute inset-0 flex items-center justify-center z-0 pointer-events-none"
+        style={{ opacity: isConfirmed ? 0 : opacity }}
+      >
+        <span className="font-dm font-medium text-[14px]" style={{ color: 'rgba(255, 255, 255, 0.40)' }}>
+          Slide to Confirm Ride
+        </span>
+      </motion.div>
+
+      {/* Confirmed Text */}
+      <div 
+        className="absolute inset-0 flex items-center justify-center transition-opacity duration-300 z-10 pointer-events-none"
+        style={{ opacity: isConfirmed ? 1 : 0 }}
+      >
+        <span className="font-dm font-medium text-[14px] text-white">
+          Confirmed ✓
+        </span>
+      </div>
+      
+      {/* Draggable Thumb */}
+      <motion.div
+        drag={!isConfirmed ? "x" : false}
+        dragConstraints={{ left: 0, right: maxDrag }}
+        dragElastic={0}
+        dragMomentum={false}
+        onDragEnd={handleDragEnd}
+        animate={{ 
+          width: isConfirmed ? containerWidth - (padding * 2) : thumbWidth,
+          backgroundColor: isConfirmed ? '#22C55E' : undefined
+        }}
+        transition={{ type: "spring", bounce: 0, duration: 0.3 }}
+        className="absolute flex items-center justify-center z-20 overflow-hidden"
+        style={{ 
+          x,
+          left: padding, 
+          top: '50%',
+          marginTop: '-22px', 
+          height: '44px',
+          borderRadius: '99px',
+          background: isConfirmed ? undefined : 'linear-gradient(135deg, #22C55E, #16A34A)',
+          boxShadow: '0 4px 16px rgba(34, 197, 94, 0.35)',
+          cursor: isConfirmed ? 'default' : 'grab'
+        }}
+      >
+        <motion.div 
+          animate={{ opacity: isConfirmed ? 0 : 1 }}
+          className="flex items-center shrink-0 w-[52px] justify-center"
+        >
+          <ChevronRight size={18} className="text-white ml-2" />
+          <ChevronRight size={18} className="text-white -ml-3 opacity-50" />
+        </motion.div>
+      </motion.div>
     </div>
   );
 };
@@ -294,12 +359,12 @@ const RIDE_TYPES = [
   { id: 'Premium', nameKey: 'premium_cab', price: 150, time: '5 min', iconId: 'premium' },
 ];
 
-const getRideIcon = (iconId: string) => {
+const getRideIcon = (iconId: string, size: number = 54) => {
   switch (iconId) {
-    case 'auto': return <img src="https://img.icons8.com/fluency/256/auto-rickshaw.png" alt="Auto" className="w-[54px] h-[54px] object-contain drop-shadow-md" />;
-    case 'economy': return <img src="https://img.icons8.com/fluency/256/car.png" alt="Car" className="w-[54px] h-[54px] object-contain drop-shadow-md" />;
-    case 'premium': return <img src="https://img.icons8.com/fluency/256/suv.png" alt="Premium SUV" className="w-[54px] h-[54px] object-contain drop-shadow-md" />;
-    default: return <img src="https://img.icons8.com/fluency/256/car.png" alt="Car" className="w-[54px] h-[54px] object-contain drop-shadow-md" />;
+    case 'auto': return <img src="https://img.icons8.com/fluency/256/auto-rickshaw.png" alt="Auto" style={{ width: size, height: size }} className="object-contain drop-shadow-md" />;
+    case 'economy': return <img src="https://img.icons8.com/fluency/256/car.png" alt="Car" style={{ width: size, height: size }} className="object-contain drop-shadow-md" />;
+    case 'premium': return <img src="https://img.icons8.com/fluency/256/suv.png" alt="Premium SUV" style={{ width: size, height: size }} className="object-contain drop-shadow-md" />;
+    default: return <img src="https://img.icons8.com/fluency/256/car.png" alt="Car" style={{ width: size, height: size }} className="object-contain drop-shadow-md" />;
   }
 };
 
@@ -1300,7 +1365,7 @@ export default function RiderHome() {
 
                 {/* Solid inner core */}
                 <div 
-                  className="relative z-10 w-full flex-1 flex flex-col pb-6"
+                  className="relative z-10 w-full flex-1 flex flex-col pt-[16px] pb-[24px]"
                   style={{
                     backgroundColor: '#0B0E0C',
                     borderRadius: '32px 32px 0 0',
@@ -1309,138 +1374,87 @@ export default function RiderHome() {
                   {/* Inner highlight */}
                   <div className="absolute inset-0 rounded-t-[32px] pointer-events-none z-0" style={{ background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, transparent 30%)' }} />
                   
-                  <div className="p-5 sm:p-6 relative z-10 pb-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <button onClick={() => setStep('home')} className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-zinc-400 hover:text-white transition-colors">
-                      <ChevronRight className="rotate-180" size={20} />
-                    </button>
-                    <h2 className="font-bold text-sm text-zinc-300 uppercase tracking-widest">{t.choose_ride}</h2>
-                    <div className="w-10" />
-                  </div>
-
-                  {/* 1. Source & 2. Destination (Connecting Wire Layout) */}
-                  <div 
-                    className="relative flex flex-col px-[16px] py-[14px] rounded-[18px] mb-6"
-                    style={{
-                      background: '#121A15',
-                      border: '1px solid rgba(255, 255, 255, 0.06)',
-                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)'
-                    }}
-                  >
-                    {/* Connecting Wire */}
-                    <svg className="absolute left-[24px] top-[40px] w-[2px] h-[28px] z-0" style={{ strokeDasharray: "4 4", animation: "line-flow 1.5s linear infinite" }}>
-                      <line x1="1" y1="0" x2="1" y2="28" stroke="rgba(34, 197, 94, 0.15)" strokeWidth="1" />
-                    </svg>
-
-                    {/* From */}
-                    <button 
-                      onClick={() => navigate('/map', { state: { pickingUp: true } })}
-                      className="flex items-center gap-4 relative z-10 w-full text-left transition-opacity hover:opacity-80"
-                    >
-                      <div 
-                        className="w-[18px] h-[18px] rounded-full flex items-center justify-center flex-shrink-0"
-                        style={{ backgroundColor: 'rgba(34, 197, 94, 0.20)' }}
-                      >
-                        <div className="w-[8px] h-[8px] rounded-full bg-[#22C55E]" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[9px] tracking-[0.2em] font-dm uppercase mb-0.5" style={{ color: '#4ADE80', opacity: 0.8 }}>From</p>
-                        <p className="text-[15px] font-sora font-semibold truncate" style={{ color: 'rgba(255, 255, 255, 0.92)' }}>{pickup}</p>
-                      </div>
-                    </button>
-
-                    <div className="h-[20px]" />
-
-                    {/* To */}
-                    <button 
-                      onClick={() => navigate('/map', { state: { pickingUp: false } })}
-                      className="flex items-center gap-4 relative z-10 w-full text-left transition-opacity hover:opacity-80"
-                    >
-                      <div className="w-[18px] flex justify-center items-center flex-shrink-0">
-                        <div 
-                          className="w-[9px] h-[9px] animate-[breathe_2.5s_ease_infinite]"
-                          style={{ border: '1px solid rgba(255, 255, 255, 0.35)', borderRadius: '1px' }}
-                        />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[9px] tracking-[0.2em] font-dm uppercase mb-0.5" style={{ color: '#4ADE80', opacity: 0.8 }}>To</p>
-                        <p className="text-[15px] font-sora font-semibold truncate" style={{ color: 'rgba(255, 255, 255, 0.92)' }}>{destination}</p>
-                      </div>
-                    </button>
-                  </div>
-
-                  <div className="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar">
-                    {RIDE_TYPES.map((type) => (
+                  {/* Vehicle Cards */}
+                  <div className="flex flex-col gap-[8px] px-0 w-full z-10">
+                    {RIDE_TYPES.map((type) => {
+                      const isSelected = selectedRide.id === type.id;
+                      return (
                       <button 
                         key={type.id}
                         onClick={() => setSelectedRide(type)}
-                        className={`w-full flex items-center gap-3 py-3 px-4 rounded-[20px] transition-all border ${
-                          selectedRide.id === type.id 
-                            ? 'border-[#22C55E]/40 shadow-[0_0_20px_rgba(34,197,94,0.12)]' 
-                            : 'border-transparent hover:border-white/5'
-                        }`}
+                        className="relative mx-[16px] h-[72px] flex items-center justify-between px-[16px] rounded-[16px] transition-all overflow-hidden"
                         style={{
-                          background: selectedRide.id === type.id ? 'rgba(34, 197, 94, 0.06)' : 'transparent',
+                          background: isSelected ? 'rgba(34, 197, 94, 0.06)' : 'rgba(255, 255, 255, 0.03)',
+                          border: isSelected ? '1px solid #22C55E' : '1px solid rgba(255, 255, 255, 0.07)'
                         }}
                       >
-                        <div className="w-[64px] h-[48px] flex items-center justify-center shrink-0 -ml-1">
-                          {getRideIcon(type.iconId)}
+                        {isSelected && (
+                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-[40px] bg-[#22C55E] rounded-r-full" />
+                        )}
+                        
+                        <div className="flex items-center gap-[16px] h-full">
+                          <div className="w-[48px] h-[48px] flex items-center justify-center shrink-0">
+                            {getRideIcon(type.iconId)}
+                          </div>
+                          <div className="flex flex-col items-start justify-center">
+                            <p className="font-sora font-semibold text-[15px] leading-tight text-[rgba(255,255,255,0.92)]">{t[type.nameKey]}</p>
+                            <p className="text-[10px] opacity-60 font-dm uppercase tracking-widest mt-1">
+                              {type.time} • {distanceInfo?.distance || '...'}
+                            </p>
+                          </div>
                         </div>
-                        <div className="flex-1 text-left">
-                          <p className={`font-sora font-semibold text-[15px] ${selectedRide.id === type.id ? 'text-[#4ADE80]' : 'text-[rgba(255,255,255,0.92)]'}`}>{t[type.nameKey]}</p>
-                          <p className="text-[10px] opacity-60 font-dm uppercase tracking-widest mt-0.5" style={{ color: selectedRide.id === type.id ? '#4ADE80' : 'rgba(255, 255, 255, 0.6)' }}>
-                            {type.time} • {distanceInfo?.distance || '...'}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className={`font-sora font-semibold text-lg ${selectedRide.id === type.id ? 'text-white' : 'text-[rgba(255,255,255,0.92)]'}`}>₹{type.price}</p>
-                          <p className="text-[9px] opacity-60 font-dm uppercase tracking-widest mt-0.5" style={{ color: selectedRide.id === type.id ? '#4ADE80' : 'rgba(255, 255, 255, 0.6)' }}>Estimated</p>
+                        
+                        <div className="flex flex-col items-end justify-center h-full">
+                          <p className="font-sora font-semibold text-lg leading-tight text-white">₹{type.price}</p>
+                          <p className="text-[9px] opacity-60 font-dm uppercase tracking-widest mt-1">Estimated</p>
                         </div>
                       </button>
-                    ))}
+                    )})}
                   </div>
-                </div>
-                <div className="p-6 pt-5 bg-[#080B09] border-t border-white/[0.04] flex flex-col gap-5 relative z-10">
-                  <div className="flex items-center justify-between px-1">
+
+                  <div className="h-[16px]" />
+
+                  {/* Payment Row */}
+                  <div 
+                    className="w-full flex items-center justify-between px-[16px] py-[14px] border-y z-10 relative" 
+                    style={{ borderColor: 'rgba(255, 255, 255, 0.06)' }}
+                  >
                     <div className="flex items-center gap-2 text-zinc-400">
-                      <CreditCard size={18} style={{ color: 'rgba(255, 255, 255, 0.4)' }} />
-                      <span className="font-dm font-bold text-[11px] uppercase tracking-[0.15em] text-[rgba(255,255,255,0.5)]">Personal • UPI</span>
+                      <CreditCard size={18} style={{ color: 'rgba(255, 255, 255, 0.45)' }} />
+                      <span className="font-dm text-[13px]" style={{ color: 'rgba(255, 255, 255, 0.45)' }}>Personal • UPI</span>
                     </div>
                     {distanceInfo && (
-                      <div className="text-right">
-                        <p className="text-[9px] text-[#4ADE80] opacity-80 font-dm font-bold uppercase tracking-[0.15em] mb-0.5">Total Duration</p>
-                        <p className="text-[15px] font-sora font-semibold text-[#22c55e]">{distanceInfo.duration}</p>
+                      <div className="flex items-center gap-4">
+                        <div className="flex flex-col items-end">
+                          <p className="text-[9px] tracking-[0.1em] font-dm uppercase mb-0.5" style={{ color: 'rgba(255, 255, 255, 0.30)' }}>TOTAL DURATION</p>
+                          <p className="text-[16px] font-sora font-semibold text-[#22C55E] leading-none">{distanceInfo.duration}</p>
+                        </div>
                       </div>
                     )}
                   </div>
-                  
-                  <div className="space-y-3 mt-4 w-full">
-                    <SwipeButton 
-                      label={isScheduling ? "Slide to Confirm Schedule" : "Slide to Request Ride"} 
-                      colorHex={isScheduling ? "#EAB308" : "#22c55e"} 
-                      onSwipe={handleRequest} 
-                    />
-                    
-                    {!isScheduling ? (
-                      <SwipeButton 
-                        label="Slide to Schedule Ride" 
-                        colorHex="#EAB308" 
-                        onSwipe={() => setShowTimePicker(true)} 
-                      />
-                    ) : (
-                      <button 
-                        onClick={() => setShowTimePicker(true)}
-                        className="w-full py-3.5 rounded-2xl font-medium text-sm transition-all flex items-center justify-center gap-2 text-zinc-400 hover:text-white border border-white/5 bg-white/5"
-                      >
-                        <Clock size={16} />
-                        Change Time
-                      </button>
-                    )}
-                  </div>
-                </div> {/* Close Solid Inner Core */}
-                  
+
+                  <div className="h-[20px]" />
+
+                  {/* Slider */}
+                  <SmartSlider onConfirm={handleRequest} />
+
+                  <div className="h-[12px]" />
+
+                  {/* Schedule Ride Link */}
+                  {!isScheduling && (
+                    <button 
+                      onClick={() => setShowTimePicker(true)}
+                      className="w-full text-center font-dm text-[13px] hover:underline z-10 relative mt-2"
+                      style={{ color: 'rgba(255, 255, 255, 0.35)', transition: 'color 0.2s', textDecorationColor: 'rgba(255,255,255,0.35)' }}
+                      onMouseEnter={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.65)'}
+                      onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.35)'}
+                    >
+                      ⏱ Schedule Ride
+                    </button>
+                  )}
+
                   {isScheduling && scheduledDate && (
-                    <div className="space-y-3">
+                    <div className="mt-4 space-y-3 px-[16px] z-10 relative">
                       <div className="bg-[#22c55e]/10 border border-[#22c55e]/30 rounded-2xl p-4 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <Clock className="text-[#22c55e]" size={18} />
@@ -1503,27 +1517,7 @@ export default function RiderHome() {
                     </div>
                   )}
 
-                  <div className="space-y-2 mt-2">
-                    <button 
-                      onClick={handleRequest}
-                      className="w-full py-4 rounded-xl font-bold text-[15px] transition-all bg-[#22c55e] text-black hover:bg-[#16a34a] active:scale-[0.98]"
-                    >
-                      {isScheduling ? 'Confirm Schedule' : 'Confirm Ride'}
-                    </button>
-                    
-                    <button 
-                      onClick={() => setShowTimePicker(true)}
-                      className={`w-full py-3 rounded-xl font-medium text-sm transition-all flex items-center justify-center gap-2 ${
-                        isScheduling 
-                          ? 'text-[#22c55e] bg-[#22c55e]/10' 
-                          : 'text-zinc-400 hover:text-white hover:bg-white/5'
-                      }`}
-                    >
-                      <Clock size={16} />
-                      {isScheduling ? 'Change Schedule' : t.schedule_ride}
-                    </button>
-                  </div>
-                </div>
+                </div> {/* Close Solid Inner Core */}
               </motion.div>
             )}
 
