@@ -35,35 +35,46 @@ export default function BottomNav({ activeTab: propActiveTab }: BottomNavProps) 
 
   return (
     <motion.div 
-      className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] isolation-isolate"
-      style={{ width: 'calc(100% - 48px)', maxWidth: '360px' }}
-      initial={{ y: 100, opacity: 0, scale: 0.8 }}
+      className="fixed bottom-5 left-1/2 -translate-x-1/2 z-[9999] isolation-isolate"
+      style={{ width: 'calc(100vw - 40px)', maxWidth: '360px' }}
+      initial={{ y: 100, opacity: 0, scale: 0.9 }}
       animate={{ y: 0, opacity: 1, scale: 1 }}
       transition={{
-        duration: 0.5,
-        delay: 0.4,
-        ease: [0.34, 1.56, 0.64, 1]
+        duration: 0.6,
+        delay: 0.3,
+        ease: [0.16, 1, 0.3, 1]
       }}
     >
-      <div className="relative h-16 rounded-[32px] overflow-hidden border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.60)]">
+      <div className="relative h-[68px] rounded-[32px] overflow-visible">
         
-        {/* Layer 0: Background Video */}
-        <video
-          autoPlay loop muted playsInline
-          className="absolute inset-0 w-full h-full object-cover z-0 rounded-[32px]"
-        >
-          <source src="/assets/name-bg.mp4" type="video/mp4" />
-        </video>
+        {/* Layer 1: Subtle Video Texture Backdrop */}
+        <div className="absolute inset-0 z-0 rounded-[32px] overflow-hidden">
+          <video
+            autoPlay loop muted playsInline
+            className="absolute inset-0 w-full h-full object-cover opacity-[0.06]"
+          >
+            <source src="/assets/name-bg.mp4" type="video/mp4" />
+          </video>
+        </div>
 
-        {/* Layer 1: Dark Dim Overlay & Blur */}
+        {/* Layer 2: Primary Glass Surface */}
+        <div className="absolute inset-0 z-[1] rounded-[32px] bg-[rgba(18,18,18,0.92)] backdrop-blur-[24px] saturate-[120%]" />
+
+        {/* Layer 3: Top Edge Rim Light */}
         <div 
-          className="absolute inset-0 z-[1] rounded-[32px] bg-black/78 backdrop-blur-[16px]" 
+          className="absolute top-0 left-[10%] right-[10%] h-[1px] z-[2] opacity-60"
+          style={{
+            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.15) 30%, rgba(255,255,255,0.15) 70%, transparent)'
+          }}
         />
 
-        {/* Layer 2: Subtle Edge Highlight */}
-        <div className="absolute inset-0 z-[2] rounded-[32px] border border-white/[0.08] pointer-events-none" />
+        {/* Layer 4: Neutral External Border and Inner Highlights */}
+        <div className="absolute inset-0 z-[3] rounded-[32px] border border-white/[0.08] pointer-events-none shadow-[inset_0_2px_0_rgba(255,255,255,0.04)]" />
 
-        {/* Layer 4: Content */}
+        {/* Layer 5: Spatial Shadow */}
+        <div className="absolute inset-0 -z-10 rounded-[32px] shadow-[0_16px_40px_rgba(0,0,0,0.70),0_4px_12px_rgba(0,0,0,0.50)]" />
+
+        {/* Content Container */}
         <div className="relative z-10 flex items-center justify-around h-full px-2">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
@@ -71,34 +82,57 @@ export default function BottomNav({ activeTab: propActiveTab }: BottomNavProps) 
 
             if (tab.isCenter) {
               return (
-                <motion.button
-                  key={tab.id}
-                  onClick={() => navigate(tab.path)}
-                  className="relative flex-shrink-0 mx-1 group"
-                  whileTap={{ scale: 0.88 }}
-                  initial={false}
-                >
-                  {/* Button Core */}
-                  <div className="w-[52px] h-[52px] bg-transparent rounded-full flex items-center justify-center relative overflow-hidden transition-all duration-300">
-                    {/* Video Layer */}
-                    <video 
-                      autoPlay loop muted playsInline 
-                      className="absolute inset-0 w-full h-full object-cover"
-                    >
-                      <source src="/assets/name-bg.mp4" />
-                    </video>
+                <div key={tab.id} className="relative flex flex-col items-center">
+                  <motion.button
+                    onClick={() => navigate(tab.path)}
+                    className="relative flex-shrink-0 -mt-8 group outline-none"
+                    whileTap={{ scale: 0.88 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                  >
+                    {/* Hero Media Circle (56x56) */}
+                    <div className="w-14 h-14 rounded-full relative overflow-hidden shadow-[0_8px_24px_rgba(0,0,0,0.4)]">
+                      {/* Full Quality Video Layer */}
+                      <video 
+                        autoPlay loop muted playsInline 
+                        className="absolute inset-0 w-full h-full object-cover"
+                      >
+                        <source src="/assets/name-bg.mp4" />
+                      </video>
 
-                    {/* Edge Border over video */}
-                    <div className="absolute inset-0 border-[1.5px] border-white/20 rounded-full z-10 pointer-events-none" />
-                    
-                    {/* Icon Sitting Above */}
-                    <Icon 
-                      size={22} 
-                      className="relative z-20 text-white opacity-90 drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]" 
-                      strokeWidth={2.5} 
+                      {/* Vignette Overlay for Readability */}
+                      <div 
+                        className="absolute inset-0 z-10"
+                        style={{
+                          background: 'radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.35) 100%)'
+                        }}
+                      />
+                      
+                      {/* Centered White Icon */}
+                      <div className="absolute inset-0 flex items-center justify-center z-20">
+                        <Icon 
+                          size={22} 
+                          className="text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.9)]" 
+                          strokeWidth={2.5} 
+                        />
+                      </div>
+                    </div>
+
+                    {/* Outer Neutral Ring (1.5px) */}
+                    <div className="absolute inset-[-2px] border-[1.5px] border-white/20 rounded-full z-30 pointer-events-none" />
+
+                    {/* Subtle Green Accent Ring (Rotating) */}
+                    <motion.div 
+                      className="absolute inset-[-4px] border border-[rgba(34,197,94,0.25)] rounded-full z-40 pointer-events-none"
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
                     />
-                  </div>
-                </motion.button>
+                  </motion.button>
+
+                  {/* Share Label - Neutral */}
+                  <span className="mt-1 text-[8px] font-dm font-medium tracking-[0.10em] uppercase text-white/35">
+                    {tab.label}
+                  </span>
+                </div>
               );
             }
 
@@ -106,38 +140,38 @@ export default function BottomNav({ activeTab: propActiveTab }: BottomNavProps) 
               <motion.button
                 key={tab.id}
                 onClick={() => navigate(tab.path)}
-                className="relative flex flex-col items-center justify-center min-w-[48px] py-1 gap-[3px] rounded-full"
+                className="relative flex flex-col items-center justify-center min-w-[54px] py-1 gap-[3px] rounded-full group outline-none"
                 whileTap={{
-                  scale: 0.82,
+                  scale: 0.90,
                   transition: { type: 'spring', stiffness: 500, damping: 15 }
                 }}
               >
-                {/* Active Indicator Background */}
+                {/* Active Minimalist Background Pill */}
                 {isActive && (
                   <motion.div
                     layoutId="navActiveBg"
-                    className="absolute inset-0 bg-white/8 border border-white/10 rounded-full -z-10"
+                    className="absolute inset-0 bg-white/[0.06] border border-white/[0.08] rounded-[20px] -z-10 w-[110%] left-[-5%]"
                     transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
                   />
                 )}
 
-                {/* Top Indicator Dot */}
+                {/* Top Emerald Indicator Line */}
                 {isActive && (
                   <motion.div
                     layoutId="navIndicator"
-                    className="absolute -top-[1px] left-1/2 -translate-x-1/2 w-1 h-1 bg-[#22C55E] rounded-full"
+                    className="absolute -top-[12px] left-1/2 -translate-x-1/2 w-4 h-[2px] bg-[#22C55E] rounded-full"
                   />
                 )}
 
                 <motion.div
-                  className={isActive ? 'text-[#22C55E]' : 'text-white/35'}
-                  animate={isActive ? { scale: [1, 1.3, 1] } : {}}
+                  className={`transition-colors duration-200 ${isActive ? 'text-[#22C55E]' : 'text-white/28 group-hover:text-white/55'}`}
+                  animate={isActive ? { scale: [1, 1.15, 1] } : {}}
                   transition={{ duration: 0.3 }}
                 >
-                  <Icon size={19} strokeWidth={isActive ? 2.5 : 2} />
+                  <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
                 </motion.div>
 
-                <span className={`text-[8px] font-medium tracking-wider uppercase font-dm ${isActive ? 'text-[#22C55E]' : 'text-white/22'}`}>
+                <span className={`text-[8px] font-dm font-medium tracking-[0.10em] uppercase transition-colors duration-200 ${isActive ? 'text-[#22C55E]' : 'text-white/20 group-hover:text-white/40'}`}>
                   {tab.label}
                 </span>
               </motion.button>
