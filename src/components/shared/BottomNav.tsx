@@ -51,14 +51,14 @@ export default function BottomNav({ activeTab: propActiveTab }: BottomNavProps) 
         <div className="absolute inset-0 z-0 rounded-[32px] overflow-hidden">
           <video
             autoPlay loop muted playsInline
-            className="absolute inset-0 w-full h-full object-cover opacity-[0.35]"
+            className="absolute inset-0 w-full h-full object-cover opacity-[0.18]"
           >
             <source src="/assets/name-bg.mp4" type="video/mp4" />
           </video>
         </div>
 
         {/* Layer 2: Primary Glass Surface */}
-        <div className="absolute inset-0 z-[1] rounded-[32px] bg-black/35 backdrop-blur-[40px] saturate-[140%]" />
+        <div className="absolute inset-0 z-[1] rounded-[32px] bg-black/75 backdrop-blur-[40px] saturate-[110%]" />
 
         {/* Layer 3: Top Edge Rim Light */}
         <div 
@@ -90,29 +90,22 @@ export default function BottomNav({ activeTab: propActiveTab }: BottomNavProps) 
                     transition={{ type: 'spring', stiffness: 400, damping: 15 }}
                   >
                     {/* Hero Media Circle (56x56) */}
-                    <div className="w-14 h-14 rounded-full relative overflow-hidden shadow-[0_8px_24px_rgba(0,0,0,0.6)] border border-white/10 bg-gradient-to-b from-zinc-800 to-black">
-                      {/* Sub-glow for depth */}
-                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(34,197,94,0.15),transparent_70%)]" />
+                    <div className="w-14 h-14 rounded-full relative overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.8)] border border-white/15 bg-[#09090b]">
+                      {/* Deep internal shadow for a concave look */}
+                      <div className="absolute inset-x-0 top-0 h-4 bg-gradient-to-b from-white/5 to-transparent" />
                       
                       {/* Centered White Icon */}
                       <div className="absolute inset-0 flex items-center justify-center z-20">
                         <Icon 
                           size={22} 
-                          className="text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.9)]" 
+                          className="text-white drop-shadow-[0_2px_10px_rgba(255,255,255,0.2)]" 
                           strokeWidth={2.5} 
                         />
                       </div>
                     </div>
 
-                    {/* Outer Neutral Ring (1.5px) */}
-                    <div className="absolute inset-[-2px] border-[1.5px] border-white/20 rounded-full z-30 pointer-events-none" />
-
-                    {/* Subtle Green Accent Ring (Rotating) */}
-                    <motion.div 
-                      className="absolute inset-[-4px] border border-[rgba(34,197,94,0.25)] rounded-full z-40 pointer-events-none"
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                    />
+                    {/* Outer Neutral Ring (Minimalist) */}
+                    <div className="absolute inset-[-1.5px] border border-white/[0.08] rounded-full z-30 pointer-events-none" />
                   </motion.button>
 
                   {/* Share Label - Neutral */}
