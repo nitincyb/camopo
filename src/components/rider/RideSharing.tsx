@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Users, MapPin, Clock, ChevronRight, Search, ArrowLeft, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
+import BottomNav from '../shared/BottomNav';
 import { db } from '../../firebase';
 import { collection, query, where, onSnapshot, orderBy, doc, updateDoc, arrayUnion, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../../contexts/AuthContext';
@@ -139,7 +140,7 @@ export default function RideSharing() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white font-sans pb-20">
+    <div className="min-h-screen bg-black text-white font-sans pb-[100px]">
       {/* Header */}
       <div className="sticky top-0 z-30 bg-zinc-950/80 backdrop-blur-xl border-b border-white/5 p-6 flex items-center gap-4">
         <button 
@@ -267,6 +268,7 @@ export default function RideSharing() {
           </div>
         )}
       </div>
+      <BottomNav activeTab="share" />
     </div>
   );
 }

@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { auth, db } from '../../firebase';
-import { User, LogOut, Settings, Wallet, Globe, Shield, CreditCard, Clock, Bell, HelpCircle, ChevronRight, ArrowRight, Car, Home, History, Users } from 'lucide-react';
+import { Globe, ChevronRight, Home, History, Users, HelpCircle, User, CreditCard, Bell, LogOut } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import BottomNav from './BottomNav';
 import { doc, updateDoc } from 'firebase/firestore';
 import { handleFirestoreError, OperationType } from '../../utils/firestoreErrorHandler';
 
@@ -14,10 +16,23 @@ export function Profile() {
   const [ridesCount, setRidesCount] = useState(0);
   const [distance, setDistance] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [scrolled, setScrolled] = useState(false);
+  const [isSweeping, setIsSweeping] = useState(false);
+  const timeoutsRef = useRef<NodeJS.Timeout[]>([]);
+
+  const playSequence = () => {
+    timeoutsRef.current.forEach(clearTimeout);
+    timeoutsRef.current = [];
+    setIsSweeping(true);
+    const t1 = setTimeout(() => setIsSweeping(false), 1500);
+    timeoutsRef.current = [t1];
+  };
 
   useEffect(() => {
-    // Inject Fonts and Custom Animations
+    const t = setTimeout(playSequence, 400);
+    return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
     const link = document.createElement('link');
     link.href = 'https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Sora:wght@100..800&display=swap';
     link.rel = 'stylesheet';
@@ -25,37 +40,13 @@ export function Profile() {
 
     const style = document.createElement('style');
     style.innerHTML = `
-      @keyframes riseIn {
-        0%   { transform: translateY(16px) translateZ(0); opacity: 0; }
-        100% { transform: translateY(0) translateZ(0); opacity: 1; }
-      }
-      .animate-rise-in {
-        animation: riseIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
-      }
-      @keyframes avatarEnter {
-        0% { transform: scale(0.65); opacity: 0; }
-        60% { transform: scale(1.08); }
-        100% { transform: scale(1.0); opacity: 1; }
-      }
-      .animate-avatar-enter {
-        animation: avatarEnter 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.08s both;
+      @keyframes sweep {
+        0%   { background-position: 200% center; }
+        100% { background-position: -200% center; }
       }
       @keyframes spin {
         from { transform: rotate(0deg); }
         to { transform: rotate(360deg); }
-      }
-      .animate-spin-ring {
-        animation: spin 5s linear infinite;
-        will-change: transform;
-        transform: translateZ(0);
-      }
-      .glass-card {
-        background: rgba(255,255,255,0.04);
-        backdrop-filter: blur(20px) saturate(160%);
-        -webkit-backdrop-filter: blur(20px) saturate(160%);
-        border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 20px;
-        box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), 0 8px 32px rgba(0,0,0,0.35);
       }
       .no-scrollbar::-webkit-scrollbar { display: none; }
       .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -69,10 +60,8 @@ export function Profile() {
   }, []);
 
   useEffect(() => {
-    // Count up animation with ease-out cubic
     const duration = 1200;
     const start = performance.now();
-    // Default values as per specification
     const targetRides = 24;
     const targetDistance = 87;
 
@@ -89,17 +78,7 @@ export function Profile() {
     };
     rAF = requestAnimationFrame(updateCounters);
     return () => cancelAnimationFrame(rAF);
-  }, [profile?.stats]);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!scrollContainerRef.current) return;
-      setScrolled(scrollContainerRef.current.scrollTop > 10);
-    };
-    const el = scrollContainerRef.current;
-    if (el) el.addEventListener('scroll', handleScroll);
-    return () => el?.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [profile]);
 
   const handleLanguageChange = async (newLang: string) => {
     if (!user) return;
@@ -116,322 +95,243 @@ export function Profile() {
     }
   };
 
-  const SectionLabel = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
-    <div 
-      className={`mx-4 mb-2 text-[10px] text-white/25 uppercase tracking-[0.15em] font-medium ${className}`}
-      style={{ fontFamily: 'DM Sans, sans-serif' }}
-    >
-      {children}
-    </div>
-  );
-
   return (
     <div 
       ref={scrollContainerRef}
-      className="fixed inset-0 bg-[#080C09] overflow-y-auto no-scrollbar"
-      style={{ paddingBottom: '100px' }}
+      className="fixed inset-0 bg-zinc-950 overflow-y-auto no-scrollbar pb-[100px]"
     >
       {/* ════════ HEADER ════════ */}
-      <div 
-        className={`sticky top-0 z-50 px-4 pt-10 pb-4 flex justify-between items-center transition-all duration-300 ${
-          scrolled ? 'bg-[#080C09]/95 backdrop-blur-[20px]' : 'bg-transparent'
-        }`}
+      <motion.div 
+        className="px-5 pt-20 pb-4"
+        initial={{ opacity: 0, y: 14 }} 
+        animate={{ opacity: 1, y: 0 }} 
+        transition={{ duration: 0.4, delay: 0, ease: [0.25, 0.46, 0.45, 0.94] }}
       >
-        <div className="w-10" />
-        <h1 
-          className="text-[18px] font-semibold text-[#F0FFF4]" 
-          style={{ fontFamily: 'Sora, sans-serif' }}
-        >
-          Profile
-        </h1>
-        <button 
-          className="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 border border-white/08 active:rotate-90 transition-all duration-300"
-          onClick={() => {}} 
-        >
-          <Settings size={18} className="text-white/50" />
-        </button>
-      </div>
-
-      <div className="pb-10">
-        
-        {/* ════════ IDENTITY CARD ════════ */}
-        <div 
-          className="mx-4 mt-3 mb-6 glass-card p-6 animate-rise-in"
-          style={{ animationDelay: '0.06s' }}
-        >
-          <div className="flex flex-col items-center">
-            <div className="relative w-[84px] h-[84px] flex items-center justify-center">
-              <div 
-                className="absolute w-[92px] h-[92px] rounded-full animate-spin-ring"
+        <div className="flex items-center justify-between">
+          <div className="flex-1">
+            <h1 className="text-zinc-500 text-[10px] font-bold uppercase tracking-[0.2em] mb-2 opacity-50">Profile</h1>
+            <motion.div 
+               onClick={playSequence}
+               whileTap={{ scale: 0.96 }}
+               style={{ 
+                  position: 'relative',
+                  display: 'inline-block',
+                  cursor: 'pointer',
+                  userSelect: 'none',
+               }}
+            >
+              <h1 
                 style={{
-                  zIndex: 1,
-                  padding: '2px',
-                  background: 'conic-gradient(#22C55E 0deg, rgba(34,197,94,0.10) 180deg, #22C55E 360deg)',
-                  WebkitMask: 'radial-gradient(farthest-side, transparent calc(100% - 2.5px), #fff calc(100% - 2.5px))',
-                  mask: 'radial-gradient(farthest-side, transparent calc(100% - 2.5px), #fff calc(100% - 2.5px))'
-                }}
-              />
-              
-              {user?.photoURL ? (
-                <img 
-                  src={user.photoURL} 
-                  alt="Profile" 
-                  className="w-[84px] h-[84px] rounded-full object-cover animate-avatar-enter" 
-                  style={{ zIndex: 2, position: 'relative' }}
-                />
-              ) : (
-                <div 
-                  className="w-[84px] h-[84px] rounded-full flex items-center justify-center bg-[#0D1A0F] border-2 border-[#22C55E] animate-avatar-enter"
-                  style={{ zIndex: 2, position: 'relative' }}
-                >
-                  <span 
-                    className="text-[30px] font-bold text-[#22C55E]"
-                    style={{ fontFamily: 'Sora, sans-serif' }}
-                  >
-                    {profile?.displayName?.[0] || user?.email?.[0]?.toUpperCase() || 'P'}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            <h2 
-              className="text-[20px] font-semibold text-[#F0FFF4] mt-[14px]"
-              style={{ fontFamily: 'Sora, sans-serif' }}
-            >
-              {profile?.displayName || 'User'}
-            </h2>
-            <p 
-              className="text-[13px] text-white/38 mt-1"
-              style={{ fontFamily: 'DM Sans, sans-serif' }}
-            >
-              {user?.email || 'user@campus.edu'}
-            </p>
-            
-            <div 
-              className="mt-2 px-[14px] py-[5px] rounded-full bg-[#22C55E1A] border border-[#22C55E38] text-[#4ADE80] text-[10px] uppercase font-medium tracking-[0.12em]"
-              style={{ fontFamily: 'DM Sans, sans-serif' }}
-            >
-              {profile?.role === 'driver' ? 'DRIVER' : 'RIDER'}
-            </div>
-          </div>
-          
-          <div className="mt-4 pt-4 border-t border-white/06">
-            <div className="flex justify-between items-center">
-              <div className="flex-1 text-center">
-                <div className="text-[18px] font-semibold text-[#F0FFF4]" style={{ fontFamily: 'Sora, sans-serif' }}>
-                  {ridesCount}
-                </div>
-                <div className="text-[10px] text-white/28 uppercase tracking-[0.10em] mt-0.5" style={{ fontFamily: 'DM Sans, sans-serif' }}>
-                  RIDES
-                </div>
-              </div>
-              <div className="w-[1px] h-6 bg-white/07" />
-              <div className="flex-1 text-center">
-                <div className="text-[18px] font-semibold text-[#F0FFF4]" style={{ fontFamily: 'Sora, sans-serif' }}>
-                  {distance}
-                </div>
-                <div className="text-[10px] text-white/28 uppercase tracking-[0.10em] mt-0.5" style={{ fontFamily: 'DM Sans, sans-serif' }}>
-                  DISTANCE
-                </div>
-              </div>
-              <div className="w-[1px] h-6 bg-white/07" />
-              <div className="flex-1 text-center">
-                <div className="text-[18px] font-semibold text-[#F0FFF4]" style={{ fontFamily: 'Sora, sans-serif' }}>
-                  2024
-                </div>
-                <div className="text-[10px] text-white/28 uppercase tracking-[0.10em] mt-0.5" style={{ fontFamily: 'DM Sans, sans-serif' }}>
-                  SINCE
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ════════ LANGUAGE ════════ */}
-        <div className="animate-rise-in" style={{ animationDelay: '0.12s' }}>
-          <SectionLabel>LANGUAGE</SectionLabel>
-          <div className="mx-4 glass-card p-4">
-            <div className="flex items-center gap-3 mb-3">
-              <Globe size={16} className="text-white/40" />
-              <span className="text-[14px] font-medium text-[#F0FFF4]" style={{ fontFamily: 'DM Sans, sans-serif' }}>
-                Select Language
+                  fontSize: '56px',
+                  fontWeight: 900,
+                  letterSpacing: '-0.04em',
+                  lineHeight: 1.0,
+                  margin: 0,
+                  fontFamily: '"Sora", sans-serif',
+                  background: 'linear-gradient(90deg, #F59E0B, #10B981, #F59E0B)',
+                  backgroundSize: '200% auto',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  animation: isSweeping ? 'sweep 1.5s ease-out forwards' : 'none',
+                  textShadow: '0 0 30px rgba(16,185,129,0.15)'
+                }}>
+                {profile?.displayName || 'Raj Tak'}
+              </h1>
+            </motion.div>
+            <p className="text-zinc-500 text-sm mt-1.5 font-medium opacity-80">{user?.email || 'user@campus.edu'}</p>
+            <div className="mt-4 inline-flex">
+              <span className="bg-emerald-500/10 text-emerald-500 text-[10px] font-bold px-3 py-1 rounded-full border border-emerald-500/20 tracking-wider">
+                {profile?.role === 'driver' ? 'DRIVER' : 'RIDER'}
               </span>
             </div>
-            <div className="flex gap-2">
-              {[
-                { id: 'en', label: 'English' },
-                { id: 'hi', label: 'हिन्दी' },
-                { id: 'gu', label: 'ગુજરાતી' }
-              ].map(lang => {
-                const isActive = language === lang.id;
-                return (
-                  <button
-                    key={lang.id}
-                    onClick={() => handleLanguageChange(lang.id)}
-                    className="flex-1 py-2 text-[13px] rounded-full transition-all duration-200 active:scale-95"
-                    style={{
-                      fontFamily: 'DM Sans, sans-serif',
-                      background: isActive ? '#22C55E' : 'rgba(255,255,255,0.05)',
-                      border: isActive ? 'none' : '1px solid rgba(255,255,255,0.08)',
-                      color: isActive ? '#0A0F0B' : 'rgba(255,255,255,0.40)',
-                      fontWeight: isActive ? 600 : 400
-                    }}
-                  >
-                    {lang.label}
-                  </button>
-                );
-              })}
-            </div>
           </div>
-        </div>
 
-        {/* ════════ WALLET ════════ */}
-        <div className="animate-rise-in" style={{ animationDelay: '0.17s' }}>
-          <SectionLabel className="mt-6">WALLET</SectionLabel>
-          <div className="mx-4 glass-card p-4">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'rgba(34,197,94,0.10)' }}>
-                  <Wallet size={18} className="text-[#22C55E]" />
-                </div>
-                <div>
-                  <div className="text-[14px] font-medium text-[#F0FFF4]" style={{ fontFamily: 'DM Sans, sans-serif' }}>
-                    Campus Wallet
-                  </div>
-                  <div className="text-[11px] text-white/30 mt-0.5" style={{ fontFamily: 'DM Sans, sans-serif' }}>
-                    Available Balance
-                  </div>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-[22px] font-semibold text-[#F0FFF4] mb-1" style={{ fontFamily: 'Sora, sans-serif' }}>
-                  ₹0.00
-                </div>
-                <button 
-                  className="px-[14px] py-[6px] rounded-full text-[12px] font-medium transition-all active:scale-95"
-                  style={{ 
-                    fontFamily: 'DM Sans, sans-serif',
-                    background: 'rgba(34,197,94,0.10)',
-                    border: '1px solid rgba(34,197,94,0.22)',
-                    color: '#4ADE80'
-                  }}
-                >
-                  Add Money
-                </button>
-              </div>
+          <motion.div 
+            className="group relative w-11 h-11 shrink-0 ml-4"
+            initial={{ scale: 0.6, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.55, ease: [0.34, 1.56, 0.64, 1] }}
+          >
+            <div 
+              className="absolute inset-[-3px] rounded-full z-0 pointer-events-none transition-[animation-duration] duration-300 ease-in-out group-hover:![animation-duration:1.5s]"
+              style={{
+                background: 'conic-gradient(from 0deg, #22C55E 0deg, rgba(34,197,94,0.10) 180deg, #22C55E 360deg)',
+                maskImage: 'radial-gradient(farthest-side, transparent calc(100% - 2px), white calc(100% - 2px))',
+                WebkitMaskImage: 'radial-gradient(farthest-side, transparent calc(100% - 2px), white calc(100% - 2px))',
+                animation: 'spin 4s linear infinite',
+                willChange: 'transform',
+                transform: 'translateZ(0)'
+              }}
+            />
+            <div className="relative z-10 w-full h-full rounded-full border border-zinc-800 overflow-hidden flex items-center justify-center bg-[#181a20]">
+              {user?.photoURL ? (
+                <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-lg font-semibold text-white">
+                  {profile?.displayName?.[0] || user?.email?.[0]?.toUpperCase() || 'P'}
+                </span>
+              )}
             </div>
-            <div className="h-[1px] bg-white/06 my-3" />
-            <div className="text-center text-[12px] text-white/22 py-1" style={{ fontFamily: 'DM Sans, sans-serif' }}>
-              No transactions yet
-            </div>
-          </div>
+          </motion.div>
         </div>
+      </motion.div>
 
-        {/* ════════ SETTINGS ════════ */}
-        <div className="animate-rise-in" style={{ animationDelay: '0.22s' }}>
-          <SectionLabel className="mt-6">ACCOUNT</SectionLabel>
-          <div className="mx-4 glass-card overflow-hidden">
+      {/* ════════ STATS ════════ */}
+      <motion.div 
+        initial={{ opacity: 0, y: 14 }} 
+        animate={{ opacity: 1, y: 0 }} 
+        transition={{ duration: 0.4, delay: 0.07, ease: [0.25, 0.46, 0.45, 0.94] }}
+      >
+        <div className="px-5 mt-8 mb-4">
+          <h3 className="text-sm font-medium text-zinc-300">Activity</h3>
+        </div>
+        <div className="px-5">
+          <div className="grid grid-cols-3 gap-3">
             {[
-              { id: 'profile', icon: User, label: 'Edit Profile', component: 'chevron' },
-              { id: 'payment', icon: CreditCard, label: 'Payment Methods', subLabel: 'Personal • UPI', component: 'chevron' },
-              { id: 'history', icon: Clock, label: 'Ride History', component: 'chevron' },
-              { id: 'driver', icon: Car, label: 'Become a Driver', subLabel: 'Earn on your schedule', component: 'arrow', highlight: true },
-              { id: 'notifications', icon: Bell, label: 'Notifications', component: 'toggle' },
-              { id: 'help', icon: HelpCircle, label: 'Help & Support', component: 'chevron' },
-            ].map((item, i, arr) => (
-              <React.Fragment key={item.id}>
-                <button className={`w-full h-[54px] px-4 flex items-center justify-between group active:bg-white/5 transition-colors ${item.highlight ? 'bg-[#22C55E08]' : ''}`}>
-                  <div className="flex items-center gap-3">
-                    <div 
-                      className="w-[34px] h-[34px] rounded-full flex items-center justify-center transition-colors"
-                      style={{ background: item.highlight ? 'rgba(34,197,94,0.10)' : 'rgba(255,255,255,0.05)' }}
-                    >
-                      <item.icon size={16} className={item.highlight ? 'text-[#22C55E]' : 'text-white/40'} />
-                    </div>
-                    <div className="text-left">
-                      <div className="text-[14px] font-medium text-[#F0FFF4] leading-tight" style={{ fontFamily: 'DM Sans, sans-serif' }}>
-                        {item.label}
-                      </div>
-                      {item.subLabel && (
-                        <div className="text-[11px] text-white/28 mt-0.5" style={{ fontFamily: 'DM Sans, sans-serif' }}>
-                          {item.subLabel}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center">
-                    {item.component === 'chevron' && (
-                      <ChevronRight size={14} className="text-white/18 group-active:translate-x-[2px] transition-transform" />
-                    )}
-                    {item.component === 'arrow' && (
-                      <ArrowRight size={14} className="text-[#22C55E] group-active:translate-x-[2px] transition-transform" />
-                    )}
-                    {item.component === 'toggle' && (
-                      <div className="w-[34px] h-[20px] rounded-full relative bg-[#22C55E]">
-                        <div className="absolute right-[2px] top-[2px] w-[16px] h-[16px] rounded-full bg-white shadow-sm" />
-                      </div>
-                    )}
-                  </div>
-                </button>
-                {i < arr.length - 1 && <div className="h-[1px] bg-white/05 ml-[62px]" />}
-              </React.Fragment>
+              { value: ridesCount, label: 'RIDES' },
+              { value: distance, label: 'DISTANCE' },
+              { value: '2024', label: 'SINCE' }
+            ].map((stat, i) => (
+              <motion.div 
+                key={i} 
+                className="group relative overflow-hidden bg-[#181a20] rounded-2xl border border-white/[0.06] py-5 flex flex-col items-center justify-center hover:scale-[1.05] hover:-translate-y-[4px] hover:border-white/[0.12] transition-all duration-300 ease-in-out"
+                whileTap={{ scale: 0.95 }}
+              >
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.06)_0%,transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                <div className="absolute top-0 left-[-100%] h-full w-[150%] bg-gradient-to-r from-transparent via-white/[0.04] to-transparent skew-x-[-20deg] group-hover:translate-x-[150%] transition-transform duration-[800ms] ease-in-out pointer-events-none" />
+                <span className="relative z-10 text-white font-semibold text-xl">{stat.value}</span>
+                <span className="relative z-10 text-zinc-500 text-xs font-medium tracking-wide mt-1">{stat.label}</span>
+              </motion.div>
             ))}
           </div>
         </div>
+      </motion.div>
 
-        {/* ════════ SIGN OUT ════════ */}
-        <div className="animate-rise-in" style={{ animationDelay: '0.27s' }}>
-          <div className="mx-4 mt-6">
-            <button 
-              onClick={handleSignOut}
-              className="w-full h-[52px] px-4 flex items-center gap-3 rounded-[14px] active:bg-[#EF44441A] transition-all group"
-              style={{ 
-                background: 'rgba(239,68,68,0.05)', 
-                border: '1px solid rgba(239,68,68,0.10)', 
-                borderLeft: '2px solid rgba(239,68,68,0.28)' 
-              }}
-            >
-              <LogOut size={16} className="text-[#EF4444]/45 group-active:text-[#EF4444]/85 transition-colors" />
-              <span className="text-[14px] font-medium text-[#EF4444]/55 group-active:text-[#EF4444]/85 transition-colors" style={{ fontFamily: 'DM Sans, sans-serif' }}>
-                Sign Out
-              </span>
+      {/* ════════ LANGUAGE ════════ */}
+      <motion.div 
+        initial={{ opacity: 0, y: 14 }} 
+        animate={{ opacity: 1, y: 0 }} 
+        transition={{ duration: 0.4, delay: 0.14, ease: [0.25, 0.46, 0.45, 0.94] }}
+      >
+        <div className="px-5 mt-6 mb-4">
+          <h3 className="text-sm font-medium text-zinc-300">Language</h3>
+        </div>
+        <div className="px-5 flex gap-3 overflow-x-auto no-scrollbar">
+          {[
+            { id: 'en', label: 'English' },
+            { id: 'hi', label: 'हिन्दी' },
+            { id: 'gu', label: 'ગુજરાતી' }
+          ].map(lang => {
+            const isActive = language === lang.id;
+            return (
+              <button
+                key={lang.id}
+                onClick={() => handleLanguageChange(lang.id)}
+                className={`px-4 py-2.5 rounded-full shrink-0 transition-colors ${
+                  isActive 
+                    ? 'bg-white text-black font-bold text-xs' 
+                    : 'bg-zinc-900 border border-zinc-800 text-zinc-500 text-xs font-medium'
+                }`}
+              >
+                {lang.label}
+              </button>
+            );
+          })}
+        </div>
+      </motion.div>
+
+      {/* ════════ WALLET ════════ */}
+      <motion.div 
+        initial={{ opacity: 0, y: 14 }} 
+        animate={{ opacity: 1, y: 0 }} 
+        transition={{ duration: 0.4, delay: 0.21, ease: [0.25, 0.46, 0.45, 0.94] }}
+      >
+        <div className="px-5 mt-6 mb-4">
+          <h3 className="text-sm font-medium text-zinc-300">Wallet</h3>
+        </div>
+        <div className="px-5">
+          <div className="group relative overflow-hidden bg-[#181a20] rounded-2xl border border-white/[0.06] p-5 flex items-center justify-between hover:border-white/[0.12] transition-colors duration-300">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.06)_0%,transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+            <div className="absolute top-0 left-[-100%] h-full w-[150%] bg-gradient-to-r from-transparent via-white/[0.04] to-transparent skew-x-[-20deg] group-hover:translate-x-[150%] transition-transform duration-[800ms] ease-in-out pointer-events-none" />
+            
+            <div className="relative z-10">
+              <div className="text-white font-semibold text-2xl tracking-tight">₹0.00</div>
+              <div className="text-zinc-500 text-xs mt-1">Available Balance</div>
+            </div>
+            <button className="relative z-10 bg-emerald-500/10 text-emerald-500 text-xs font-bold px-4 py-2 rounded-full border border-emerald-500/20 active:opacity-70 transition-opacity">
+              Add Money
             </button>
           </div>
         </div>
+      </motion.div>
 
-        <div className="text-center mt-6 mb-4 text-[11px] text-white/12 font-medium" style={{ fontFamily: 'DM Sans, sans-serif' }}>
+      {/* ════════ SETTINGS ════════ */}
+      <motion.div 
+        initial={{ opacity: 0, y: 14 }} 
+        animate={{ opacity: 1, y: 0 }} 
+        transition={{ duration: 0.4, delay: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }}
+      >
+        <div className="px-5 mt-6 mb-4">
+          <h3 className="text-sm font-medium text-zinc-300">Settings</h3>
+        </div>
+        <div className="px-5">
+          <div className="bg-[#181a20] rounded-2xl border border-white/[0.06] overflow-hidden">
+            {[
+              { id: 'profile', icon: User, label: 'Edit Profile' },
+              { id: 'payment', icon: CreditCard, label: 'Payment Methods', subLabel: 'Personal • UPI' },
+              { id: 'notifications', icon: Bell, label: 'Notifications', isToggle: true },
+              { id: 'help', icon: HelpCircle, label: 'Help & Support' },
+            ].map((item, i, arr) => (
+              <motion.button 
+                key={item.id}
+                whileTap={{ scale: 0.98, x: 2 }}
+                transition={{ duration: 0.1 }}
+                className={`group w-full flex items-center gap-4 px-4 py-4 text-left hover:bg-white/[0.02] transition-colors duration-200 ${
+                  i < arr.length - 1 ? 'border-b border-white/[0.04]' : ''
+                }`}
+              >
+                <div className="w-9 h-9 rounded-xl bg-zinc-800 flex items-center justify-center shrink-0">
+                  <item.icon size={18} className="text-zinc-400" />
+                </div>
+                <div className="flex-1">
+                  <div className="text-white font-medium text-sm">{item.label}</div>
+                  {item.subLabel && <div className="text-zinc-600 text-xs mt-0.5">{item.subLabel}</div>}
+                </div>
+                {item.isToggle ? (
+                  <div className="w-12 h-6 rounded-full bg-emerald-500 relative flex items-center px-1">
+                    <motion.div 
+                      className="w-4 h-4 rounded-full bg-white shadow-sm"
+                      initial={{ x: 24 }}
+                    />
+                  </div>
+                ) : (
+                  <ChevronRight size={16} className="text-zinc-700 group-hover:translate-x-[3px] transition-transform duration-200" />
+                )}
+              </motion.button>
+            ))}
+          </div>
+        </div>
+      </motion.div>
+
+      {/* ════════ SIGN OUT ════════ */}
+      <motion.div 
+        initial={{ opacity: 0, y: 14 }} 
+        animate={{ opacity: 1, y: 0 }} 
+        transition={{ duration: 0.4, delay: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+      >
+        <div className="px-5 mt-4">
+          <button onClick={handleSignOut} className="w-full flex items-center gap-3 py-4 border-t border-white/[0.04] active:opacity-60 transition-opacity">
+            <LogOut size={18} className="text-red-400" />
+            <span className="text-red-400 font-medium text-sm">Sign out</span>
+          </button>
+        </div>
+        <div className="text-zinc-700 text-[10px] text-center mt-3">
           CampusMobility v1.0.0
         </div>
-      </div>
+      </motion.div>
 
-      <div className="fixed bottom-0 left-0 right-0 z-50">
-        <div className="bg-[#080C09]/95 backdrop-blur-[20px] border-t border-white/05 px-2 pb-safe">
-          <div className="max-w-xl mx-auto flex items-center justify-around py-2">
-            <button onClick={() => navigate('/')} className="flex flex-col items-center gap-1 py-1 px-3 text-white/30 hover:text-white/60 transition-colors">
-              <Home size={20} />
-              <span className="text-[9px] font-bold uppercase tracking-wider">Home</span>
-            </button>
-            <button onClick={() => navigate('/history')} className="flex flex-col items-center gap-1 py-1 px-3 text-white/30 hover:text-white/60 transition-colors">
-              <History size={20} />
-              <span className="text-[9px] font-bold uppercase tracking-wider">History</span>
-            </button>
-            <button onClick={() => navigate('/ride-sharing')} className="relative flex flex-col items-center gap-1 py-1 px-4">
-              <div className="w-11 h-11 -mt-5 bg-[#22C55E] rounded-full flex items-center justify-center shadow-[0_8px_20px_rgba(34,197,94,0.35)]">
-                <Users size={20} className="text-[#080C09]" />
-              </div>
-              <span className="text-[9px] font-bold uppercase tracking-wider text-[#22C55E]">Share</span>
-            </button>
-            <button onClick={() => navigate('/support')} className="flex flex-col items-center gap-1 py-1 px-3 text-white/30 hover:text-white/60 transition-colors">
-              <HelpCircle size={20} />
-              <span className="text-[9px] font-bold uppercase tracking-wider">Support</span>
-            </button>
-            <button className="flex flex-col items-center gap-1 py-1 px-3 text-[#22C55E]">
-              <User size={20} />
-              <span className="text-[9px] font-bold uppercase tracking-wider">Profile</span>
-            </button>
-          </div>
-        </div>
-      </div>
+      {/* Shared Bottom Navigation */}
+      <BottomNav activeTab="profile" />
     </div>
   );
 }

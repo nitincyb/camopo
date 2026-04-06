@@ -5,6 +5,7 @@ import { collection, query, where, orderBy, limit, getDocs, getDocFromServer, do
 import { db, auth } from '../firebase';
 import { motion } from 'motion/react';
 import { handleFirestoreError, OperationType } from '../utils/firestoreErrorHandler';
+import BottomNav from '../components/shared/BottomNav';
 
 interface Ride {
   id: string;
@@ -100,7 +101,7 @@ export function TripHistory() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-zinc-950 p-6 space-y-8 text-zinc-50 pb-20">
+    <div className="min-h-screen bg-zinc-950 p-6 space-y-8 text-zinc-50 pb-[100px]">
       <div className="flex items-center gap-4">
         <button onClick={() => navigate(-1)} className="p-2 bg-zinc-900 rounded-full text-zinc-50 hover:bg-zinc-800 transition-colors">
           <ChevronLeft size={24} />
@@ -225,6 +226,7 @@ export function TripHistory() {
           </div>
         )}
       </div>
+      <BottomNav activeTab="trips" />
     </div>
   );
 }

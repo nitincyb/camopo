@@ -12,6 +12,7 @@ import { doc, updateDoc, collection, addDoc, onSnapshot, query, where, serverTim
 import { useGeolocation } from '../../hooks/useGeolocation';
 import { mapService } from '../../services/mapService';
 import { sendPushNotification } from '../../services/notificationService';
+import BottomNav from '../shared/BottomNav';
 import { handleFirestoreError, OperationType } from '../../utils/firestoreErrorHandler';
 import { format, addHours, isAfter, isBefore, addDays } from 'date-fns';
 
@@ -1269,7 +1270,7 @@ export default function RiderHome() {
 
       {/* Personalized Home Screen */}
       {step === 'home' && !showBooking && (
-        <div className="absolute inset-0 z-10 flex flex-col">
+        <div className="absolute inset-0 z-10 flex flex-col overflow-y-auto no-scrollbar pb-[100px]">
 
           {/* Search Bar - Primary Entry Point */}
           <div className="px-5 pt-12 pb-2">
@@ -2217,48 +2218,7 @@ export default function RiderHome() {
 
       {/* Bottom Navigation Bar */}
       {!showBooking && step === 'home' && (
-        <div className="absolute bottom-0 left-0 right-0 z-30">
-          <div className="bg-zinc-900 border-t border-zinc-800 px-2 pb-safe">
-            <div className="max-w-xl mx-auto flex items-center justify-around py-2">
-              <button 
-                className="flex flex-col items-center gap-1 py-2 px-3 text-emerald-500"
-              >
-                <Home size={20} />
-                <span className="text-[9px] font-bold uppercase tracking-wider">Home</span>
-              </button>
-              <button 
-                onClick={() => navigate('/history')}
-                className="flex flex-col items-center gap-1 py-2 px-3 text-zinc-500 hover:text-zinc-300 transition-colors"
-              >
-                <History size={20} />
-                <span className="text-[9px] font-bold uppercase tracking-wider">{t.history}</span>
-              </button>
-              <button 
-                onClick={() => navigate('/ride-sharing')}
-                className="relative flex flex-col items-center gap-1 py-1 px-4"
-              >
-                <div className="w-12 h-12 -mt-5 bg-emerald-500 rounded-full flex items-center justify-center shadow-lg">
-                  <Users size={22} className="text-black" />
-                </div>
-                <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-500">Share</span>
-              </button>
-              <button 
-                onClick={() => navigate('/support')}
-                className="flex flex-col items-center gap-1 py-2 px-3 text-zinc-500 hover:text-zinc-300 transition-colors"
-              >
-                <HelpCircle size={20} />
-                <span className="text-[9px] font-bold uppercase tracking-wider">{t.support}</span>
-              </button>
-              <button 
-                onClick={() => navigate('/profile')}
-                className="flex flex-col items-center gap-1 py-2 px-3 text-zinc-500 hover:text-zinc-300 transition-colors"
-              >
-                <User size={20} />
-                <span className="text-[9px] font-bold uppercase tracking-wider">{t.profile}</span>
-              </button>
-            </div>
-          </div>
-        </div>
+        <BottomNav activeTab="home" />
       )}
     </div>
   );

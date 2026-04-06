@@ -6,6 +6,7 @@ import { SupportTicket } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, Plus, MessageSquare, AlertTriangle, CheckCircle, Clock, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import BottomNav from './BottomNav';
 
 export default function SupportTickets() {
   const { user, profile } = useAuth();
@@ -88,7 +89,7 @@ export default function SupportTickets() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-50 flex flex-col">
+    <div className="min-h-screen bg-zinc-950 text-zinc-50 flex flex-col pb-[100px]">
       {/* Header */}
       <div className="bg-zinc-900 border-b border-zinc-800 p-4 sticky top-0 z-30 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -109,7 +110,7 @@ export default function SupportTickets() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 p-4 overflow-y-auto">
+      <div className="flex-1 p-4 overflow-y-auto pb-24">
         {loading ? (
           <div className="flex justify-center items-center h-40">
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-emerald-500"></div>
@@ -246,6 +247,7 @@ export default function SupportTickets() {
           </motion.div>
         )}
       </AnimatePresence>
+      <BottomNav activeTab="support" />
     </div>
   );
 }
