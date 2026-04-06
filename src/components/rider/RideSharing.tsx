@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, MapPin, Clock, ChevronRight, Search, ArrowLeft, Check } from 'lucide-react';
+import { Users, MapPin, Clock, ChevronRight, Search, ChevronLeft, ArrowLeft, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import BottomNav from '../shared/BottomNav';
@@ -140,24 +140,29 @@ export default function RideSharing() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white font-sans pb-[100px]">
-      {/* Header */}
-      <div className="sticky top-0 z-30 bg-zinc-950/80 backdrop-blur-xl border-b border-white/5 p-6 flex items-center gap-4">
-        <button 
-          onClick={() => navigate(-1)}
-          className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
-        >
-          <ArrowLeft size={20} />
-        </button>
-        <h1 className="text-xl font-black font-display uppercase tracking-widest">{t.ride_sharing}</h1>
+    <div className="min-h-screen bg-zinc-950 flex flex-col font-sans pb-[100px]">
+      {/* ════════ HEADER ════════ */}
+      <div className="px-5 pt-12 pb-6 border-b border-white/[0.03] flex justify-between items-center sticky top-0 bg-zinc-950/80 backdrop-blur-xl z-40">
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => navigate(-1)}
+            className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center hover:bg-zinc-800 transition-colors"
+          >
+            <ChevronLeft size={18} className="text-white" />
+          </button>
+          <div className="flex flex-col">
+            <h1 className="text-lg font-bold text-white tracking-tight">{t.ride_sharing}</h1>
+            <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.2em]">{t.available_rides}</span>
+          </div>
+        </div>
       </div>
 
-      <div className="p-6 max-w-2xl mx-auto space-y-6">
+      <div className="px-5 pt-4 pb-24 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-zinc-500 font-black text-[10px] uppercase tracking-[0.3em]">{t.available_rides}</h2>
+          <h2 className="text-zinc-500 font-bold text-[10px] uppercase tracking-[0.2em]">{t.available_rides}</h2>
           <div className="flex items-center gap-2 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
             <Users size={12} className="text-emerald-500" />
-            <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">{rides.length} Active</span>
+            <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">{rides.length} Active</span>
           </div>
         </div>
 
@@ -167,22 +172,23 @@ export default function RideSharing() {
             <p className="text-zinc-500 font-bold text-xs uppercase tracking-widest">Loading shared rides...</p>
           </div>
         ) : rides.length === 0 ? (
-          <div className="text-center py-20 space-y-4 bg-white/5 rounded-[32px] border border-white/5">
-            <div className="w-16 h-16 bg-zinc-900 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/5">
-              <Users size={32} className="text-zinc-800" />
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#1c1c1e] to-[#121213] border border-white/[0.05] shadow-[0_4px_24px_rgba(0,0,0,0.5)] flex items-center justify-center mb-4">
+              <Users size={24} className="text-zinc-700" />
             </div>
-            <p className="text-zinc-500 font-bold text-sm uppercase tracking-widest px-6">{t.no_rides}</p>
+            <p className="text-white font-bold text-sm tracking-tight mb-1">{t.no_rides}</p>
+            <p className="text-zinc-600 text-xs font-medium mb-4">Check back later for newly shared rides.</p>
           </div>
         ) : (
           <div className="space-y-4">
             {rides.map((ride) => (
               <motion.div 
                 key={ride.id}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-zinc-900/50 border border-white/5 rounded-[32px] overflow-hidden hover:border-emerald-500/30 transition-colors"
+                className="bg-gradient-to-br from-[#1c1c1e] to-[#121213] border border-white/[0.05] shadow-[0_4px_24px_rgba(0,0,0,0.5)] rounded-2xl overflow-hidden hover:border-white/[0.1] transition-all"
               >
-                <div className="p-6 space-y-6">
+                <div className="p-5 space-y-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-zinc-800 rounded-xl flex items-center justify-center overflow-hidden border border-white/10">

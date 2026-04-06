@@ -101,15 +101,25 @@ export function TripHistory() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-zinc-950 p-6 space-y-8 text-zinc-50 pb-[100px]">
-      <div className="flex items-center gap-4">
-        <button onClick={() => navigate(-1)} className="p-2 bg-zinc-900 rounded-full text-zinc-50 hover:bg-zinc-800 transition-colors">
-          <ChevronLeft size={24} />
-        </button>
-        <h1 className="text-3xl font-black tracking-tight italic">Your Trips</h1>
+    <div className="min-h-screen bg-zinc-950 flex flex-col font-sans pb-[100px]">
+      {/* ════════ HEADER ════════ */}
+      <div className="px-5 pt-12 pb-6 border-b border-white/[0.03] flex justify-between items-center sticky top-0 bg-zinc-950/80 backdrop-blur-xl z-40">
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => navigate(-1)}
+            className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center hover:bg-zinc-800 transition-colors"
+          >
+            <ChevronLeft size={18} className="text-white" />
+          </button>
+          <div className="flex flex-col">
+            <h1 className="text-lg font-bold text-white tracking-tight">Your Trips</h1>
+            <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.2em]">Journey History</span>
+          </div>
+        </div>
       </div>
 
-      <div className="space-y-4">
+      {/* ════════ CONTENT ════════ */}
+      <div className="px-5 pt-4 pb-24 space-y-4">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-4">
             <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
@@ -117,12 +127,12 @@ export function TripHistory() {
           </div>
         ) : trips.length > 0 ? (
           trips.map((trip, index) => (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
+            <motion.div 
+              key={trip.id}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              key={trip.id}
-              className="bg-zinc-900/50 rounded-[32px] border border-zinc-800 p-6 space-y-4 hover:border-emerald-500/30 transition-colors"
+              className="bg-gradient-to-br from-[#1c1c1e] to-[#121213] border border-white/[0.05] shadow-[0_4px_24px_rgba(0,0,0,0.5)] rounded-2xl p-5 block relative space-y-4"
             >
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-2 text-zinc-400">
@@ -217,12 +227,18 @@ export function TripHistory() {
             </motion.div>
           ))
         ) : (
-          <div className="p-8 text-center bg-zinc-900/50 rounded-[32px] border border-zinc-800">
-            <div className="w-16 h-16 bg-zinc-800 rounded-full mx-auto flex items-center justify-center text-zinc-600 mb-4">
-              <Clock size={32} />
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#1c1c1e] to-[#121213] border border-white/[0.05] shadow-[0_4px_24px_rgba(0,0,0,0.5)] flex items-center justify-center mb-4">
+              <Clock size={24} className="text-zinc-700" />
             </div>
-            <h3 className="text-lg font-bold text-zinc-50">No trips yet</h3>
-            <p className="text-zinc-500 text-sm">Your journey history will appear here once you complete your first ride.</p>
+            <p className="text-white font-bold text-sm tracking-tight mb-1">No trips yet</p>
+            <p className="text-zinc-600 text-xs font-medium mb-4">Your journey history will appear here once you complete your first ride.</p>
+            <button 
+              onClick={() => navigate('/')}
+              className="text-emerald-500 text-xs font-bold uppercase tracking-wider hover:opacity-80 transition-opacity"
+            >
+              Book your first ride
+            </button>
           </div>
         )}
       </div>

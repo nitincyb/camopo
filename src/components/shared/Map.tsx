@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useRef } from 'react';
+import React, { useEffect, useMemo, useState, useRef, memo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { motion, AnimatePresence } from 'motion/react';
@@ -86,34 +86,26 @@ function MapControls({ isAutoCenter, setIsAutoCenter }: { isAutoCenter: boolean,
   return (
     <div className="absolute right-4 top-[120px] z-[1000] flex flex-col gap-3 pointer-events-auto">
       <button 
-        onClick={() => {
-          setIsAutoCenter(true);
-        }}
-        className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all active:scale-90 shadow-[0_8px_30px_rgba(0,0,0,0.5)] border border-white/10 backdrop-blur-xl ${
+        onClick={() => setIsAutoCenter(true)}
+        className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all active:scale-90 shadow-[0_4px_16px_rgba(0,0,0,0.4)] border border-white/10 ${
           isAutoCenter 
             ? 'bg-emerald-500 text-black' 
-            : 'bg-[#151515]/60 text-zinc-300 hover:bg-[#151515]/80'
+            : 'bg-[#151515]/90 text-zinc-300'
         }`}
         title="Recenter Map"
       >
         <Target size={20} />
       </button>
-      <div className="flex flex-col bg-[#151515]/60 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] overflow-hidden">
+      <div className="flex flex-col bg-[#151515]/90 border border-white/10 rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.4)] overflow-hidden">
         <button 
           className="w-12 h-12 flex items-center justify-center text-zinc-300 hover:bg-white/10 transition-all active:scale-90 border-b border-white/5"
-          onClick={() => {
-            setIsAutoCenter(false);
-            map.zoomIn();
-          }}
+          onClick={() => { setIsAutoCenter(false); map.zoomIn(); }}
         >
           <Plus size={20} />
         </button>
         <button 
           className="w-12 h-12 flex items-center justify-center text-zinc-300 hover:bg-white/10 transition-all active:scale-90"
-          onClick={() => {
-            setIsAutoCenter(false);
-            map.zoomOut();
-          }}
+          onClick={() => { setIsAutoCenter(false); map.zoomOut(); }}
         >
           <Minus size={20} />
         </button>
@@ -122,7 +114,7 @@ function MapControls({ isAutoCenter, setIsAutoCenter }: { isAutoCenter: boolean,
   );
 }
 
-export default function Map({ center, zoom = 15, markers = [], path = [], onMarkerClick }: MapProps) {
+function Map({ center, zoom = 15, markers = [], path = [], onMarkerClick }: MapProps) {
   const [isAutoCenter, setIsAutoCenter] = useState(true);
   const polylinePositions = useMemo(() => 
     path
@@ -143,11 +135,11 @@ export default function Map({ center, zoom = 15, markers = [], path = [], onMark
   }
 
   return (
-    <div className="h-full w-full bg-[#fcfcfc] overflow-hidden relative group">
+    <div className="h-full w-full overflow-hidden relative group">
       <MapContainer 
         center={[center.lat, center.lng]} 
         zoom={zoom} 
-        style={{ height: '100%', width: '100%', background: '#fcfcfc' }}
+        style={{ height: '100%', width: '100%' }}
         zoomControl={false}
         attributionControl={false}
       >
@@ -160,8 +152,7 @@ export default function Map({ center, zoom = 15, markers = [], path = [], onMark
         />
         <MapControls isAutoCenter={isAutoCenter} setIsAutoCenter={setIsAutoCenter} />
         <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-          className="map-tiles-transparent"
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         
         {markers.map((marker) => {
@@ -195,39 +186,16 @@ export default function Map({ center, zoom = 15, markers = [], path = [], onMark
         })}
 
         {polylinePositions.length > 1 && (
-          <>
-            {/* Outer large cinematic glow */}
-            <Polyline 
-              positions={polylinePositions} 
-              color="#10b981" 
-              weight={12} 
-              opacity={0.08}
-              className="drop-shadow-[0_0_12px_rgba(16,185,129,0.5)]"
-            />
-            {/* Inner glow for polyline */}
-            <Polyline 
-              positions={polylinePositions} 
-              color="#10b981" 
-              weight={6} 
-              opacity={0.3}
-            />
-            {/* Main polyline */}
-            <Polyline 
-              positions={polylinePositions} 
-              color="#10b981" 
-              weight={3} 
-              opacity={1}
-              dashArray="1, 10"
-              className="animate-dash stroke-linecap-round"
-            />
-          </>
+          <Polyline 
+            positions={polylinePositions} 
+            color="#22c55e" 
+            weight={4} 
+            opacity={0.85}
+          />
         )}
       </MapContainer>
 
       <style>{`
-        .leaflet-container {
-          background: #fcfcfc !important;
-        }
         .premium-popup .leaflet-popup-content-wrapper {
           background: rgba(15, 15, 15, 0.85);
           backdrop-filter: blur(20px);
@@ -260,3 +228,12 @@ export default function Map({ center, zoom = 15, markers = [], path = [], onMark
     </div>
   );
 }
+
+// React.memo: prevents Leaflet re-renders on unrelated parent state changes
+export default memo(Map, (prev, next) =>
+  prev.center.lat === next.center.lat &&
+  prev.center.lng === next.center.lng &&
+  prev.zoom === next.zoom &&
+  prev.markers === next.markers &&
+  prev.path === next.path
+);

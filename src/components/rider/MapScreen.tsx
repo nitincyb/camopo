@@ -128,14 +128,6 @@ export default function MapScreen() {
           ]}
           path={path}
         />
-        {/* Dark vignette overlay for premium feel */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              'radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.45) 100%)',
-          }}
-        />
       </motion.div>
 
       {/* ── Tap backdrop to collapse ────────────────────────────────────── */}
@@ -183,14 +175,10 @@ export default function MapScreen() {
             willChange: 'height, transform'
           }}
         >
-          {/* Spinning Cinematic Edge Light (CSS Animated for Mobile Performance) */}
+          {/* Static glowing border - replaces cinematic-spin for mobile perf */}
           <div
-            className="absolute inset-[-100%] z-0"
-            style={{
-              background: 'conic-gradient(from 0deg, transparent 0%, transparent 35%, rgba(34, 197, 94, 0.4) 40%, rgba(34, 197, 94, 0.9) 50%, rgba(34, 197, 94, 0.4) 60%, transparent 65%, transparent 100%)',
-              willChange: 'transform',
-              animation: 'cinematic-spin 5s linear infinite'
-            }}
+            className="absolute inset-0 z-0"
+            style={{ borderRadius: '28px 28px 0 0', boxShadow: 'inset 0 0 0 1.5px rgba(34,197,94,0.25), 0 -4px 20px rgba(34,197,94,0.08)' }}
           />
 
           {/* Solid inner core (removing backdrop filter entirely for smooth mobile perf) */}

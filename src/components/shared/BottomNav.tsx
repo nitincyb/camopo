@@ -47,18 +47,8 @@ export default function BottomNav({ activeTab: propActiveTab }: BottomNavProps) 
     >
       <div className="relative h-[68px] rounded-[32px] overflow-visible">
         
-        {/* Layer 1: Subtle Video Texture Backdrop */}
-        <div className="absolute inset-0 z-0 rounded-[32px] overflow-hidden">
-          <video
-            autoPlay loop muted playsInline
-            className="absolute inset-0 w-full h-full object-cover opacity-[0.18]"
-          >
-            <source src="/assets/name-bg.mp4" type="video/mp4" />
-          </video>
-        </div>
-
-        {/* Layer 2: Primary Glass Surface */}
-        <div className="absolute inset-0 z-[1] rounded-[32px] bg-black/75 backdrop-blur-[40px] saturate-[110%]" />
+        {/* Primary Glass Surface - no video for mobile perf */}
+        <div className="absolute inset-0 z-[1] rounded-[32px] bg-black/80 backdrop-blur-[20px]" />
 
         {/* Layer 3: Top Edge Rim Light */}
         <div 
@@ -98,7 +88,7 @@ export default function BottomNav({ activeTab: propActiveTab }: BottomNavProps) 
                       <div className="absolute inset-0 flex items-center justify-center z-20">
                         <Icon 
                           size={22} 
-                          className="text-white drop-shadow-[0_2px_10px_rgba(255,255,255,0.2)]" 
+                          className={`${isActive && tab.id === 'share' ? 'text-yellow-400 drop-shadow-[0_2px_10px_rgba(250,204,21,0.4)]' : 'text-white drop-shadow-[0_2px_10px_rgba(255,255,255,0.2)]'}`} 
                           strokeWidth={2.5} 
                         />
                       </div>
@@ -109,7 +99,7 @@ export default function BottomNav({ activeTab: propActiveTab }: BottomNavProps) 
                   </motion.button>
 
                   {/* Share Label - Neutral */}
-                  <span className="mt-1 text-[8px] font-dm font-medium tracking-[0.10em] uppercase text-white/35">
+                  <span className={`mt-1 text-[8px] font-dm font-medium tracking-[0.10em] uppercase transition-colors duration-200 ${isActive && tab.id === 'share' ? 'text-yellow-400/60' : 'text-white/35'}`}>
                     {tab.label}
                   </span>
                 </div>
@@ -139,19 +129,19 @@ export default function BottomNav({ activeTab: propActiveTab }: BottomNavProps) 
                 {isActive && (
                   <motion.div
                     layoutId="navIndicator"
-                    className="absolute -top-[12px] left-1/2 -translate-x-1/2 w-4 h-[2px] bg-[#22C55E] rounded-full"
+                    className={`absolute -top-[12px] left-1/2 -translate-x-1/2 w-4 h-[2px] rounded-full ${tab.id === 'share' ? 'bg-yellow-400' : 'bg-[#22C55E]'}`}
                   />
                 )}
 
                 <motion.div
-                  className={`transition-colors duration-200 ${isActive ? 'text-[#22C55E]' : 'text-white/28 group-hover:text-white/55'}`}
+                  className={`transition-colors duration-200 ${isActive ? (tab.id === 'share' ? 'text-yellow-400' : 'text-[#22C55E]') : 'text-white/28 group-hover:text-white/55'}`}
                   animate={isActive ? { scale: [1, 1.15, 1] } : {}}
                   transition={{ duration: 0.3 }}
                 >
                   <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
                 </motion.div>
 
-                <span className={`text-[8px] font-dm font-medium tracking-[0.10em] uppercase transition-colors duration-200 ${isActive ? 'text-[#22C55E]' : 'text-white/20 group-hover:text-white/40'}`}>
+                <span className={`text-[8px] font-dm font-medium tracking-[0.10em] uppercase transition-colors duration-200 ${isActive ? (tab.id === 'share' ? 'text-yellow-400' : 'text-[#22C55E]') : 'text-white/20 group-hover:text-white/40'}`}>
                   {tab.label}
                 </span>
               </motion.button>

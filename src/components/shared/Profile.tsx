@@ -8,6 +8,84 @@ import BottomNav from './BottomNav';
 import { doc, updateDoc } from 'firebase/firestore';
 import { handleFirestoreError, OperationType } from '../../utils/firestoreErrorHandler';
 
+// --- CinematicScramble: Smooth scramble + depth animation ---
+const SCRAMBLE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+
+function CinematicScramble({ text, className = '', style = {} }: { text: string; className?: string; style?: React.CSSProperties }) {
+  const [display, setDisplay] = React.useState('');
+  const [phase, setPhase] = React.useState<'scramble' | 'done'>('scramble');
+  const frameRef = React.useRef(0);
+  const startRef = React.useRef(0);
+
+  React.useEffect(() => {
+    if (!text) return;
+
+    const totalDuration = 1200;
+    const resolveStart = 300;
+
+    const seed = text.split('').map(() => Math.floor(Math.random() * SCRAMBLE_CHARS.length));
+
+    startRef.current = performance.now();
+    setPhase('scramble');
+
+    const animate = (now: number) => {
+      const elapsed = now - startRef.current;
+      const progress = Math.min(elapsed / totalDuration, 1);
+
+      if (progress >= 1) {
+        setDisplay(text);
+        setPhase('done');
+        return;
+      }
+
+      let result = '';
+      for (let i = 0; i < text.length; i++) {
+        if (text[i] === ' ') {
+          result += ' ';
+          continue;
+        }
+
+        const charThreshold = resolveStart / totalDuration + (i / text.length) * 0.5;
+
+        if (progress > charThreshold) {
+          result += text[i];
+        } else {
+          const cycleSpeed = 4;
+          const idx = (seed[i] + Math.floor(elapsed / (50 + i * 8)) * cycleSpeed) % SCRAMBLE_CHARS.length;
+          result += SCRAMBLE_CHARS[idx];
+        }
+      }
+
+      setDisplay(result);
+      frameRef.current = requestAnimationFrame(animate);
+    };
+
+    frameRef.current = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frameRef.current);
+  }, [text]);
+
+  return (
+    <motion.p
+      className={className}
+      style={style}
+      initial={{ opacity: 0, scale: 1.03, filter: 'blur(6px)' }}
+      animate={{
+        opacity: 1,
+        scale: 1,
+        filter: 'blur(0px)',
+      }}
+      transition={{
+        duration: 1.0,
+        ease: [0.22, 1, 0.36, 1],
+        opacity: { duration: 0.5 },
+        filter: { duration: 1.2, ease: [0.25, 0.46, 0.45, 0.94] },
+      }}
+    >
+      {display}
+    </motion.p>
+  );
+}
+
 export function Profile() {
   const { profile, user } = useAuth();
   const navigate = useNavigate();
@@ -16,21 +94,7 @@ export function Profile() {
   const [ridesCount, setRidesCount] = useState(0);
   const [distance, setDistance] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [isSweeping, setIsSweeping] = useState(false);
-  const timeoutsRef = useRef<NodeJS.Timeout[]>([]);
 
-  const playSequence = () => {
-    timeoutsRef.current.forEach(clearTimeout);
-    timeoutsRef.current = [];
-    setIsSweeping(true);
-    const t1 = setTimeout(() => setIsSweeping(false), 1500);
-    timeoutsRef.current = [t1];
-  };
-
-  useEffect(() => {
-    const t = setTimeout(playSequence, 400);
-    return () => clearTimeout(t);
-  }, []);
 
   useEffect(() => {
     const link = document.createElement('link');
@@ -40,14 +104,6 @@ export function Profile() {
 
     const style = document.createElement('style');
     style.innerHTML = `
-      @keyframes sweep {
-        0%   { background-position: 200% center; }
-        100% { background-position: -200% center; }
-      }
-      @keyframes spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-      }
       .no-scrollbar::-webkit-scrollbar { display: none; }
       .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     `;
@@ -102,119 +158,97 @@ export function Profile() {
     >
       {/* ════════ HEADER ════════ */}
       <motion.div 
-        className="px-5 pt-20 pb-4"
-        initial={{ opacity: 0, y: 14 }} 
+        className="px-5 pt-24 pb-10 flex flex-col items-center text-center"
+        initial={{ opacity: 0, y: 20 }} 
         animate={{ opacity: 1, y: 0 }} 
-        transition={{ duration: 0.4, delay: 0, ease: [0.25, 0.46, 0.45, 0.94] }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       >
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <h1 className="text-zinc-500 text-[10px] font-bold uppercase tracking-[0.2em] mb-2 opacity-50">Profile</h1>
-            <motion.div 
-               onClick={playSequence}
-               whileTap={{ scale: 0.96 }}
-               style={{ 
-                  position: 'relative',
-                  display: 'inline-block',
-                  cursor: 'pointer',
-                  userSelect: 'none',
-               }}
-            >
-              <h1 
-                style={{
-                  fontSize: '56px',
-                  fontWeight: 900,
-                  letterSpacing: '-0.04em',
-                  lineHeight: 1.0,
-                  margin: 0,
-                  fontFamily: '"Sora", sans-serif',
-                  background: 'linear-gradient(90deg, #F59E0B, #10B981, #F59E0B)',
-                  backgroundSize: '200% auto',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  animation: isSweeping ? 'sweep 1.5s ease-out forwards' : 'none',
-                  textShadow: '0 0 30px rgba(16,185,129,0.15)'
-                }}>
-                {profile?.displayName || 'Raj Tak'}
-              </h1>
-            </motion.div>
-            <p className="text-zinc-500 text-sm mt-1.5 font-medium opacity-80">{user?.email || 'user@campus.edu'}</p>
-            <div className="mt-4 inline-flex">
-              <span className="bg-emerald-500/10 text-emerald-500 text-[10px] font-bold px-3 py-1 rounded-full border border-emerald-500/20 tracking-wider">
-                {profile?.role === 'driver' ? 'DRIVER' : 'RIDER'}
+        <motion.div 
+          className="relative w-28 h-28 mb-6"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.1, ease: [0.34, 1.56, 0.64, 1] }}
+        >
+          <div className="relative z-10 w-full h-full rounded-full border border-white/[0.05] overflow-hidden flex items-center justify-center bg-gradient-to-br from-[#1c1c1e] to-[#121213] shadow-[0_8px_32px_rgba(0,0,0,0.6)]">
+            {user?.photoURL ? (
+              <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover grayscale-[0.2]" />
+            ) : (
+              <span className="text-3xl font-bold text-zinc-600 tracking-widest">
+                {profile?.displayName?.[0] || user?.email?.[0]?.toUpperCase() || 'P'}
               </span>
-            </div>
+            )}
           </div>
+        </motion.div>
 
-          <motion.div 
-            className="group relative w-11 h-11 shrink-0 ml-4"
-            initial={{ scale: 0.6, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.55, ease: [0.34, 1.56, 0.64, 1] }}
-          >
-            <div 
-              className="absolute inset-[-3px] rounded-full z-0 pointer-events-none transition-[animation-duration] duration-300 ease-in-out group-hover:![animation-duration:1.5s]"
-              style={{
-                background: 'conic-gradient(from 0deg, #22C55E 0deg, rgba(34,197,94,0.10) 180deg, #22C55E 360deg)',
-                maskImage: 'radial-gradient(farthest-side, transparent calc(100% - 2px), white calc(100% - 2px))',
-                WebkitMaskImage: 'radial-gradient(farthest-side, transparent calc(100% - 2px), white calc(100% - 2px))',
-                animation: 'spin 4s linear infinite',
-                willChange: 'transform',
-                transform: 'translateZ(0)'
-              }}
-            />
-            <div className="relative z-10 w-full h-full rounded-full border border-zinc-800 overflow-hidden flex items-center justify-center bg-[#181a20]">
-              {user?.photoURL ? (
-                <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-lg font-semibold text-white">
-                  {profile?.displayName?.[0] || user?.email?.[0]?.toUpperCase() || 'P'}
-                </span>
-              )}
-            </div>
-          </motion.div>
+        <motion.p 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="text-zinc-600 text-[10px] font-bold uppercase tracking-[0.4em] mb-3"
+        >
+          {new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening'}
+        </motion.p>
+        
+        <div className="mb-1 pointer-events-none">
+          <CinematicScramble 
+            text={profile?.displayName || 'Raj Tak'}
+            className="text-white font-bold tracking-tight"
+            style={{
+              fontSize: '42px',
+              lineHeight: 1.0,
+              margin: 0,
+              fontFamily: '"Sora", sans-serif',
+            }}
+          />
+        </div>
+
+        <p className="text-zinc-600 text-xs font-medium opacity-50 mb-5">{user?.email || 'user@campus.edu'}</p>
+
+        <div className="flex items-center gap-2 justify-center px-4 py-1 rounded-full border border-zinc-900 bg-zinc-950/50">
+          <span className="w-1 h-1 rounded-full bg-emerald-500/50" />
+          <span className="text-zinc-500 font-bold text-[9px] uppercase tracking-[0.25em]">
+            {profile?.role === 'driver' ? 'DRV CONSOLE' : 'RIDER PASS'}
+          </span>
         </div>
       </motion.div>
 
-      {/* ════════ STATS ════════ */}
+      {/* ════════ ACTIVITY ════════ */}
       <motion.div 
-        initial={{ opacity: 0, y: 14 }} 
-        animate={{ opacity: 1, y: 0 }} 
-        transition={{ duration: 0.4, delay: 0.07, ease: [0.25, 0.46, 0.45, 0.94] }}
+        initial={{ opacity: 0 }} 
+        animate={{ opacity: 1 }} 
+        transition={{ duration: 0.5, delay: 0.1 }}
       >
-        <div className="px-5 mt-8 mb-4">
-          <h3 className="text-sm font-medium text-zinc-300">Activity</h3>
-        </div>
-        <div className="px-5">
-          <div className="grid grid-cols-3 gap-3">
-            {[
-              { value: ridesCount, label: 'RIDES' },
-              { value: distance, label: 'DISTANCE' },
-              { value: '2024', label: 'SINCE' }
-            ].map((stat, i) => (
-              <motion.div 
-                key={i} 
-                className="group relative overflow-hidden bg-[#181a20] rounded-2xl border border-white/[0.06] py-5 flex flex-col items-center justify-center hover:scale-[1.05] hover:-translate-y-[4px] hover:border-white/[0.12] transition-all duration-300 ease-in-out"
-                whileTap={{ scale: 0.95 }}
-              >
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.06)_0%,transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-                <div className="absolute top-0 left-[-100%] h-full w-[150%] bg-gradient-to-r from-transparent via-white/[0.04] to-transparent skew-x-[-20deg] group-hover:translate-x-[150%] transition-transform duration-[800ms] ease-in-out pointer-events-none" />
-                <span className="relative z-10 text-white font-semibold text-xl">{stat.value}</span>
-                <span className="relative z-10 text-zinc-500 text-xs font-medium tracking-wide mt-1">{stat.label}</span>
-              </motion.div>
-            ))}
-          </div>
+        <div className="px-5 mt-4">
+          <motion.button 
+            onClick={() => navigate('/history')}
+            className="group relative w-full bg-gradient-to-br from-[#1c1c1e] to-[#121213] rounded-2xl border border-white/[0.05] shadow-[0_4px_24px_rgba(0,0,0,0.5)] p-5 flex items-center justify-between transition-all duration-300"
+            whileTap={{ scale: 0.98 }}
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-zinc-950 border border-zinc-900 flex items-center justify-center shrink-0">
+                <History size={18} className="text-zinc-500 group-hover:text-emerald-500 transition-colors" />
+              </div>
+              <div className="text-left">
+                <div className="text-white text-sm font-bold tracking-normal">Journey Records</div>
+                <div className="text-zinc-600 text-[10px] font-bold uppercase tracking-wider mt-1 opacity-70">
+                  {ridesCount} Total • {distance} KM
+                </div>
+              </div>
+            </div>
+            
+            <ChevronRight size={16} className="text-zinc-800 group-hover:text-zinc-400 transition-colors" />
+          </motion.button>
         </div>
       </motion.div>
 
       {/* ════════ LANGUAGE ════════ */}
       <motion.div 
-        initial={{ opacity: 0, y: 14 }} 
-        animate={{ opacity: 1, y: 0 }} 
-        transition={{ duration: 0.4, delay: 0.14, ease: [0.25, 0.46, 0.45, 0.94] }}
+        initial={{ opacity: 0 }} 
+        animate={{ opacity: 1 }} 
+        transition={{ duration: 0.5, delay: 0.15 }}
       >
-        <div className="px-5 mt-6 mb-4">
-          <h3 className="text-sm font-medium text-zinc-300">Language</h3>
+        <div className="px-5 mt-8 mb-4">
+          <h3 className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.2em]">Regional</h3>
         </div>
         <div className="px-5 flex gap-3 overflow-x-auto no-scrollbar">
           {[
@@ -227,10 +261,10 @@ export function Profile() {
               <button
                 key={lang.id}
                 onClick={() => handleLanguageChange(lang.id)}
-                className={`px-4 py-2.5 rounded-full shrink-0 transition-colors ${
+                className={`px-5 py-2.5 rounded-xl shrink-0 transition-all text-xs font-bold border ${
                   isActive 
-                    ? 'bg-white text-black font-bold text-xs' 
-                    : 'bg-zinc-900 border border-zinc-800 text-zinc-500 text-xs font-medium'
+                    ? 'bg-white text-black border-white shadow-[0_4px_24px_rgba(255,255,255,0.15)]' 
+                    : 'bg-gradient-to-br from-[#1c1c1e] to-[#121213] border-white/[0.05] shadow-[0_4px_24px_rgba(0,0,0,0.5)] text-zinc-600 hover:text-white transition-colors'
                 }`}
               >
                 {lang.label}
@@ -242,21 +276,18 @@ export function Profile() {
 
       {/* ════════ WALLET ════════ */}
       <motion.div 
-        initial={{ opacity: 0, y: 14 }} 
-        animate={{ opacity: 1, y: 0 }} 
-        transition={{ duration: 0.4, delay: 0.21, ease: [0.25, 0.46, 0.45, 0.94] }}
+        initial={{ opacity: 0 }} 
+        animate={{ opacity: 1 }} 
+        transition={{ duration: 0.5, delay: 0.2 }}
       >
         <div className="px-5 mt-6 mb-4">
-          <h3 className="text-sm font-medium text-zinc-300">Wallet</h3>
+          <h3 className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.2em]">Wallet</h3>
         </div>
         <div className="px-5">
-          <div className="group relative overflow-hidden bg-[#181a20] rounded-2xl border border-white/[0.06] p-5 flex items-center justify-between hover:border-white/[0.12] transition-colors duration-300">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.06)_0%,transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-            <div className="absolute top-0 left-[-100%] h-full w-[150%] bg-gradient-to-r from-transparent via-white/[0.04] to-transparent skew-x-[-20deg] group-hover:translate-x-[150%] transition-transform duration-[800ms] ease-in-out pointer-events-none" />
-            
+          <div className="group relative bg-gradient-to-br from-[#1c1c1e] to-[#121213] rounded-2xl border border-white/[0.05] shadow-[0_4px_24px_rgba(0,0,0,0.5)] p-5 flex items-center justify-between transition-colors duration-300">
             <div className="relative z-10">
-              <div className="text-white font-semibold text-2xl tracking-tight">₹0.00</div>
-              <div className="text-zinc-500 text-xs mt-1">Available Balance</div>
+              <div className="text-white font-bold text-xl tracking-tight">₹0.00</div>
+              <div className="text-zinc-600 text-[10px] uppercase font-bold tracking-wider mt-1 opacity-70">Balance</div>
             </div>
             <button className="relative z-10 bg-emerald-500/10 text-emerald-500 text-xs font-bold px-4 py-2 rounded-full border border-emerald-500/20 active:opacity-70 transition-opacity">
               Add Money
@@ -266,46 +297,46 @@ export function Profile() {
       </motion.div>
 
       {/* ════════ SETTINGS ════════ */}
+      {/* ════════ SETTINGS ════════ */}
       <motion.div 
-        initial={{ opacity: 0, y: 14 }} 
-        animate={{ opacity: 1, y: 0 }} 
-        transition={{ duration: 0.4, delay: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }}
+        initial={{ opacity: 0 }} 
+        animate={{ opacity: 1 }} 
+        transition={{ duration: 0.5, delay: 0.25 }}
       >
-        <div className="px-5 mt-6 mb-4">
-          <h3 className="text-sm font-medium text-zinc-300">Settings</h3>
+        <div className="px-5 mt-8 mb-4">
+          <h3 className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.2em]">Settings</h3>
         </div>
         <div className="px-5">
-          <div className="bg-[#181a20] rounded-2xl border border-white/[0.06] overflow-hidden">
+          <div className="bg-gradient-to-br from-[#1c1c1e] to-[#121213] rounded-2xl border border-white/[0.05] shadow-[0_4px_24px_rgba(0,0,0,0.5)] overflow-hidden">
             {[
-              { id: 'profile', icon: User, label: 'Edit Profile' },
+              { id: 'profile', icon: User, label: 'Account Profile' },
               { id: 'payment', icon: CreditCard, label: 'Payment Methods', subLabel: 'Personal • UPI' },
-              { id: 'notifications', icon: Bell, label: 'Notifications', isToggle: true },
-              { id: 'help', icon: HelpCircle, label: 'Help & Support' },
+              { id: 'notifications', icon: Bell, label: 'App Notifications', isToggle: true },
+              { id: 'help', icon: HelpCircle, label: 'Support & Help' },
             ].map((item, i, arr) => (
               <motion.button 
                 key={item.id}
-                whileTap={{ scale: 0.98, x: 2 }}
-                transition={{ duration: 0.1 }}
-                className={`group w-full flex items-center gap-4 px-4 py-4 text-left hover:bg-white/[0.02] transition-colors duration-200 ${
-                  i < arr.length - 1 ? 'border-b border-white/[0.04]' : ''
+                whileTap={{ scale: 0.98 }}
+                className={`group w-full flex items-center gap-4 px-5 py-4 text-left transition-colors duration-200 ${
+                  i < arr.length - 1 ? 'border-b border-white/[0.05]' : ''
                 }`}
               >
-                <div className="w-9 h-9 rounded-xl bg-zinc-800 flex items-center justify-center shrink-0">
-                  <item.icon size={18} className="text-zinc-400" />
+                <div className="w-8 h-8 rounded-lg bg-zinc-950 border border-zinc-900 flex items-center justify-center shrink-0">
+                  <item.icon size={16} className="text-zinc-500" />
                 </div>
                 <div className="flex-1">
-                  <div className="text-white font-medium text-sm">{item.label}</div>
-                  {item.subLabel && <div className="text-zinc-600 text-xs mt-0.5">{item.subLabel}</div>}
+                  <div className="text-white font-bold text-sm tracking-tight">{item.label}</div>
+                  {item.subLabel && <div className="text-zinc-700 text-[10px] font-bold uppercase tracking-wider mt-0.5">{item.subLabel}</div>}
                 </div>
                 {item.isToggle ? (
-                  <div className="w-12 h-6 rounded-full bg-emerald-500 relative flex items-center px-1">
+                  <div className="w-10 h-5 rounded-full bg-emerald-500 relative flex items-center px-1">
                     <motion.div 
-                      className="w-4 h-4 rounded-full bg-white shadow-sm"
-                      initial={{ x: 24 }}
+                      className="w-3 h-3 rounded-full bg-white shadow-sm"
+                      initial={{ x: 20 }}
                     />
                   </div>
                 ) : (
-                  <ChevronRight size={16} className="text-zinc-700 group-hover:translate-x-[3px] transition-transform duration-200" />
+                  <ChevronRight size={14} className="text-zinc-800" />
                 )}
               </motion.button>
             ))}
@@ -315,18 +346,18 @@ export function Profile() {
 
       {/* ════════ SIGN OUT ════════ */}
       <motion.div 
-        initial={{ opacity: 0, y: 14 }} 
-        animate={{ opacity: 1, y: 0 }} 
-        transition={{ duration: 0.4, delay: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+        initial={{ opacity: 0 }} 
+        animate={{ opacity: 1 }} 
+        transition={{ duration: 0.5, delay: 0.3 }}
       >
-        <div className="px-5 mt-4">
-          <button onClick={handleSignOut} className="w-full flex items-center gap-3 py-4 border-t border-white/[0.04] active:opacity-60 transition-opacity">
-            <LogOut size={18} className="text-red-400" />
-            <span className="text-red-400 font-medium text-sm">Sign out</span>
+        <div className="px-5 mt-6 mb-8">
+          <button onClick={handleSignOut} className="w-full flex items-center justify-between group p-1 transition-all">
+            <span className="text-zinc-700 font-bold text-[10px] uppercase tracking-[0.2em] group-hover:text-red-400 transition-colors">Sign Out of Account</span>
+            <LogOut size={14} className="text-zinc-800 group-hover:text-red-400 transition-colors" />
           </button>
         </div>
-        <div className="text-zinc-700 text-[10px] text-center mt-3">
-          CampusMobility v1.0.0
+        <div className="text-zinc-800 text-[9px] font-bold uppercase tracking-[0.2em] text-center mb-8 opacity-40">
+          CampusMobility v1.1.0-Release
         </div>
       </motion.div>
 

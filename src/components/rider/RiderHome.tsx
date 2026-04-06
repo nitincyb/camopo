@@ -337,14 +337,16 @@ const SmartSlider = ({
         border: trackBorder
       }}
     >
-      {/* Shimmer Overlay */}
-      {!isConfirmed && (
+      {/* Shimmer Overlay - only during active drag */}
+      {!isConfirmed && isDragging && (
         <div 
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: isDragging && !isGreen ? (theme === 'red' ? 'linear-gradient(90deg, transparent 0%, rgba(239, 68, 68, 0.15) 50%, transparent 100%)' : 'linear-gradient(90deg, transparent 0%, rgba(245, 158, 11, 0.15) 50%, transparent 100%)') : 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.04) 50%, transparent 100%)',
-            backgroundSize: '200% 100%',
-            animation: `shimmer ${isDragging ? '0.6s' : '2.5s'} ease-in-out infinite`
+            background: theme === 'red' 
+              ? 'linear-gradient(90deg, transparent 0%, rgba(239, 68, 68, 0.15) 50%, transparent 100%)'
+              : theme === 'amber'
+              ? 'linear-gradient(90deg, transparent 0%, rgba(245, 158, 11, 0.15) 50%, transparent 100%)'
+              : 'linear-gradient(90deg, transparent 0%, rgba(34,197,94,0.12) 50%, transparent 100%)',
           }}
         />
       )}
@@ -394,11 +396,10 @@ const SmartSlider = ({
           cursor: isConfirmed ? 'default' : 'grab'
         }}
       >
-        <motion.div 
-          animate={{ opacity: isConfirmed ? 0 : 1 }}
+        <div 
           className="flex items-center shrink-0 w-[44px] justify-center absolute left-0 h-full origin-center"
           style={{
-            animation: isConfirmed ? 'confirmBurst 0.3s ease-out forwards' : isDragging ? 'dragVibrate 0.08s linear infinite' : `hapticPulse 3s ease-in-out infinite ${isGreen ? '0s' : '1.5s'}`
+            animation: isConfirmed ? 'confirmBurst 0.3s ease-out forwards' : isDragging ? 'dragVibrate 0.08s linear infinite' : 'none'
           }}
         >
           {icon || (
@@ -407,7 +408,7 @@ const SmartSlider = ({
               <ChevronRight size={16} className="text-white -ml-3 opacity-50" />
             </>
           )}
-        </motion.div>
+        </div>
       </motion.div>
     </div>
   );
@@ -463,14 +464,10 @@ const SearchingOverlay = ({ onCancel, t, children }: { onCancel: () => void; t: 
         willChange: 'transform, opacity',
       }}
     >
-      {/* Spinning Cinematic Edge Light */}
+      {/* Static glowing border - replaces cinematic-spin for mobile perf */}
       <div
-        className="absolute inset-[-100%] z-0"
-        style={{
-          background: 'conic-gradient(from 0deg, transparent 0%, transparent 35%, rgba(34, 197, 94, 0.4) 40%, rgba(34, 197, 94, 0.9) 50%, rgba(34, 197, 94, 0.4) 60%, transparent 65%, transparent 100%)',
-          willChange: 'transform',
-          animation: 'cinematic-spin 5s linear infinite'
-        }}
+        className="absolute inset-0 z-0 rounded-t-[28px]"
+        style={{ boxShadow: 'inset 0 0 0 1.5px rgba(34,197,94,0.3), 0 -6px 24px rgba(34,197,94,0.1)' }}
       />
 
       {/* Solid Inner Core */}
@@ -534,83 +531,18 @@ const SearchingOverlay = ({ onCancel, t, children }: { onCancel: () => void; t: 
   );
 };
 
-// --- CinematicScramble: Smooth scramble + depth animation ---
-const SCRAMBLE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-
-function CinematicScramble({ text, className = '' }: { text: string; className?: string }) {
-  const [display, setDisplay] = useState('');
-  const [phase, setPhase] = useState<'scramble' | 'done'>('scramble');
-  const frameRef = useRef(0);
-  const startRef = useRef(0);
-
-  useEffect(() => {
-    if (!text) return;
-
-    const totalDuration = 1200;
-    const resolveStart = 300;
-
-    // Generate a stable random seed per character
-    const seed = text.split('').map(() => Math.floor(Math.random() * SCRAMBLE_CHARS.length));
-
-    startRef.current = performance.now();
-    setPhase('scramble');
-
-    const animate = (now: number) => {
-      const elapsed = now - startRef.current;
-      const progress = Math.min(elapsed / totalDuration, 1);
-
-      if (progress >= 1) {
-        setDisplay(text);
-        setPhase('done');
-        return;
-      }
-
-      let result = '';
-      for (let i = 0; i < text.length; i++) {
-        if (text[i] === ' ') {
-          result += ' ';
-          continue;
-        }
-
-        // Each character has a resolve threshold based on its position
-        const charThreshold = resolveStart / totalDuration + (i / text.length) * 0.5;
-
-        if (progress > charThreshold) {
-          result += text[i];
-        } else {
-          // Cycle through chars deterministically using time, not pure random
-          const cycleSpeed = 4;
-          const idx = (seed[i] + Math.floor(elapsed / (50 + i * 8)) * cycleSpeed) % SCRAMBLE_CHARS.length;
-          result += SCRAMBLE_CHARS[idx];
-        }
-      }
-
-      setDisplay(result);
-      frameRef.current = requestAnimationFrame(animate);
-    };
-
-    frameRef.current = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(frameRef.current);
-  }, [text]);
-
+// CinematicScramble replaced with a simple inline fade for mobile perf
+function CinematicScramble({ text, className = '', style }: { text: string; className?: string; style?: React.CSSProperties }) {
   return (
-    <motion.p
+    <p
       className={className}
-      initial={{ opacity: 0, scale: 1.03, filter: 'blur(6px)' }}
-      animate={{
-        opacity: 1,
-        scale: 1,
-        filter: 'blur(0px)',
-      }}
-      transition={{
-        duration: 1.0,
-        ease: [0.22, 1, 0.36, 1],
-        opacity: { duration: 0.5 },
-        filter: { duration: 1.2, ease: [0.25, 0.46, 0.45, 0.94] },
+      style={{
+        ...style,
+        animation: 'simpleFadeIn 0.5s ease-out forwards',
       }}
     >
-      {display}
-    </motion.p>
+      {text}
+    </p>
   );
 }
 
@@ -1279,11 +1211,13 @@ export default function RiderHome() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] }}
               onClick={() => navigate('/map')}
-              className="w-full bg-zinc-900 rounded-2xl flex items-center gap-4 px-5 py-4 border border-zinc-800 hover:border-zinc-700 transition-colors active:scale-[0.98]"
+              className="w-full bg-gradient-to-br from-[#1c1c1e] to-[#121213] flex items-center gap-4 px-5 py-4 transition-all active:scale-[0.98] rounded-2xl border border-white/[0.05] shadow-[0_4px_24px_rgba(0,0,0,0.5)]"
             >
-              <Search size={18} className="text-zinc-500 shrink-0" />
-              <span className="text-sm font-medium text-zinc-400">Where to?</span>
-              <ChevronRight size={16} className="text-zinc-600 ml-auto" />
+              <div className="flex items-center justify-center w-5 h-5">
+                <Search size={18} className="text-[#22C55E] shrink-0" />
+              </div>
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400">Where to?</span>
+              <ChevronRight size={14} className="text-zinc-700 ml-auto" />
             </motion.button>
           </div>
 
@@ -1342,21 +1276,15 @@ export default function RiderHome() {
                     setSelectedRide(type);
                     navigate('/map');
                   }}
-                  className="relative z-10 flex-1 flex flex-col items-center justify-center gap-3.5 py-7 bg-[#181a20] rounded-2xl border border-white/[0.06] hover:border-white/[0.12] hover:scale-[1.05] hover:-translate-y-[4px] hover:transition-all duration-300 ease-in-out cursor-pointer group overflow-hidden pointer-events-auto"
+                  className="relative z-10 flex-1 flex flex-col items-center justify-center gap-4 py-8 bg-gradient-to-br from-[#1c1c1e] to-[#121213] rounded-2xl border border-white/[0.05] transition-all duration-300 cursor-pointer group active:scale-[0.98] pointer-events-auto shadow-[0_4px_24px_rgba(0,0,0,0.5)]"
                 >
-                  {/* Faint ambient glow on hover */}
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.06)_0%,transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-in-out pointer-events-none" />
-                  
-                  {/* Subtle soft cinematic light sweep */}
-                  <div className="absolute top-0 left-[-100%] h-full w-[150%] bg-gradient-to-r from-transparent via-white/[0.04] to-transparent skew-x-[-20deg] group-hover:translate-x-[150%] transition-transform duration-[800ms] ease-in-out pointer-events-none" />
-                  
                   {/* Clean Icon */}
-                  <div className="relative z-10 text-emerald-500 group-hover:brightness-110 transition-all duration-300">
-                    {getRideIcon(type.iconId, 34)}
+                  <div className="relative z-10 text-emerald-500 opacity-80 group-hover:opacity-100 transition-all duration-300">
+                    {getRideIcon(type.iconId, 32)}
                   </div>
                   
                   {/* Clean Text */}
-                  <span className="relative z-10 text-xs font-medium tracking-wide text-zinc-500 group-hover:text-zinc-200 transition-colors duration-300">
+                  <span className="relative z-10 text-[10px] font-bold uppercase tracking-widest text-zinc-600 group-hover:text-zinc-300 transition-colors duration-300">
                     {type.id}
                   </span>
                 </motion.button>
@@ -1368,21 +1296,15 @@ export default function RiderHome() {
                 transition={{ duration: 0.4, delay: 0.4 + RIDE_TYPES.length * 0.07, ease: [0.25, 0.46, 0.45, 0.94] }}
                 whileTap={{ scale: 0.95, transition: { duration: 0.1 } }}
                 onClick={() => navigate('/ride-sharing')}
-                className="relative z-10 flex-1 flex flex-col items-center justify-center gap-3.5 py-7 bg-[#181a20] rounded-2xl border border-white/[0.06] hover:border-white/[0.12] hover:scale-[1.05] hover:-translate-y-[4px] hover:transition-all duration-300 ease-in-out cursor-pointer group overflow-hidden pointer-events-auto"
+                className="relative z-10 flex-1 flex flex-col items-center justify-center gap-4 py-8 bg-gradient-to-br from-[#1c1c1e] to-[#121213] rounded-2xl border border-white/[0.05] transition-all duration-300 cursor-pointer group active:scale-[0.98] pointer-events-auto shadow-[0_4px_24px_rgba(0,0,0,0.5)]"
               >
-                {/* Faint ambient glow on hover */}
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.06)_0%,transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-in-out pointer-events-none" />
-                
-                {/* Subtle soft cinematic light sweep */}
-                <div className="absolute top-0 left-[-100%] h-full w-[150%] bg-gradient-to-r from-transparent via-white/[0.04] to-transparent skew-x-[-20deg] group-hover:translate-x-[150%] transition-transform duration-[800ms] ease-in-out pointer-events-none" />
-                
                 {/* Clean Icon */}
-                <div className="relative z-10 text-emerald-500 group-hover:brightness-110 transition-all duration-300">
-                  <Users size={34} />
+                <div className="relative z-10 text-yellow-400 opacity-80 group-hover:opacity-100 transition-all duration-300">
+                  <Users size={32} />
                 </div>
                 
                 {/* Clean Text */}
-                <span className="relative z-10 text-xs font-medium tracking-wide text-zinc-500 group-hover:text-zinc-200 transition-colors duration-300">
+                <span className="relative z-10 text-[10px] font-bold uppercase tracking-widest text-yellow-400/80 group-hover:text-yellow-200 transition-colors duration-300">
                   Share
                 </span>
               </motion.button>
@@ -1405,10 +1327,9 @@ export default function RiderHome() {
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: "100%", opacity: 0 }}
                 transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-                className="relative p-6 pt-8 pb-12 space-y-6 sm:-mx-6 -mb-4 sm:-mb-6 overflow-hidden rounded-t-[32px] isolate"
+              className="relative p-6 pt-8 pb-12 space-y-6 sm:-mx-6 -mb-4 sm:-mb-6 overflow-hidden rounded-t-[32px] isolate"
+              style={{ background: '#111111' }}
               >
-                {/* Inner glass layer */}
-                <div className="absolute inset-[1px] bg-[rgba(20,20,20,0.6)] backdrop-blur-[16px] z-[-1] pointer-events-none rounded-t-[31px] border border-white/5" />
                 
                 {/* Drag handle */}
                 <div className="absolute top-3 left-1/2 -translate-x-1/2 w-10 h-1.5 bg-white/20 rounded-full" />
@@ -1449,7 +1370,7 @@ export default function RiderHome() {
                         setSearchingFor('pickup');
                         setSearchQuery(pickup);
                       }}
-                      className="w-full bg-[rgba(255,255,255,0.03)] backdrop-blur-md rounded-2xl py-4 pl-10 pr-4 font-bold text-zinc-300 text-sm border border-white/5 hover:bg-[rgba(255,255,255,0.08)] transition-all duration-300 text-left"
+                      className="w-full bg-[rgba(255,255,255,0.05)] rounded-2xl py-4 pl-10 pr-4 font-bold text-zinc-300 text-sm border border-white/5 hover:bg-[rgba(255,255,255,0.08)] transition-colors text-left"
                     >
                       {pickup}
                     </button>
@@ -1461,7 +1382,7 @@ export default function RiderHome() {
                         setSearchingFor('destination');
                         setSearchQuery(destination);
                       }}
-                      className="w-full bg-[rgba(255,255,255,0.03)] backdrop-blur-md rounded-2xl py-4 pl-10 pr-4 font-bold text-white text-sm border border-white/5 hover:bg-[rgba(255,255,255,0.08)] transition-all duration-300 text-left"
+                      className="w-full bg-[rgba(255,255,255,0.05)] rounded-2xl py-4 pl-10 pr-4 font-bold text-white text-sm border border-white/5 hover:bg-[rgba(255,255,255,0.08)] transition-colors text-left"
                     >
                       {destination}
                     </button>
@@ -1510,20 +1431,11 @@ export default function RiderHome() {
                   backgroundColor: '#0B0E0C',
                 }}
               >
-                {/* Cinematic animated edge light */}
+                {/* Static border - replaces cinematic-spin for mobile perf */}
                 <div 
                   className="absolute inset-[0] z-[0] pointer-events-none overflow-hidden rounded-t-[24px]"
                 >
-                  <div 
-                    className="absolute inset-[-100%]"
-                    style={{
-                      background: 'conic-gradient(from 0deg, transparent 0%, transparent 40%, rgba(34, 197, 94, 0.15) 45%, rgba(34, 197, 94, 0.6) 50%, rgba(34, 197, 94, 0.15) 55%, transparent 60%, transparent 100%)',
-                      willChange: 'transform',
-                      animation: 'cinematic-spin 8s linear infinite'
-                    }}
-                  />
-                  {/* The inner core covering the glow so just edges show */}
-                  <div className="absolute inset-[2px] bg-[#0B0E0C] rounded-t-[24px]" />
+                  <div className="absolute inset-0 rounded-t-[24px]" style={{ boxShadow: 'inset 0 0 0 1.5px rgba(34,197,94,0.25), 0 -4px 20px rgba(34,197,94,0.08)' }} />
                 </div>
 
                 {/* Content Container positioned over the background */}
@@ -1785,7 +1697,8 @@ export default function RiderHome() {
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: 20, opacity: 0 }}
-                className="relative bg-[rgba(20,20,20,0.6)] backdrop-blur-[16px] rounded-[32px] overflow-hidden border border-emerald-500/20 "
+              className="relative rounded-[32px] overflow-hidden border border-emerald-500/20"
+              style={{ background: '#0d1510' }}
               >
                 <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/10 to-transparent pointer-events-none" />
                 <div className="p-6 space-y-6 relative z-10">
