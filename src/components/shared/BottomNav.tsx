@@ -90,22 +90,9 @@ export default function BottomNav({ activeTab: propActiveTab }: BottomNavProps) 
                     transition={{ type: 'spring', stiffness: 400, damping: 15 }}
                   >
                     {/* Hero Media Circle (56x56) */}
-                    <div className="w-14 h-14 rounded-full relative overflow-hidden shadow-[0_8px_24px_rgba(0,0,0,0.4)]">
-                      {/* Full Quality Video Layer */}
-                      <video 
-                        autoPlay loop muted playsInline 
-                        className="absolute inset-0 w-full h-full object-cover"
-                      >
-                        <source src="/assets/name-bg.mp4" />
-                      </video>
-
-                      {/* Vignette Overlay for Readability */}
-                      <div 
-                        className="absolute inset-0 z-10"
-                        style={{
-                          background: 'radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.35) 100%)'
-                        }}
-                      />
+                    <div className="w-14 h-14 rounded-full relative overflow-hidden shadow-[0_8px_24px_rgba(0,0,0,0.6)] border border-white/10 bg-gradient-to-b from-zinc-800 to-black">
+                      {/* Sub-glow for depth */}
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(34,197,94,0.15),transparent_70%)]" />
                       
                       {/* Centered White Icon */}
                       <div className="absolute inset-0 flex items-center justify-center z-20">
