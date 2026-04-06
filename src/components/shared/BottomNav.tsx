@@ -58,7 +58,7 @@ export default function BottomNav({ activeTab: propActiveTab }: BottomNavProps) 
         </div>
 
         {/* Layer 2: Primary Glass Surface */}
-        <div className="absolute inset-0 z-[1] rounded-[32px] bg-[rgba(18,18,18,0.92)] backdrop-blur-[24px] saturate-[120%]" />
+        <div className="absolute inset-0 z-[1] rounded-[32px] bg-black/45 backdrop-blur-[20px] saturate-[120%]" />
 
         {/* Layer 3: Top Edge Rim Light */}
         <div 
