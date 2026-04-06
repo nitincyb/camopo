@@ -51,14 +51,14 @@ export default function BottomNav({ activeTab: propActiveTab }: BottomNavProps) 
         <div className="absolute inset-0 z-0 rounded-[32px] overflow-hidden">
           <video
             autoPlay loop muted playsInline
-            className="absolute inset-0 w-full h-full object-cover opacity-[0.12]"
+            className="absolute inset-0 w-full h-full object-cover opacity-[0.35]"
           >
             <source src="/assets/name-bg.mp4" type="video/mp4" />
           </video>
         </div>
 
         {/* Layer 2: Primary Glass Surface */}
-        <div className="absolute inset-0 z-[1] rounded-[32px] bg-black/60 backdrop-blur-[40px] saturate-[140%]" />
+        <div className="absolute inset-0 z-[1] rounded-[32px] bg-black/35 backdrop-blur-[40px] saturate-[140%]" />
 
         {/* Layer 3: Top Edge Rim Light */}
         <div 
